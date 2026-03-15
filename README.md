@@ -1,11 +1,19 @@
 # Online-Exam
 
-A web platform for secure online exams with code execution, SQL validation, and AI-assisted theory grading.
+A starter codebase for a web platform that supports secure online exams:
+- **Code & SQL execution:** via Judge0 API
+- **Theory grading:** planned NLP microservice (sentence-transformers)
+- **Stack:** ASP.NET Core 8 Web API (C#), React frontend, PostgreSQL database
+- **Containerization (planned):** Docker / docker-compose
 
-## Stack
-- Backend: ASP.NET Core 8 Web API (C#)
-- Frontend: React (placeholder scaffold)
-- Database: PostgreSQL
-- Code execution: Judge0 API
-- NLP scoring: sentence-transformers (planned microservice)
-- Containerization: Docker / docker-compose (planned)
+## Current contents
+- `backend/OnlineExam.Api/` — minimal ASP.NET Core Web API with `/health`
+- `frontend/` — placeholder package.json ready for your chosen tooling (e.g., Vite + React)
+- `.gitignore` — excludes build artifacts and temp files
+
+## Quick start (backend)
+```bash
+cd backend/OnlineExam.Api
+dotnet restore
+dotnet run
+# Visit http://localhost:5000/health (or the port shown) to see {"status":"ok"}
