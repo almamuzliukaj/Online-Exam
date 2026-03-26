@@ -1,0 +1,15 @@
+# OnlineExam — Dokumentim (Master)
+
+## Përmbajtja
+1. Hyrje (01-introduction)
+2. Scope & Rolet (02-scope-and-roles)
+3. Kërkesat Funksionale (03-functional-requirements)
+4. Kërkesat Jo-Funksionale (04-nonfunctional-requirements)
+5. User Stories (05-user-stories)
+6. Use Cases (06-use-cases)
+7. Data Model (07-data-model)
+8. Arkitektura (08-system-architecture)
+9. API Overview (09-api-overview)
+10. UI Pages (10-ui-pages)
+11. Security/Proctoring (11-security-proctoring)
+12. Roadmap (12-roadmap-and-mvp) (opsionale)
