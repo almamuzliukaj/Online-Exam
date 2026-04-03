@@ -8,7 +8,9 @@ if (!BASE_URL) {
 
 export async function apiFetch(path, { token, ...options } = {}) {
   const url =
-    path.startsWith("http") ? path : `${BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
+    path.startsWith("http")
+      ? path
+      : `${BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
 
   const headers = {
     "Content-Type": "application/json",
