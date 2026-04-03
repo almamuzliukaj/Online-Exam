@@ -4,9 +4,9 @@ import { login } from "../lib/auth";
 
 export default function Login() {
   const navigate = useNavigate();
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("admin@test.com");
+  const [password, setPassword] = useState("123");
+  const [show, setShow] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -16,48 +16,86 @@ export default function Login() {
     setError("");
     setLoading(true);
     try {
-      await login(email.trim(), password);
-      navigate("/dashboard", { replace: true });
+      await login(email, password);
+      navigate("/dashboard");
     } catch (err) {
-      setError(err?.message || "Invalid credentials");
+      setError(err?.message || "Login failed");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div style={{ maxWidth: 420, margin: "60px auto", padding: 16 }}>
-      <h1>Login</h1>
+    <div className="shell">
+      <div className="center">
+        <div className="card authCard">
+          <div className="cardHeader">
+            <div className="brand">
+              <span className="logoDot" />
+              <span>Online Exam</span>
+            </div>
+            <h1 className="h1" style={{ marginTop: 14 }}>Welcome back</h1>
+            <p className="p">Sign in to continue to your dashboard.</p>
+          </div>
 
-      <form onSubmit={onSubmit} style={{ display: "grid", gap: 12 }}>
-        <label>
-          Email
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={{ width: "100%", padding: 10, marginTop: 6 }}
-          />
-        </label>
+          <div className="cardBody">
+            <form className="authForm" onSubmit={onSubmit}>
+              {error ? <div className="alert">{error}</div> : null}
 
-        <label>
-          Password
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={{ width: "100%", padding: 10, marginTop: 6 }}
-          />
-        </label>
+              <div className="field">
+                <div className="label">Email</div>
+                <input
+                  className="input"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  type="email"
+                  placeholder="you@example.com"
+                  autoComplete="email"
+                  required
+                  disabled={loading}
+                />
+              </div>
 
-        <button type="submit" disabled={loading} style={{ padding: 10 }}>
-          {loading ? "Signing in..." : "Login"}
-        </button>
+              <div className="field">
+                <div className="label">Password</div>
+                <div className="inputWrap">
+                  <input
+                    className="input"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    type={show ? "text" : "password"}
+                    placeholder="••••••••"
+                    autoComplete="current-password"
+                    required
+                    disabled={loading}
+                  />
+                  <button
+                    type="button"
+                    className="btn inputRightBtn"
+                    onClick={() => setShow((s) => !s)}
+                    disabled={loading}
+                  >
+                    {show ? "Hide" : "Show"}
+                  </button>
+                </div>
+              </div>
 
-        {error ? <div style={{ color: "crimson" }}>{error}</div> : null}
-      </form>
+              <button className="btn btnPrimary" type="submit" disabled={loading}>
+                {loading ? "Signing in..." : "Sign in"}
+              </button>
+
+              <div className="small">
+                Mock mode works without backend. When backend is ready, set{" "}
+                <span className="mono">VITE_USE_MOCK_AUTH=false</span>.
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ padding: "14px 0" }} className="container small">
+        Tip: use <span className="mono">admin@test.com</span> to get role <span className="mono">Admin</span> in mock mode.
+      </div>
     </div>
   );
 }

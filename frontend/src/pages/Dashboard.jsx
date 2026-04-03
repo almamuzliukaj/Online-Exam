@@ -1,60 +1,88 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { logout, me } from "../lib/auth";
+import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState(null);
+  const [user, setUser] = useState(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      setError("");
-      setLoading(true);
+    (async () => {
       try {
-        const data = await me();
-        if (!cancelled) setProfile(data);
-      } catch (err) {
-        // token invalid/expired → back to login
-        logout();
-        if (!cancelled) {
-          setError("Session expired. Please login again.");
-          navigate("/login", { replace: true });
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
+        const u = await me();
+        setUser(u);
+      } catch (e) {
+        setError(e?.message || "Failed to load profile");
       }
-    }
-
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, [navigate]);
+    })();
+  }, []);
 
   function onLogout() {
     logout();
-    navigate("/login", { replace: true });
+    navigate("/login");
   }
 
-  if (loading) return <div style={{ padding: 16 }}>Loading…</div>;
-
   return (
-    <div style={{ maxWidth: 720, margin: "40px auto", padding: 16 }}>
-      <h1>Dashboard</h1>
+    <div className="shell">
+      <header className="nav">
+        <div className="container navInner">
+          <div className="brand">
+            <span className="logoDot" />
+            <span>Online Exam</span>
+          </div>
 
-      {error ? <div style={{ color: "crimson" }}>{error}</div> : null}
+          <div className="row" style={{ gap: 12 }}>
+            {user ? (
+              <span className="chip">
+                <strong style={{ color: "var(--text)" }}>{user.email}</strong>
+                <span>•</span>
+                <span>{user.role}</span>
+              </span>
+            ) : (
+              <span className="chip">Loading user…</span>
+            )}
 
-      <pre style={{ background: "#111", color: "#0f0", padding: 16, overflow: "auto" }}>
-        {JSON.stringify(profile, null, 2)}
-      </pre>
+            <button className="btn btnDanger" onClick={onLogout}>
+              Logout
+            </button>
+          </div>
+        </div>
+      </header>
 
-      <button onClick={onLogout} style={{ padding: 10 }}>
-        Logout
-      </button>
+      <main className="container" style={{ padding: "26px 0 40px" }}>
+        <div className="grid2">
+          <section className="card">
+            <div className="cardHeader">
+              <h2 style={{ margin: 0 }}>Dashboard</h2>
+              <p className="p" style={{ marginTop: 6 }}>
+                This is a protected page. Below is the current user payload.
+              </p>
+            </div>
+            <div className="cardBody">
+              {error ? <div className="alert">{error}</div> : null}
+              <pre className="mono">{JSON.stringify(user, null, 2)}</pre>
+            </div>
+          </section>
+
+          <aside className="card">
+            <div className="cardHeader">
+              <h3 style={{ margin: 0 }}>Next steps</h3>
+              <p className="p" style={{ marginTop: 6 }}>
+                When backend is ready, switch mock mode off and connect to real endpoints.
+              </p>
+            </div>
+            <div className="cardBody" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div className="chip">POST /auth/login</div>
+              <div className="chip">GET /auth/me</div>
+              <div className="small">
+                Env: <span className="mono">VITE_API_BASE_URL</span> and{" "}
+                <span className="mono">VITE_USE_MOCK_AUTH</span>.
+              </div>
+            </div>
+          </aside>
+        </div>
+      </main>
     </div>
   );
 }
