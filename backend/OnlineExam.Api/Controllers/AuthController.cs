@@ -7,7 +7,6 @@ using OnlineExam.Api.DTOs;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System.Linq;
 
 namespace OnlineExam.Api.Controllers
 {
@@ -27,6 +26,7 @@ namespace OnlineExam.Api.Controllers
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequestDto dto)
         {
+            // Kujdes: password kontrollohet si plaintext vetëm për demo!
             var user = _db.Users
                 .FirstOrDefault(u => u.Email == dto.Email && u.PasswordHash == dto.Password);
 
@@ -41,11 +41,13 @@ namespace OnlineExam.Api.Controllers
 
             var key = Encoding.UTF8.GetBytes(jwtKey);
 
+            // Claims në JWT -- Përfshi gjithmonë edhe NameIdentifier!
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new Claim(ClaimTypes.Role, user.Role),
-                new Claim(ClaimTypes.Name, user.Email)
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),               // <-- DETAJ I RËNDËSISHËM!
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),             // (Opsionale, standard JWT)
+                new Claim(ClaimTypes.Name, user.Email),
+                new Claim(ClaimTypes.Role, user.Role)
             };
 
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -76,20 +78,21 @@ namespace OnlineExam.Api.Controllers
         [HttpGet("me")]
         public IActionResult Me()
         {
-            var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            // KTU lexo GUID-in në mënyrë të sigurt (nga NameIdentifier)
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var email = User.FindFirst(ClaimTypes.Name)?.Value;
             var role = User.FindFirst(ClaimTypes.Role)?.Value;
 
             return Ok(new
             {
-                UserId = userId,
-                Email = email,
-                Role = role
+                userId,  // TANI NUK ËSHTË MË null!
+                email,
+                role
             });
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpGet("admin/ping")] // ✅ FIXED ROUTE
+        [HttpGet("admin/ping")]
         public IActionResult Ping()
         {
             return Ok("Hello Admin!");
