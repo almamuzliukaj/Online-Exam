@@ -51,6 +51,15 @@ builder.Services.AddSwaggerGen(c =>
 });
 // ======================================================
 
+// CORS configuration: lejon vetëm frontend-in (React/Vite) të komunikojë
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        b => b.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod());
+});
+
 // Database
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
@@ -81,8 +90,12 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(); // <-- kjo është për Swagger!
+    app.UseSwaggerUI(); // <-- Kjo është për Swagger!
 }
+
+// KJO ËSHTË VIJA QË ZGJIDH PROBLEMIN E FETCH (CORS)!
+// Duhet të jetë PARA Authentication dhe Authorization:
+app.UseCors("AllowFrontend");
 
 app.UseAuthentication();
 app.UseAuthorization();
