@@ -7,10 +7,11 @@ if (!BASE_URL) {
 }
 
 export async function apiFetch(path, { token, ...options } = {}) {
+  // KJO siguron që midis BASE_URL dhe path të jetë VETËM 1 slash
   const url =
     path.startsWith("http")
       ? path
-      : `${BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
+      : `${BASE_URL.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
 
   const headers = {
     "Content-Type": "application/json",
