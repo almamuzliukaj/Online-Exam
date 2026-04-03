@@ -35,9 +35,18 @@ ONLINE-EXAM/
       bin/                (do not commit)
       obj/                (do not commit)
 
-  frontend/              (placeholder)
+  frontend/              (Vite + React)
+    src/
+      components/       (Button, Card, Input, Navbar)
+      lib/              (auth.js, api.js)
+      pages/            (Login.jsx, Dashboard.jsx)
+      routes/           (ProtectedRoute.jsx)
+      App.jsx
+      main.jsx
+      index.css
+    index.html
     package.json
-    package-lock.json
+    .env.example
 
   docs/
     00-master.md
@@ -91,28 +100,50 @@ Common local links (depending on your launch settings):
 
 ---
 
-## Frontend status (placeholder)
-The `frontend/` folder is currently a **placeholder**. The scripts in `frontend/package.json` only print messages and do not start a real dev server yet.
+## Run frontend (Vite + React)
 
-You can still install dependencies (there are none by default):
+The frontend is a **Vite + React** app at `frontend/`.
 
+### 1. Install dependencies
 ```bash
 cd frontend
 npm install
 ```
 
-Current scripts output placeholders:
+### 2. Configure environment
+Copy the example env file and adjust if needed:
 ```bash
-npm run dev
-npm run build
-npm run lint
+cp .env.example .env
 ```
 
-### Next step (when implementing frontend)
-Replace the placeholder with a real React setup (for example **Vite**):
-- Add dependencies and a dev server
-- Update `scripts.dev`, `scripts.build`, and `scripts.lint`
-- Document the real frontend URL/port here
+Default `.env` content:
+```env
+VITE_API_BASE_URL=http://localhost:5045
+VITE_USE_MOCK_AUTH=true
+```
+
+### 3. Start the dev server
+```bash
+npm run dev
+```
+
+The app runs at **http://localhost:5173**.
+
+### Mock mode
+When `VITE_USE_MOCK_AUTH=true` (default), the frontend does **not** call the backend.
+- Any non-empty email/password is accepted.
+- The user role is inferred from the email:
+  - Email contains `admin` → **Admin**
+  - Email contains `prof` → **Professor**
+  - Anything else → **Student**
+- Example: `admin@test.com` / `any-password`
+
+To connect to the real backend, set `VITE_USE_MOCK_AUTH=false` (backend must be running and CORS must allow `http://localhost:5173`).
+
+### Build for production
+```bash
+npm run build
+```
 
 ---
 
