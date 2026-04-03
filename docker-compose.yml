@@ -1,0 +1,17 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:16
+    container_name: onlineexam-postgres
+    environment:
+      POSTGRES_DB: onlineexam
+      POSTGRES_USER: onlineexam
+      POSTGRES_PASSWORD: onlineexam
+    ports:
+      - "5432:5432"
+    volumes:
+      - onlineexam_db:/var/lib/postgresql/data
+
+volumes:
+  onlineexam_db:
