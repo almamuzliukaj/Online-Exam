@@ -5,9 +5,11 @@ namespace OnlineExam.Api.Data
 {
     public class AppDbContext : DbContext
     {
-        public DbSet<User> Users { get; set; }
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) {}
 
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Exam> Exams { get; set; }
+        public DbSet<Question> Questions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -20,7 +22,7 @@ namespace OnlineExam.Api.Data
                     Id = Guid.NewGuid(),
                     FullName = "Admin User",
                     Email = "admin@onlineexam.com",
-                    PasswordHash = "Password123!", // Real project: ALWAYS use hashed passwords!
+                    PasswordHash = "Password123!",
                     Role = "Admin",
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
@@ -46,6 +48,13 @@ namespace OnlineExam.Api.Data
                     CreatedAt = DateTime.UtcNow
                 }
             );
+
+            // FK: Exam → Questions (one-to-many)
+            modelBuilder.Entity<Question>()
+                .HasOne(q => q.Exam)
+                .WithMany()
+                .HasForeignKey(q => q.ExamId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
