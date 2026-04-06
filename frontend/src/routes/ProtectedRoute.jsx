@@ -1,9 +1,13 @@
-// frontend/src/routes/ProtectedRoute.jsx
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { getToken } from "../lib/auth";
 
-export default function ProtectedRoute() {
+export default function ProtectedRoute({ children }) {
+  const location = useLocation();
   const token = getToken();
-  if (!token) return <Navigate to="/login" replace />;
-  return <Outlet />;
+
+  if (!token) {
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  }
+
+  return children;
 }

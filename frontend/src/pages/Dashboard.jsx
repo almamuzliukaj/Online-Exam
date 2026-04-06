@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { logout, me } from "../lib/auth";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -54,11 +54,28 @@ export default function Dashboard() {
         <div className="grid2">
           <section className="card">
             <div className="cardHeader">
-              <h2 style={{ margin: 0 }}>Dashboard</h2>
-              <p className="p" style={{ marginTop: 6 }}>
-                This is a protected page. Below is the current user payload.
-              </p>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 12,
+                }}
+              >
+                <div>
+                  <h2 style={{ margin: 0 }}>Dashboard</h2>
+                  <p className="p" style={{ marginTop: 6 }}>
+                    This is a protected page. Below is the current user payload.
+                  </p>
+                </div>
+
+                {/* Quick navigation */}
+                <Link className="btn" to="/exams">
+                  Go to Exams
+                </Link>
+              </div>
             </div>
+
             <div className="cardBody">
               {error ? <div className="alert">{error}</div> : null}
               <pre className="mono">{JSON.stringify(user, null, 2)}</pre>
@@ -69,10 +86,14 @@ export default function Dashboard() {
             <div className="cardHeader">
               <h3 style={{ margin: 0 }}>Next steps</h3>
               <p className="p" style={{ marginTop: 6 }}>
-                When backend is ready, switch mock mode off and connect to real endpoints.
+                When backend is ready, switch mock mode off and connect to real
+                endpoints.
               </p>
             </div>
-            <div className="cardBody" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div
+              className="cardBody"
+              style={{ display: "flex", flexDirection: "column", gap: 12 }}
+            >
               <div className="chip">POST /auth/login</div>
               <div className="chip">GET /auth/me</div>
               <div className="small">
