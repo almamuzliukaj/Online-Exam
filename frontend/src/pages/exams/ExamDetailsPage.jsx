@@ -1,30 +1,17 @@
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getExam, listQuestions } from "../../lib/examsApi";
 import { me } from "../../lib/auth";
 import { canManageExams } from "../../lib/permissions";
 
-type ExamDto = {
-  id: string;
-  title?: string;
-  description?: string | null;
-};
-
-type QuestionDto = {
-  id: string;
-  text?: string;
-  type?: string;
-  points?: number;
-};
-
 export default function ExamDetailsPage() {
   const { examId } = useParams();
 
-  const [role, setRole] = useState<string | null>(null);
-  const [exam, setExam] = useState<ExamDto | null>(null);
-  const [questions, setQuestions] = useState<QuestionDto[]>([]);
+  const [role, setRole] = useState(null);
+  const [exam, setExam] = useState(null);
+  const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>("");
+  const [error, setError] = useState("");
 
   const canEdit = useMemo(() => canManageExams(role), [role]);
 
@@ -49,28 +36,26 @@ export default function ExamDetailsPage() {
         setLoading(true);
         setError("");
 
-        const [examData, qData] = await Promise.all([getExam(examId), listQuestions(examId)]);
+        const [examData, qData] = await Promise.all([
+          getExam(examId),
+          listQuestions(examId),
+        ]);
 
         if (!active) return;
 
         setExam(examData);
         setQuestions(Array.isArray(qData) ? qData : []);
-      } catch (err: any) {
+      } catch (err) {
         if (!active) return;
-
-        if (err?.status === 404) {
-          setError("Exam endpoints not available yet (backend Sprint 2 not merged).");
-        } else {
-          setError(err?.message ?? "Failed to load exam.");
-        }
+        const statusPart = err?.status ? ` (HTTP ${err.status})` : "";
+        const msgPart = err?.message ? ` ${err.message}` : "";
+        setError(`Failed to load exam details.${statusPart}${msgPart}`.trim());
       } finally {
         if (active) setLoading(false);
       }
     })();
 
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, [examId]);
 
   return (
@@ -81,17 +66,13 @@ export default function ExamDetailsPage() {
             <span className="logoDot" />
             <span>Online Exam</span>
           </div>
-
           <div className="row" style={{ gap: 12 }}>
-            <Link className="btn" to="/exams">
-              Back
-            </Link>
-
-            {examId && canEdit ? (
+            <Link className="btn" to="/exams">Back</Link>
+            {examId && canEdit && (
               <Link className="btn btnPrimary" to={`/exams/${examId}/questions/new`}>
                 Add question
               </Link>
-            ) : null}
+            )}
           </div>
         </div>
       </header>
@@ -106,13 +87,12 @@ export default function ExamDetailsPage() {
           </div>
 
           <div className="cardBody" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {loading ? <div className="chip">Loading…</div> : null}
-            {error ? <div className="alert">{error}</div> : null}
+            {loading && <div className="chip">Loading…</div>}
+            {error && <div className="alert">{error}</div>}
 
-            {!loading && !error ? (
+            {!loading && !error && (
               <>
                 <h3 style={{ margin: "8px 0 0" }}>Questions</h3>
-
                 {questions.length === 0 ? (
                   <div className="small">No questions yet.</div>
                 ) : (
@@ -131,7 +111,7 @@ export default function ExamDetailsPage() {
                   </div>
                 )}
               </>
-            ) : null}
+            )}
           </div>
         </section>
       </main>

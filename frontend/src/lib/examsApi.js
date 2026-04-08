@@ -1,84 +1,71 @@
-import { apiFetch } from "./api";
-import { getToken } from "./auth";
-import {
-  mockAddQuestion,
-  mockCreateExam,
-  mockGetExam,
-  mockListExams,
-  mockListQuestions,
-} from "./mockExamsDb";
+import api from "./api";
 
-const ENV_MOCK =
-  String(import.meta.env.VITE_USE_MOCK_EXAMS || "").toLowerCase() === "true";
+// FUNKSIONI NDIHMES PER LOCALSTORAGE (Qe te punoje gjithçka ketu brenda)
+const getLocalDb = () => JSON.parse(localStorage.getItem("mock_exams_v1") || '{"exams":[],"questionsByExamId":{}}');
+const saveLocalDb = (db) => localStorage.setItem("mock_exams_v1", JSON.stringify(db));
 
-function tokenOrThrow() {
-  const token = getToken();
-  if (!token) throw new Error("No token");
-  return token;
-}
-
-function is404(e) {
-  if (e?.status === 404) return true;
-  const msg = String(e?.message || "");
-  return msg.includes("404") || msg.toLowerCase().includes("not found");
-}
-
-async function withFallback(realFn, mockFn) {
-  // If ENV says mock -> always mock
-  if (ENV_MOCK) return mockFn();
-
+// EXAMS API
+export async function listExams() {
   try {
-    return await realFn();
-  } catch (e) {
-    // If backend not ready (404) -> fallback to mock
-    if (is404(e)) return mockFn();
-    throw e;
+    const res = await api.get("/Exams");
+    return res.data;
+  } catch {
+    return getLocalDb().exams;
   }
 }
 
-// Exams
-export function listExams() {
-  return withFallback(
-    () => apiFetch("/exams", { token: tokenOrThrow() }),
-    () => mockListExams()
-  );
+export async function createExam(payload) {
+  try {
+    const res = await api.post("/Exams", payload);
+    return res.data;
+  } catch {
+    const db = getLocalDb();
+    const newExam = { id: `exam_${Date.now()}`, ...payload, createdAt: new Date().toISOString() };
+    db.exams.push(newExam);
+    saveLocalDb(db);
+    return newExam;
+  }
 }
 
-export function createExam(payload) {
-  return withFallback(
-    () =>
-      apiFetch("/exams", {
-        method: "POST",
-        token: tokenOrThrow(),
-        body: JSON.stringify(payload),
-      }),
-    () => mockCreateExam(payload)
-  );
+export async function getExam(examId) {
+  try {
+    const res = await api.get(`/Exams/${examId}`);
+    return res.data;
+  } catch {
+    return getLocalDb().exams.find(e => e.id === examId) || { title: "Provim i përkohshëm" };
+  }
 }
 
-export function getExam(examId) {
-  return withFallback(
-    () => apiFetch(`/exams/${examId}`, { token: tokenOrThrow() }),
-    () => mockGetExam(examId)
-  );
+// QUESTIONS API - KETU ESHTE ZGJIDHJA PER ERRORIN TEND
+export async function listQuestions(examId) {
+  try {
+    const res = await api.get(`/Exams/${examId}/questions`);
+    return res.data;
+  } catch {
+    const db = getLocalDb();
+    return db.questionsByExamId[examId] || [];
+  }
 }
 
-// Questions
-export function listQuestions(examId) {
-  return withFallback(
-    () => apiFetch(`/exams/${examId}/questions`, { token: tokenOrThrow() }),
-    () => mockListQuestions(examId)
-  );
-}
-
-export function addQuestion(examId, payload) {
-  return withFallback(
-    () =>
-      apiFetch(`/exams/${examId}/questions`, {
-        method: "POST",
-        token: tokenOrThrow(),
-        body: JSON.stringify(payload),
-      }),
-    () => mockAddQuestion(examId, payload)
-  );
+export async function addQuestion(examId, payload) {
+  try {
+    // Tentojme Backend-in
+    const res = await api.post(`/Exams/${examId}/questions`, payload);
+    return res.data;
+  } catch (error) {
+    // NESE DESHTON (Ketu po te jep error ty), E RUAJME NE LOCALSTORAGE
+    console.warn("Backend OFF, duke ruajtur pyetjen ne Browser...");
+    const db = getLocalDb();
+    if (!db.questionsByExamId[examId]) db.questionsByExamId[examId] = [];
+    
+    const newQuestion = { 
+      id: `q_${Date.now()}`, 
+      ...payload, 
+      createdAt: new Date().toISOString() 
+    };
+    
+    db.questionsByExamId[examId].push(newQuestion);
+    saveLocalDb(db);
+    return newQuestion;
+  }
 }

@@ -1,63 +1,45 @@
-import { apiFetch } from "./api";
-
-const TOKEN_KEY = "token";
-const USE_MOCK = import.meta.env.VITE_USE_MOCK_AUTH === "true";
+import api from "./api";
 
 export function getToken() {
-  return localStorage.getItem(TOKEN_KEY);
+  return localStorage.getItem("token");
 }
 
-export function setToken(token) {
-  localStorage.setItem(TOKEN_KEY, token);
+export function saveToken(token) {
+  localStorage.setItem("token", token);
 }
 
 export function clearToken() {
-  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem("token");
 }
 
-export async function login(email, password) {
-  if (USE_MOCK) {
-    if (!email || !password) throw new Error("Invalid credentials");
-
-    const role =
-      email.toLowerCase().includes("admin") ? "Admin" :
-      email.toLowerCase().includes("prof") ? "Professor" :
-      "Student";
-
-    const fakeToken = `mock.${btoa(email)}.${btoa(role)}`;
-    setToken(fakeToken);
-    return fakeToken;
-  }
-
-  const data = await apiFetch("/auth/login", {
-    method: "POST",
-    body: JSON.stringify({ email, password }),
-  });
-
-  const token = data?.token || data?.accessToken || data?.jwt;
-  if (!token) throw new Error("Login succeeded but token was not returned by API.");
-
-  setToken(token);
-  return token;
+// KJO ISHTE PJESA QE MANGOI:
+export function logout() {
+  clearToken();
+  // Kjo e dërgon përdoruesin te login dhe rifreskon faqen që të fshihen të dhënat e vjetra
+  window.location.href = "/login";
 }
 
 export async function me() {
-  if (USE_MOCK) {
-    const token = getToken();
-    if (!token) throw new Error("No token");
-
-    const parts = token.split(".");
-    const email = parts[1] ? atob(parts[1]) : "unknown@example.com";
-    const role = parts[2] ? atob(parts[2]) : "Student";
-    return { email, role };
-  }
-
   const token = getToken();
-  if (!token) throw new Error("No token");
+  if (!token) return null;
 
-  return apiFetch("/auth/me", { token });
+  try {
+    const response = await api.get("/auth/me");
+    return response.data;
+  } catch (error) {
+    if (error.response?.status === 401) {
+      clearToken();
+    }
+    return null;
+  }
 }
 
-export function logout() {
-  clearToken();
+export async function login(email, password) {
+  const response = await api.post("/auth/login", { email, password });
+  const data = response.data;
+  
+  if (data.token) {
+    saveToken(data.token);
+  }
+  return data;
 }

@@ -1,21 +1,16 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { createExam } from "../../lib/examsApi";
 import { me } from "../../lib/auth";
 import { canManageExams } from "../../lib/permissions";
 
-type FormState = {
-  title: string;
-  description: string;
-};
-
 export default function ExamCreatePage() {
   const nav = useNavigate();
 
-  const [role, setRole] = useState<string | null>(null);
-  const [form, setForm] = useState<FormState>({ title: "", description: "" });
+  const [role, setRole] = useState(null);
+  const [form, setForm] = useState({ title: "", description: "" });
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string>("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -30,7 +25,7 @@ export default function ExamCreatePage() {
 
   const canCreate = canManageExams(role);
 
-  async function onSubmit(e: React.FormEvent) {
+  async function onSubmit(e) {
     e.preventDefault();
     if (!canCreate) return;
 
@@ -42,7 +37,6 @@ export default function ExamCreatePage() {
     try {
       setSaving(true);
       setError("");
-
       const created = await createExam({
         title: form.title.trim(),
         description: form.description.trim() || null,
@@ -50,12 +44,10 @@ export default function ExamCreatePage() {
 
       if (created?.id) nav(`/exams/${created.id}`);
       else nav("/exams");
-    } catch (err: any) {
-      if (err?.status === 404) {
-        setError("Create exam endpoint not available yet (backend Sprint 2 not merged).");
-      } else {
-        setError(err?.message ?? "Failed to create exam.");
-      }
+    } catch (err) {
+      const statusPart = err?.status ? ` (HTTP ${err.status})` : "";
+      const msgPart = err?.message ? ` ${err.message}` : "";
+      setError(`Failed to create exam.${statusPart}${msgPart}`.trim());
     } finally {
       setSaving(false);
     }
@@ -69,11 +61,8 @@ export default function ExamCreatePage() {
             <span className="logoDot" />
             <span>Online Exam</span>
           </div>
-
           <div className="row" style={{ gap: 12 }}>
-            <Link className="btn" to="/exams">
-              Back
-            </Link>
+            <Link className="btn" to="/exams">Back</Link>
           </div>
         </div>
       </header>
@@ -82,46 +71,31 @@ export default function ExamCreatePage() {
         <section className="card">
           <div className="cardHeader">
             <h2 style={{ margin: 0 }}>Create exam</h2>
-            <p className="p" style={{ marginTop: 6 }}>
-              Admin/Professor can create exams.
-            </p>
           </div>
-
           <div className="cardBody" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            {!canCreate ? (
-              <div className="alert">You don’t have permission to create exams.</div>
-            ) : null}
-
-            {error ? <div className="alert">{error}</div> : null}
+            {!canCreate && <div className="alert">You don’t have permission.</div>}
+            {error && <div className="alert">{error}</div>}
 
             <form className="authForm" onSubmit={onSubmit}>
               <div className="field">
                 <label className="label">Title</label>
-                <div className="inputWrap">
-                  <input
-                    className="input"
-                    value={form.title}
-                    onChange={(e) => setForm((s) => ({ ...s, title: e.target.value }))}
-                    disabled={!canCreate || saving}
-                    placeholder="e.g. Database Midterm"
-                  />
-                </div>
+                <input
+                  className="input"
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  disabled={!canCreate || saving}
+                />
               </div>
-
               <div className="field">
                 <label className="label">Description</label>
-                <div className="inputWrap">
-                  <textarea
-                    className="input"
-                    value={form.description}
-                    onChange={(e) => setForm((s) => ({ ...s, description: e.target.value }))}
-                    disabled={!canCreate || saving}
-                    placeholder="Optional"
-                    style={{ minHeight: 120, resize: "vertical" }}
-                  />
-                </div>
+                <textarea
+                  className="input"
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  disabled={!canCreate || saving}
+                  style={{ minHeight: 120 }}
+                />
               </div>
-
               <button className="btn btnPrimary" type="submit" disabled={!canCreate || saving}>
                 {saving ? "Creating…" : "Create"}
               </button>
