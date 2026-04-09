@@ -1,45 +1,16 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import axios from 'axios';
 
-if (!BASE_URL) {
-  // Helpful message during dev
-  // eslint-disable-next-line no-console
-  console.warn("VITE_API_BASE_URL is not set. Add it to frontend/.env");
-}
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5045',
+});
 
-export async function apiFetch(path, { token, ...options } = {}) {
-  // KJO siguron që midis BASE_URL dhe path të jetë VETËM 1 slash
-  const url =
-    path.startsWith("http")
-      ? path
-      : `${BASE_URL.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
-
-  const headers = {
-    "Content-Type": "application/json",
-    ...(options.headers || {}),
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
-
-  const res = await fetch(url, { ...options, headers });
-
-  // Handle non-JSON responses safely
-  const text = await res.text();
-  let data;
-  try {
-    data = text ? JSON.parse(text) : null;
-  } catch {
-    data = text;
+// Ky funksion shton Token-in automatikisht ne cdo thirrje
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
+  return config;
+});
 
-  if (!res.ok) {
-    const message =
-      (data && typeof data === "object" && (data.message || data.error)) ||
-      (typeof data === "string" && data) ||
-      `Request failed (${res.status})`;
-    const err = new Error(message);
-    err.status = res.status;
-    err.data = data;
-    throw err;
-  }
-
-  return data;
-}
+export default api;
