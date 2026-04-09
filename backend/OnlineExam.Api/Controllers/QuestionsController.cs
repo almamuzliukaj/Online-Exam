@@ -4,6 +4,7 @@ using OnlineExam.Api.Models;
 using OnlineExam.Api.Data;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using OnlineExam.Api.DTOs; // Shto këtë
 
 namespace OnlineExam.Api.Controllers
 {
@@ -32,9 +33,8 @@ namespace OnlineExam.Api.Controllers
         // POST: /api/exams/{examId}/questions
         [HttpPost("/api/exams/{examId}/questions")]
         [Authorize(Roles = "Admin,Professor")]
-        public async Task<ActionResult<Question>> Post(Guid examId, Question question)
+        public async Task<ActionResult<Question>> Post(Guid examId, [FromBody] CreateQuestionDto dto)
         {
-            // KONTROLLI: Vetëm owner i këtij provimi ose admin
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var role = User.FindFirst(ClaimTypes.Role)?.Value;
             var exam = await _context.Exams.FindAsync(examId);
@@ -42,7 +42,12 @@ namespace OnlineExam.Api.Controllers
             if (role == "Professor" && exam.CreatedByUserId.ToString() != userId)
                 return Forbid();
 
-            question.ExamId = examId;
+            var question = new Question
+            {
+                Id = Guid.NewGuid(),
+                Text = dto.Text,
+                ExamId = examId
+            };
             _context.Questions.Add(question);
             await _context.SaveChangesAsync();
 
@@ -52,19 +57,18 @@ namespace OnlineExam.Api.Controllers
         // PUT: /api/questions/{id}
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin,Professor")]
-        public async Task<IActionResult> Put(Guid id, Question updated)
+        public async Task<IActionResult> Put(Guid id, [FromBody] CreateQuestionDto dto)
         {
             var existing = await _context.Questions.FindAsync(id);
             if (existing == null) return NotFound();
 
-            // Only admin or owner
             var exam = await _context.Exams.FindAsync(existing.ExamId);
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var role = User.FindFirst(ClaimTypes.Role)?.Value;
             if (role == "Professor" && exam.CreatedByUserId.ToString() != userId)
                 return Forbid();
 
-            existing.Text = updated.Text;
+            existing.Text = dto.Text;
             await _context.SaveChangesAsync();
             return NoContent();
         }
