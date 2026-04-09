@@ -33,7 +33,7 @@ namespace OnlineExam.Api.Controllers
         // POST: /api/exams/{examId}/questions
         [HttpPost("/api/exams/{examId}/questions")]
         [Authorize(Roles = "Admin,Professor")]
-        public async Task<ActionResult<Question>> Post(Guid examId, [FromBody] CreateQuestionDto dto)
+        public async Task<IActionResult> Post(Guid examId, [FromBody] CreateQuestionDto dto)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var role = User.FindFirst(ClaimTypes.Role)?.Value;
@@ -42,16 +42,25 @@ namespace OnlineExam.Api.Controllers
             if (role == "Professor" && exam.CreatedByUserId.ToString() != userId)
                 return Forbid();
 
-            var question = new Question
+           var question = new Question
             {
                 Id = Guid.NewGuid(),
                 Text = dto.Text,
+                Type = dto.Type,
+                Points = dto.Points,
                 ExamId = examId
             };
             _context.Questions.Add(question);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(Get), new { id = question.Id }, question);
+           return CreatedAtAction(nameof(Get), new { id = question.Id }, new
+            {
+                question.Id,
+                question.ExamId,
+                question.Type,
+                question.Text,
+                question.Points
+            });
         }
 
         // PUT: /api/questions/{id}
@@ -94,12 +103,21 @@ namespace OnlineExam.Api.Controllers
 
         // GET: /api/exams/{examId}/questions
         [HttpGet("/api/exams/{examId}/questions")]
-        public async Task<ActionResult<IEnumerable<Question>>> GetByExam(Guid examId)
+public async Task<IActionResult> GetByExam(Guid examId)
+{
+    var questions = await _context.Questions
+        .Where(q => q.ExamId == examId)
+        .Select(q => new
         {
-            var exam = await _context.Exams.Include(x => x.Questions).FirstOrDefaultAsync(x => x.Id == examId);
-            if (exam == null) return NotFound();
+            q.Id,
+            q.ExamId,
+            q.Type,
+            q.Text,
+            q.Points
+        })
+        .ToListAsync();
 
-            return Ok(exam.Questions);
-        }
+    return Ok(questions);
+}
     }
 }
