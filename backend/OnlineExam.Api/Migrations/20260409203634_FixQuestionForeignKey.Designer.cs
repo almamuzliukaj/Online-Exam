@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OnlineExam.Api.Data;
@@ -11,9 +12,11 @@ using OnlineExam.Api.Data;
 namespace OnlineExam.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260409203634_FixQuestionForeignKey")]
+    partial class FixQuestionForeignKey
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -68,6 +71,9 @@ namespace OnlineExam.Api.Migrations
                     b.Property<Guid>("ExamId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("ExamId1")
+                        .HasColumnType("uuid");
+
                     b.Property<int>("Points")
                         .HasColumnType("integer");
 
@@ -82,6 +88,8 @@ namespace OnlineExam.Api.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ExamId");
+
+                    b.HasIndex("ExamId1");
 
                     b.ToTable("Questions");
                 });
@@ -121,8 +129,8 @@ namespace OnlineExam.Api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("b17cb2e7-24c3-43ef-8cbe-9cadd3d05fc4"),
-                            CreatedAt = new DateTime(2026, 4, 9, 20, 41, 20, 30, DateTimeKind.Utc).AddTicks(4655),
+                            Id = new Guid("2111513c-e30b-4286-b2b8-7a2babfa3703"),
+                            CreatedAt = new DateTime(2026, 4, 9, 20, 36, 33, 828, DateTimeKind.Utc).AddTicks(267),
                             Email = "admin@onlineexam.com",
                             FullName = "Admin User",
                             IsActive = true,
@@ -131,8 +139,8 @@ namespace OnlineExam.Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("72f91bcd-254b-4dfc-98cc-9dece7506cb8"),
-                            CreatedAt = new DateTime(2026, 4, 9, 20, 41, 20, 30, DateTimeKind.Utc).AddTicks(4661),
+                            Id = new Guid("a120fe37-341f-4dde-90e6-122967fff74d"),
+                            CreatedAt = new DateTime(2026, 4, 9, 20, 36, 33, 828, DateTimeKind.Utc).AddTicks(276),
                             Email = "prof@onlineexam.com",
                             FullName = "Professor",
                             IsActive = true,
@@ -141,8 +149,8 @@ namespace OnlineExam.Api.Migrations
                         },
                         new
                         {
-                            Id = new Guid("be5dc142-5672-481e-92bd-7ac772db21a1"),
-                            CreatedAt = new DateTime(2026, 4, 9, 20, 41, 20, 30, DateTimeKind.Utc).AddTicks(4665),
+                            Id = new Guid("eb1100da-64be-4eef-9b4a-e6aecc5e0502"),
+                            CreatedAt = new DateTime(2026, 4, 9, 20, 36, 33, 828, DateTimeKind.Utc).AddTicks(279),
                             Email = "student@onlineexam.com",
                             FullName = "Student",
                             IsActive = true,
@@ -154,10 +162,14 @@ namespace OnlineExam.Api.Migrations
             modelBuilder.Entity("OnlineExam.Api.Models.Question", b =>
                 {
                     b.HasOne("OnlineExam.Api.Models.Exam", "Exam")
-                        .WithMany("Questions")
+                        .WithMany()
                         .HasForeignKey("ExamId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("OnlineExam.Api.Models.Exam", null)
+                        .WithMany("Questions")
+                        .HasForeignKey("ExamId1");
 
                     b.Navigation("Exam");
                 });

@@ -7,5 +7,6 @@ public class Question
     public string Type { get; set; } = null!;
     public string Text { get; set; } = null!;
     public int Points { get; set; }
+
     public Exam Exam { get; set; } = null!;
 }

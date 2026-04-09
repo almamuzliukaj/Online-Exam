@@ -51,10 +51,10 @@ namespace OnlineExam.Api.Data
 
             // FK: Exam → Questions (one-to-many)
             modelBuilder.Entity<Question>()
-                .HasOne(q => q.Exam)
-                .WithMany()
-                .HasForeignKey(q => q.ExamId)
-                .OnDelete(DeleteBehavior.Cascade);
+    .HasOne(q => q.Exam)
+    .WithMany(e => e.Questions)
+    .HasForeignKey(q => q.ExamId)
+    .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
