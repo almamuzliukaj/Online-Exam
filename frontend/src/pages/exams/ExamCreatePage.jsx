@@ -1,108 +1,69 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { createExam } from "../../lib/examsApi";
-import { me } from "../../lib/auth";
-import { canManageExams } from "../../lib/permissions";
 
 export default function ExamCreatePage() {
   const nav = useNavigate();
-
-  const [role, setRole] = useState(null);
-  const [form, setForm] = useState({ title: "", description: "" });
-  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({ title: "", description: "", durationMinutes: 60 });
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const info = await me();
-        setRole(info?.role ?? null);
-      } catch {
-        setRole(null);
-      }
-    })();
-  }, []);
-
-  const canCreate = canManageExams(role);
 
   async function onSubmit(e) {
     e.preventDefault();
-    if (!canCreate) return;
-
-    if (!form.title.trim()) {
-      setError("Title is required.");
-      return;
-    }
-
     try {
-      setSaving(true);
-      setError("");
-      const created = await createExam({
-        title: form.title.trim(),
-        description: form.description.trim() || null,
-      });
-
-      if (created?.id) nav(`/exams/${created.id}`);
-      else nav("/exams");
+      await createExam(form);
+      alert("Provimi u krijua me sukses!");
+      nav("/exams");
     } catch (err) {
-      const statusPart = err?.status ? ` (HTTP ${err.status})` : "";
-      const msgPart = err?.message ? ` ${err.message}` : "";
-      setError(`Failed to create exam.${statusPart}${msgPart}`.trim());
-    } finally {
-      setSaving(false);
+      // Nëse jep error databaza, të paktën ta dimë pse
+      setError("Gabim në Databazë: Fjalëkalimi i pasaktë ose Docker i fikur.");
+      console.error(err);
     }
   }
 
   return (
-    <div className="shell">
-      <header className="nav">
-        <div className="container navInner">
-          <div className="brand">
-            <span className="logoDot" />
-            <span>Online Exam</span>
-          </div>
-          <div className="row" style={{ gap: 12 }}>
-            <Link className="btn" to="/exams">Back</Link>
-          </div>
-        </div>
-      </header>
+    <div style={{ padding: "40px", backgroundColor: "#f3f4f6", minHeight: "100vh", color: "#333" }}>
+      <div style={{ maxWidth: "500px", margin: "0 auto", backgroundColor: "white", padding: "30px", borderRadius: "12px", boxShadow: "0 10px 15px rgba(0,0,0,0.1)" }}>
+        <h2 style={{ textAlign: "center", marginBottom: "20px", color: "#111" }}>Krijo Provim të Ri</h2>
+        
+        {error && <div style={{ color: "red", marginBottom: "15px", fontSize: "14px", textAlign: "center" }}>{error}</div>}
 
-      <main className="container" style={{ padding: "26px 0 40px" }}>
-        <section className="card">
-          <div className="cardHeader">
-            <h2 style={{ margin: 0 }}>Create exam</h2>
+        <form onSubmit={onSubmit} style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+          <div>
+            <label style={{ display: "block", fontWeight: "bold" }}>Titulli</label>
+            <input 
+              style={{ width: "100%", padding: "10px", border: "1px solid #ccc", borderRadius: "6px", color: "#000", backgroundColor: "#fff" }} 
+              value={form.title} 
+              onChange={e => setForm({...form, title: e.target.value})} 
+              required 
+            />
           </div>
-          <div className="cardBody" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            {!canCreate && <div className="alert">You don’t have permission.</div>}
-            {error && <div className="alert">{error}</div>}
 
-            <form className="authForm" onSubmit={onSubmit}>
-              <div className="field">
-                <label className="label">Title</label>
-                <input
-                  className="input"
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  disabled={!canCreate || saving}
-                />
-              </div>
-              <div className="field">
-                <label className="label">Description</label>
-                <textarea
-                  className="input"
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  disabled={!canCreate || saving}
-                  style={{ minHeight: 120 }}
-                />
-              </div>
-              <button className="btn btnPrimary" type="submit" disabled={!canCreate || saving}>
-                {saving ? "Creating…" : "Create"}
-              </button>
-            </form>
+          <div>
+            <label style={{ display: "block", fontWeight: "bold" }}>Kohëzgjatja (minuta)</label>
+            <input 
+              type="number"
+              style={{ width: "100%", padding: "10px", border: "1px solid #ccc", borderRadius: "6px", color: "#000", backgroundColor: "#fff" }} 
+              value={form.durationMinutes} 
+              onChange={e => setForm({...form, durationMinutes: e.target.value})} 
+            />
           </div>
-        </section>
-      </main>
+
+          <div>
+            <label style={{ display: "block", fontWeight: "bold" }}>Përshkrimi</label>
+            <textarea 
+              style={{ width: "100%", padding: "10px", border: "1px solid #ccc", borderRadius: "6px", minHeight: "80px", color: "#000", backgroundColor: "#fff" }} 
+              value={form.description} 
+              onChange={e => setForm({...form, description: e.target.value})} 
+            />
+          </div>
+
+          <button type="submit" style={{ backgroundColor: "#4F46E5", color: "white", padding: "12px", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "bold" }}>
+            Krijo Provimin
+          </button>
+
+          <Link to="/exams" style={{ textAlign: "center", color: "#666", textDecoration: "none", fontSize: "14px" }}>Anulo</Link>
+        </form>
+      </div>
     </div>
   );
 }
