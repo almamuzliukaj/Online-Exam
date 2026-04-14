@@ -30,8 +30,8 @@ export default function ExamCreatePage() {
       <div className="center">
         <div className="card formCard">
           <div className="cardHeader textCenter">
-            <h2 style={{ margin: 0 }}>Create New Exam</h2>
-            <p className="p" style={{ marginTop: 6 }}>Fill in the details below to create an exam.</p>
+            <h2 className="cardTitle">Create New Exam</h2>
+            <p className="p">Fill in the details below to create an exam.</p>
           </div>
 
           <div className="cardBody">
@@ -64,8 +64,7 @@ export default function ExamCreatePage() {
               <div className="field">
                 <div className="label">Description</div>
                 <textarea
-                  className="input"
-                  style={{ minHeight: 80, resize: "vertical" }}
+                  className="input textarea"
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
                   placeholder="Optional description…"

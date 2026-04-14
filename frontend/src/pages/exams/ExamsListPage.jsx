@@ -48,9 +48,9 @@ export default function ExamsListPage() {
 
   return (
     <div className="shell">
-      <div className="container" style={{ paddingTop: 26, paddingBottom: 40 }}>
+      <div className="container pageContent">
         <header className="pageHeader">
-          <h2 style={{ margin: 0 }}>Online Exams</h2>
+          <h2 className="cardTitle">Online Exams</h2>
           {canCreate && (
             <Link to="/exams/new" className="btn btnPrimary">
               + Create Exam
@@ -70,8 +70,8 @@ export default function ExamsListPage() {
             {exams.map((exam) => (
               <div key={exam.id} className="card">
                 <div className="cardBody">
-                  <h3 style={{ margin: "0 0 8px" }}>{exam.title}</h3>
-                  <p className="small" style={{ minHeight: 40 }}>
+                  <h3 className="cardTitle">{exam.title}</h3>
+                  <p className="small descriptionPreview">
                     {exam.description || "No description."}
                   </p>
                   <div className="cardFooter">

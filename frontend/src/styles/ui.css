@@ -222,3 +222,21 @@ pre{
 .textCenter{ text-align:center; }
 .link{ color: var(--muted); font-size:13px; text-decoration:none; }
 .link:hover{ color: var(--text); }
+
+.pageContent{
+  padding-top: var(--space-5);
+  padding-bottom: var(--space-6);
+}
+
+.cardTitle{
+  margin: 0 0 8px;
+}
+
+.descriptionPreview{
+  min-height: 40px;
+}
+
+.textarea{
+  min-height: 80px;
+  resize: vertical;
+}
