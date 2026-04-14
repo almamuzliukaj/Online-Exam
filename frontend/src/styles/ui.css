@@ -183,3 +183,42 @@ pre{
   background: rgba(0,0,0,.25);
   overflow:auto;
 }
+
+/* ── Exams page utilities ────────────────────────────── */
+.gridCards{
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-5);
+}
+
+.cardFooter{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top: var(--space-4);
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-3);
+}
+
+.emptyState{
+  text-align:center;
+  padding: var(--space-6) var(--space-5);
+  border-radius: var(--radius);
+  border: 1px dashed var(--border);
+  color: var(--muted);
+}
+
+.pageHeader{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom: var(--space-5);
+}
+
+.formCard{
+  width: min(520px, calc(100% - 32px));
+}
+
+.textCenter{ text-align:center; }
+.link{ color: var(--muted); font-size:13px; text-decoration:none; }
+.link:hover{ color: var(--text); }
