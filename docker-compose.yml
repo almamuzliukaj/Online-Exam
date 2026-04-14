@@ -13,5 +13,20 @@ services:
     volumes:
       - onlineexam_db:/var/lib/postgresql/data
 
+  api:
+    build:
+      context: .
+      dockerfile: backend/OnlineExam.Api/Dockerfile
+    container_name: onlineexam-api
+    depends_on:
+      - db
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://0.0.0.0:5045
+      # KËTU duhet connection string i DB brenda docker network
+      ConnectionStrings__DefaultConnection: Host=db;Port=5432;Database=onlineexam;Username=onlineexam;Password=onlineexam
+    ports:
+      - "5045:5045"
+
 volumes:
   onlineexam_db:
