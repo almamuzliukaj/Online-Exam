@@ -1,75 +1,344 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-using OnlineExam.Api.Models;
-using OnlineExam.Api.DTOs;
 using OnlineExam.Api.Data;
+using OnlineExam.Api.DTOs;
+using OnlineExam.Api.Models;
 
-namespace OnlineExam.Api.Controllers
+namespace OnlineExam.Api.Controllers;
+
+[ApiController]
+[Route("api/course-offerings")]
+[Authorize]
+public class CourseOfferingsController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class CourseOfferingsController : ControllerBase
-    {
-        private readonly AppDbContext _context;
-        public CourseOfferingsController(AppDbContext context) => _context = context;
+    private static readonly HashSet<string> AllowedOfferingStatuses = ["Draft", "Published", "Active", "Closed", "Archived"];
+    private static readonly HashSet<string> AllowedDeliveryTypes = ["Regular", "RetakeOnly", "Special"];
+    private readonly AppDbContext _context;
 
-        [HttpGet]
-        [Authorize(Roles = "Admin")]
-        public IActionResult GetOfferings()
+    public CourseOfferingsController(AppDbContext context)
+    {
+        _context = context;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetOfferings([FromQuery] Guid? termId, [FromQuery] int? yearOfStudy, [FromQuery] int? semesterNo)
+    {
+        IQueryable<CourseOffering> query = _context.CourseOfferings
+            .Include(x => x.Course)
+            .Include(x => x.Term)
+            .Include(x => x.StaffAssignments.Where(a => a.IsActive));
+
+        if (User.IsInRole("Professor") || User.IsInRole("Assistant"))
         {
-            var offerings = _context.CourseOfferings
-                .Include(o => o.Course)
-                .Include(o => o.Term)
-                .ToList();
-            return Ok(offerings);
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId == null)
+                return Unauthorized();
+
+            query = query.Where(x =>
+                x.PrimaryProfessorId == currentUserId.Value ||
+                x.AssistantId == currentUserId.Value ||
+                x.StaffAssignments.Any(a => a.UserId == currentUserId.Value && a.IsActive));
         }
 
-        [HttpPost]
-        [Authorize(Roles = "Admin")]
-        public IActionResult CreateOffering([FromBody] CreateCourseOfferingDto dto)
-        {
-            if (dto.ProfessorId == Guid.Empty)
-                return BadRequest("ProfessorId is required.");
+        if (termId.HasValue)
+            query = query.Where(x => x.TermId == termId.Value);
+        if (yearOfStudy.HasValue)
+            query = query.Where(x => x.YearOfStudy == yearOfStudy.Value);
+        if (semesterNo.HasValue)
+            query = query.Where(x => x.SemesterNo == semesterNo.Value);
 
-            var offering = new CourseOffering
+        var offerings = await query
+            .OrderBy(x => x.YearOfStudy)
+            .ThenBy(x => x.SemesterNo)
+            .ThenBy(x => x.SectionCode)
+            .ToListAsync();
+
+        return Ok(offerings);
+    }
+
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetOffering(Guid id)
+    {
+        var offering = await _context.CourseOfferings
+            .Include(x => x.Course)
+            .Include(x => x.Term)
+            .Include(x => x.StaffAssignments)
+            .FirstOrDefaultAsync(x => x.Id == id);
+
+        if (offering == null)
+            return NotFound();
+
+        if (User.IsInRole("Professor") || User.IsInRole("Assistant"))
+        {
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId == null)
+                return Unauthorized();
+
+            var hasAccess = offering.PrimaryProfessorId == currentUserId.Value ||
+                            offering.AssistantId == currentUserId.Value ||
+                            offering.StaffAssignments.Any(a => a.UserId == currentUserId.Value && a.IsActive);
+
+            if (!hasAccess)
+                return Forbid();
+        }
+
+        return Ok(offering);
+    }
+
+    [HttpGet("mine")]
+    [Authorize(Roles = "Professor,Assistant")]
+    public async Task<IActionResult> GetMyOfferings()
+    {
+        var currentUserId = GetCurrentUserId();
+        if (currentUserId == null)
+            return Unauthorized();
+
+        var offerings = await _context.CourseOfferings
+            .Include(x => x.Course)
+            .Include(x => x.Term)
+            .Include(x => x.StaffAssignments.Where(a => a.IsActive))
+            .Where(x =>
+                x.PrimaryProfessorId == currentUserId.Value ||
+                x.AssistantId == currentUserId.Value ||
+                x.StaffAssignments.Any(a => a.UserId == currentUserId.Value && a.IsActive))
+            .OrderBy(x => x.YearOfStudy)
+            .ThenBy(x => x.SemesterNo)
+            .ToListAsync();
+
+        return Ok(offerings);
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> CreateOffering([FromBody] CreateCourseOfferingDto dto)
+    {
+        var primaryProfessorId = dto.PrimaryProfessorId != Guid.Empty ? dto.PrimaryProfessorId : dto.ProfessorId ?? Guid.Empty;
+        var validationError = await ValidateOfferingAsync(dto.CourseId, dto.TermId, dto.YearOfStudy, dto.SemesterNo, dto.SectionCode, dto.DeliveryType, dto.Capacity, primaryProfessorId, dto.AssistantId);
+        if (validationError != null)
+            return BadRequest(new { message = validationError });
+
+        var normalizedSectionCode = dto.SectionCode.Trim().ToUpperInvariant();
+        if (await _context.CourseOfferings.AnyAsync(x => x.CourseId == dto.CourseId && x.TermId == dto.TermId && x.SectionCode == normalizedSectionCode))
+            return Conflict(new { message = "An offering with this course, term, and section already exists." });
+
+        var offering = new CourseOffering
+        {
+            Id = Guid.NewGuid(),
+            CourseId = dto.CourseId,
+            TermId = dto.TermId,
+            YearOfStudy = dto.YearOfStudy,
+            SemesterNo = dto.SemesterNo,
+            SectionCode = normalizedSectionCode,
+            DeliveryType = dto.DeliveryType.Trim(),
+            Capacity = dto.Capacity,
+            Status = "Draft",
+            PrimaryProfessorId = primaryProfessorId,
+            AssistantId = dto.AssistantId,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        _context.CourseOfferings.Add(offering);
+        _context.CourseOfferingStaffAssignments.Add(new CourseOfferingStaffAssignment
+        {
+            Id = Guid.NewGuid(),
+            CourseOfferingId = offering.Id,
+            UserId = primaryProfessorId,
+            RoleInOffering = "Professor",
+            AssignmentType = "Primary",
+            PermissionsProfile = "FullTeaching",
+            AssignedAt = DateTime.UtcNow,
+            AssignedBy = GetCurrentUserId()!.Value,
+            IsActive = true
+        });
+
+        if (dto.AssistantId.HasValue)
+        {
+            _context.CourseOfferingStaffAssignments.Add(new CourseOfferingStaffAssignment
             {
                 Id = Guid.NewGuid(),
-                CourseId = dto.CourseId,
-                TermId = dto.TermId,
-                YearOfStudy = dto.YearOfStudy,
-                SemesterNo = dto.SemesterNo,
-                ProfessorId = dto.ProfessorId,
-                AssistantId = dto.AssistantId
-            };
-
-            _context.CourseOfferings.Add(offering);
-            _context.SaveChanges();
-
-            var created = _context.CourseOfferings
-                .Include(x => x.Course)
-                .Include(x => x.Term)
-                .First(x => x.Id == offering.Id);
-
-            return CreatedAtAction(nameof(GetOfferings), new { id = offering.Id }, created);
+                CourseOfferingId = offering.Id,
+                UserId = dto.AssistantId.Value,
+                RoleInOffering = "Assistant",
+                AssignmentType = "Secondary",
+                PermissionsProfile = "GradingOnly",
+                AssignedAt = DateTime.UtcNow,
+                AssignedBy = GetCurrentUserId()!.Value,
+                IsActive = true
+            });
         }
 
-        [HttpGet("mine")]
-        [Authorize(Roles = "Professor,Assistant")]
-        public IActionResult GetMyOfferings()
+        await _context.SaveChangesAsync();
+
+        return CreatedAtAction(nameof(GetOffering), new { id = offering.Id }, await BuildOfferingResponseAsync(offering.Id));
+    }
+
+    [HttpPut("{id:guid}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> UpdateOffering(Guid id, [FromBody] UpdateCourseOfferingDto dto)
+    {
+        var offering = await _context.CourseOfferings
+            .Include(x => x.StaffAssignments)
+            .FirstOrDefaultAsync(x => x.Id == id);
+
+        if (offering == null)
+            return NotFound();
+
+        var validationError = await ValidateOfferingAsync(offering.CourseId, offering.TermId, dto.YearOfStudy, dto.SemesterNo, dto.SectionCode, dto.DeliveryType, dto.Capacity, dto.PrimaryProfessorId, dto.AssistantId);
+        if (validationError != null)
+            return BadRequest(new { message = validationError });
+
+        if (!AllowedOfferingStatuses.Contains(dto.Status))
+            return BadRequest(new { message = "Invalid offering status." });
+
+        var normalizedSectionCode = dto.SectionCode.Trim().ToUpperInvariant();
+        if (await _context.CourseOfferings.AnyAsync(x => x.Id != id && x.CourseId == offering.CourseId && x.TermId == offering.TermId && x.SectionCode == normalizedSectionCode))
+            return Conflict(new { message = "An offering with this course, term, and section already exists." });
+
+        offering.YearOfStudy = dto.YearOfStudy;
+        offering.SemesterNo = dto.SemesterNo;
+        offering.SectionCode = normalizedSectionCode;
+        offering.DeliveryType = dto.DeliveryType.Trim();
+        offering.Capacity = dto.Capacity;
+        offering.Status = dto.Status.Trim();
+        offering.PrimaryProfessorId = dto.PrimaryProfessorId;
+        offering.AssistantId = dto.AssistantId;
+        offering.UpdatedAt = DateTime.UtcNow;
+
+        await SyncAssignmentsAsync(offering, dto.PrimaryProfessorId, dto.AssistantId);
+        await _context.SaveChangesAsync();
+
+        return Ok(await BuildOfferingResponseAsync(id));
+    }
+
+    [HttpPost("{id:guid}/publish")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Publish(Guid id)
+    {
+        var offering = await _context.CourseOfferings.FindAsync(id);
+        if (offering == null)
+            return NotFound();
+
+        if (offering.PrimaryProfessorId == Guid.Empty)
+            return BadRequest(new { message = "Offering must have an active primary professor before publishing." });
+
+        offering.Status = "Published";
+        offering.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+        return Ok(offering);
+    }
+
+    [HttpPost("{id:guid}/close")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Close(Guid id)
+    {
+        var offering = await _context.CourseOfferings.FindAsync(id);
+        if (offering == null)
+            return NotFound();
+
+        offering.Status = "Closed";
+        offering.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+        return Ok(offering);
+    }
+
+    private async Task<object?> BuildOfferingResponseAsync(Guid offeringId)
+    {
+        return await _context.CourseOfferings
+            .Include(x => x.Course)
+            .Include(x => x.Term)
+            .Include(x => x.StaffAssignments)
+            .FirstOrDefaultAsync(x => x.Id == offeringId);
+    }
+
+    private Task SyncAssignmentsAsync(CourseOffering offering, Guid primaryProfessorId, Guid? assistantId)
+    {
+        var currentUserId = GetCurrentUserId()!.Value;
+        var activeAssignments = offering.StaffAssignments.Where(x => x.IsActive).ToList();
+
+        foreach (var professorAssignment in activeAssignments.Where(x => x.RoleInOffering == "Professor" && x.UserId != primaryProfessorId))
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return Unauthorized();
-            var userGuid = Guid.Parse(userId);
-
-            var offerings = _context.CourseOfferings
-                .Include(o => o.Course)
-                .Include(o => o.Term)
-                .Where(o => o.ProfessorId == userGuid || o.AssistantId == userGuid)
-                .ToList();
-
-            return Ok(offerings);
+            professorAssignment.IsActive = false;
+            professorAssignment.RevokedAt = DateTime.UtcNow;
+            professorAssignment.RevokedBy = currentUserId;
         }
+
+        if (!activeAssignments.Any(x => x.RoleInOffering == "Professor" && x.UserId == primaryProfessorId))
+        {
+            _context.CourseOfferingStaffAssignments.Add(new CourseOfferingStaffAssignment
+            {
+                Id = Guid.NewGuid(),
+                CourseOfferingId = offering.Id,
+                UserId = primaryProfessorId,
+                RoleInOffering = "Professor",
+                AssignmentType = "Primary",
+                PermissionsProfile = "FullTeaching",
+                AssignedAt = DateTime.UtcNow,
+                AssignedBy = currentUserId,
+                IsActive = true
+            });
+        }
+
+        foreach (var assistantAssignment in activeAssignments.Where(x => x.RoleInOffering == "Assistant" && (!assistantId.HasValue || x.UserId != assistantId.Value)))
+        {
+            assistantAssignment.IsActive = false;
+            assistantAssignment.RevokedAt = DateTime.UtcNow;
+            assistantAssignment.RevokedBy = currentUserId;
+        }
+
+        if (assistantId.HasValue && !activeAssignments.Any(x => x.RoleInOffering == "Assistant" && x.UserId == assistantId.Value))
+        {
+            _context.CourseOfferingStaffAssignments.Add(new CourseOfferingStaffAssignment
+            {
+                Id = Guid.NewGuid(),
+                CourseOfferingId = offering.Id,
+                UserId = assistantId.Value,
+                RoleInOffering = "Assistant",
+                AssignmentType = "Secondary",
+                PermissionsProfile = "GradingOnly",
+                AssignedAt = DateTime.UtcNow,
+                AssignedBy = currentUserId,
+                IsActive = true
+            });
+        }
+        return Task.CompletedTask;
+    }
+
+    private async Task<string?> ValidateOfferingAsync(Guid courseId, Guid termId, int yearOfStudy, int semesterNo, string sectionCode, string deliveryType, int capacity, Guid primaryProfessorId, Guid? assistantId)
+    {
+        if (courseId == Guid.Empty || !await _context.Courses.AnyAsync(x => x.Id == courseId))
+            return "Valid CourseId is required.";
+        if (termId == Guid.Empty || !await _context.Terms.AnyAsync(x => x.Id == termId))
+            return "Valid TermId is required.";
+        if (!IsValidYearSemesterPair(yearOfStudy, semesterNo))
+            return "YearOfStudy and SemesterNo are not a valid pair.";
+        if (string.IsNullOrWhiteSpace(sectionCode))
+            return "SectionCode is required.";
+        if (!AllowedDeliveryTypes.Contains(deliveryType.Trim()))
+            return "Invalid delivery type.";
+        if (capacity < 0)
+            return "Capacity cannot be negative.";
+        if (primaryProfessorId == Guid.Empty || !await _context.Users.AnyAsync(x => x.Id == primaryProfessorId && x.Role == "Professor" && x.IsActive))
+            return "A valid active professor is required.";
+        if (assistantId.HasValue && !await _context.Users.AnyAsync(x => x.Id == assistantId.Value && x.Role == "Assistant" && x.IsActive))
+            return "AssistantId must reference an active assistant.";
+
+        return null;
+    }
+
+    private Guid? GetCurrentUserId()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        return Guid.TryParse(userId, out var parsed) ? parsed : null;
+    }
+
+    private static bool IsValidYearSemesterPair(int yearOfStudy, int semesterNo)
+    {
+        if (yearOfStudy < 1 || yearOfStudy > 3)
+            return false;
+
+        return semesterNo == ((yearOfStudy * 2) - 1) || semesterNo == (yearOfStudy * 2);
     }
 }

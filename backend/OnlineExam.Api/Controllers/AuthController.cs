@@ -26,7 +26,7 @@ namespace OnlineExam.Api.Controllers
         public IActionResult Login([FromBody] LoginRequestDto dto)
         {
             var user = _db.Users.FirstOrDefault(u => u.Email == dto.Email);
-
+ feature/exam-fixes-and-logo
             if (user == null || !user.IsActive)
             {
                 return Unauthorized("Invalid credentials");
@@ -42,6 +42,10 @@ namespace OnlineExam.Api.Controllers
                 user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
                 _db.SaveChanges();
             }
+
+            if (user == null || !user.IsActive || !PasswordMatches(user.PasswordHash, dto.Password))
+                return Unauthorized("Invalid credentials");
+ main
 
             var jwtKey = _config["Jwt:Key"];
             var jwtIssuer = _config["Jwt:Issuer"];
@@ -108,12 +112,14 @@ namespace OnlineExam.Api.Controllers
             return Ok("Hello Admin!");
         }
 
+ feature/exam-fixes-and-logo
         private static bool IsBcryptHash(string value)
         {
             return !string.IsNullOrWhiteSpace(value) &&
                 (value.StartsWith("$2a$") || value.StartsWith("$2b$") || value.StartsWith("$2y$"));
         }
 
+ main
         private static bool PasswordMatches(string storedHash, string inputPassword)
         {
             if (string.IsNullOrWhiteSpace(storedHash) || string.IsNullOrWhiteSpace(inputPassword))
@@ -126,6 +132,7 @@ namespace OnlineExam.Api.Controllers
                 return storedHash == inputPassword;
             }
 
+ feature/exam-fixes-and-logo
             try
             {
                 return BCrypt.Net.BCrypt.Verify(inputPassword, storedHash);
@@ -134,6 +141,9 @@ namespace OnlineExam.Api.Controllers
             {
                 return false;
             }
+
+            return BCrypt.Net.BCrypt.Verify(inputPassword, storedHash);
+ main
         }
     }
 }

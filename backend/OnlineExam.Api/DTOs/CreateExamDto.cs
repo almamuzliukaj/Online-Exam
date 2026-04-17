@@ -1,10 +1,12 @@
-namespace OnlineExam.Api.DTOs
+namespace OnlineExam.Api.DTOs;
+
+public class CreateExamDto
 {
-    public class CreateExamDto {
-        public string Title { get; set; } = null!;
-        public string Description { get; set; } = null!;
-        public int DurationMinutes { get; set; } = 60;
-        public DateTime? StartsAt { get; set; }
-        public DateTime? EndsAt { get; set; }
-    }
+    public string Title { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public int DurationMinutes { get; set; } = 60;
+    public DateTime? StartsAt { get; set; }
+    public DateTime? EndsAt { get; set; }
+    public bool IsPublished { get; set; }
+    public Guid? CourseOfferingId { get; set; }
 }

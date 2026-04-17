@@ -1,91 +1,101 @@
-import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import AppShell from "../../components/AppShell";
+import { useCurrentUser } from "../../hooks/useCurrentUser";
 import { listExams } from "../../lib/examsApi";
-import { me } from "../../lib/auth";
+import { canManageExams } from "../../lib/permissions";
+import { useEffect, useState } from "react";
 
 export default function ExamsListPage() {
+  const { user, loading: userLoading, error: userError } = useCurrentUser();
   const [exams, setExams] = useState([]);
-  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-
-      let userData;
-      try {
-        userData = await me();
-      } catch {
-        userData = { email: "student@onlineexam.com", role: "Student" };
-      }
-      setUser(userData);
-
-      const examsData = await listExams();
-      setExams(examsData);
-    } catch (err) {
-      console.error("Error fetching data:", err);
-      setError("Failed to load exam data.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchData();
+    let active = true;
+
+    (async () => {
+      try {
+        setLoading(true);
+        setError("");
+        const data = await listExams();
+        if (active) setExams(Array.isArray(data) ? data : []);
+      } catch {
+        if (active) setError("Failed to load exam data.");
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
   }, []);
 
-  const canCreate = user?.role === "Admin" || user?.role === "Professor";
-
-  if (loading) {
-    return <div className="loader" style={{ padding: "50px", textAlign: "center" }}>Loading exams...</div>;
+  if (userLoading) {
+    return <div className="pageState">Loading exams...</div>;
   }
 
+  if (!user) {
+    return <div className="pageState">{userError || "Unable to load user profile."}</div>;
+  }
+
+  const canCreate = canManageExams(user.role);
+
   return (
-    <div className="container" style={{ maxWidth: "1200px", margin: "0 auto", padding: "20px" }}>
-      <header className="pageHeader">
-        <div>
-          <h2 style={{ fontSize: "28px", fontWeight: "700", marginBottom: "6px" }}>Exam Workspace</h2>
-          <p className="p">Review drafts, published exams, and question coverage in one place.</p>
-        </div>
-        {canCreate && (
-          <Link to="/exams/new" className="btn btnPrimary">
-            Create new exam
-          </Link>
+    <AppShell
+      user={user}
+      badge="Exam workspace"
+      title="Exams"
+      subtitle="Review current assessments, drafts, and publishing readiness in a cleaner operational view."
+      actions={canCreate ? <Link to="/exams/new" className="btn btnPrimary">Create exam</Link> : null}
+    >
+      <div className="stackXl">
+        <section className="summaryStrip">
+          <article className="summaryCard">
+            <span className="summaryLabel">Total exams</span>
+            <strong>{exams.length}</strong>
+          </article>
+          <article className="summaryCard">
+            <span className="summaryLabel">Published</span>
+            <strong>{exams.filter((exam) => exam.isPublished).length}</strong>
+          </article>
+          <article className="summaryCard">
+            <span className="summaryLabel">Draft</span>
+            <strong>{exams.filter((exam) => !exam.isPublished).length}</strong>
+          </article>
+        </section>
+
+        {error ? <div className="alert">{error}</div> : null}
+
+        {loading ? (
+          <div className="pageStateCard">Loading exam records...</div>
+        ) : exams.length === 0 ? (
+          <div className="emptyState">
+            <p>No exams are available yet.</p>
+            <p>Once faculty workflows are connected, current, scheduled, and published exams will appear here.</p>
+          </div>
+        ) : (
+          <section className="resourceGrid">
+            {exams.map((exam) => (
+              <article key={exam.id} className="resourceCard">
+                <div className="resourceMetaRow">
+                  <span className={`statusPill ${exam.isPublished ? "statusLive" : "statusDraft"}`}>
+                    {exam.isPublished ? "Published" : "Draft"}
+                  </span>
+                  <span className="small">{exam.durationMinutes || 60} min</span>
+                </div>
+                <h3>{exam.title}</h3>
+                <p>{exam.description || "No description has been provided for this assessment yet."}</p>
+                <div className="resourceFooter">
+                  <div className="small">Open the exam to manage questions, review details, and continue the workflow.</div>
+                  <Link className="btn" to={`/exams/${exam.id}`}>Open</Link>
+                </div>
+              </article>
+            ))}
+          </section>
         )}
-      </header>
-
-      {error && (
-        <div className="alert" style={{ marginBottom: "20px" }}>
-          {error}
-        </div>
-      )}
-
-      {exams.length === 0 ? (
-        <div className="emptyState">
-          <p>No exams are available yet.</p>
-          {canCreate && <p>Create the first exam to start the assessment workflow.</p>}
-        </div>
-      ) : (
-        <div className="cardsGrid">
-          {exams.map((exam) => (
-            <div key={exam.id} className="examTile">
-              <div className="examTileTop">
-                <span className="chip chipLight">{exam.isPublished ? "Published" : "Draft"}</span>
-                <span className="small">Duration: {exam.durationMinutes || 60} min</span>
-              </div>
-              <h3 className="examTileTitle">{exam.title}</h3>
-              <p className="examTileText">{exam.description || "No description available for this exam."}</p>
-              <div className="examTileFooter">
-                <span className="small">Questions and settings are managed in the exam details view.</span>
-                <Link to={`/exams/${exam.id}`} className="btn">
-                  Open
-                </Link>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+      </div>
+    </AppShell>
   );
 }

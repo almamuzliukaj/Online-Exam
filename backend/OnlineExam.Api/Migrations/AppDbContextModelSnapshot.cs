@@ -22,6 +22,55 @@ namespace OnlineExam.Api.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("OnlineExam.Api.Models.CarryOverCourse", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ClosedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("OriginSemesterNo")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("OriginTermId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid?>("ResolvedByPassingOfferingId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("SourceResultId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("OriginTermId");
+
+                    b.ToTable("CarryOverCourses");
+                });
+
             modelBuilder.Entity("OnlineExam.Api.Models.Course", b =>
                 {
                     b.Property<Guid>("Id")
@@ -30,13 +79,38 @@ namespace OnlineExam.Api.Migrations
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("Credits")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DefaultSemesterNo")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsElective")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("YearOfStudy")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
 
                     b.ToTable("Courses");
                 });
@@ -50,34 +124,111 @@ namespace OnlineExam.Api.Migrations
                     b.Property<Guid?>("AssistantId")
                         .HasColumnType("uuid");
 
+                    b.Property<int>("Capacity")
+                        .HasColumnType("integer");
+
                     b.Property<Guid>("CourseId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ProfessorId")
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DeliveryType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("PrimaryProfessorId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("SectionCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<int>("SemesterNo")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
                     b.Property<Guid>("TermId")
                         .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("YearOfStudy")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CourseId");
-
                     b.HasIndex("TermId");
 
+                    b.HasIndex("CourseId", "TermId", "SectionCode")
+                        .IsUnique();
+
                     b.ToTable("CourseOfferings");
+                });
+
+            modelBuilder.Entity("OnlineExam.Api.Models.CourseOfferingStaffAssignment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("AssignedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("AssignedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AssignmentType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("CourseOfferingId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("PermissionsProfile")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("RevokedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("RoleInOffering")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseOfferingId");
+
+                    b.ToTable("CourseOfferingStaffAssignments");
                 });
 
             modelBuilder.Entity("OnlineExam.Api.Models.Exam", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CourseOfferingId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
@@ -111,6 +262,8 @@ namespace OnlineExam.Api.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CourseOfferingId");
 
                     b.ToTable("Exams");
                 });
@@ -182,20 +335,143 @@ namespace OnlineExam.Api.Migrations
                     b.ToTable("Questions");
                 });
 
+            modelBuilder.Entity("OnlineExam.Api.Models.SemesterEnrollment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ApprovedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("EnrolledAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<int>("SemesterNo")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TermId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("YearOfStudy")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TermId");
+
+                    b.ToTable("SemesterEnrollments");
+                });
+
+            modelBuilder.Entity("OnlineExam.Api.Models.StudentCourseEnrollment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CourseOfferingId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("EligibleForExam")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("EnrollmentSource")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<Guid?>("LinkedSemesterEnrollmentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseOfferingId");
+
+                    b.HasIndex("LinkedSemesterEnrollmentId");
+
+                    b.HasIndex("StudentId", "CourseOfferingId")
+                        .IsUnique();
+
+                    b.ToTable("StudentCourseEnrollments");
+                });
+
             modelBuilder.Entity("OnlineExam.Api.Models.Term", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("AcademicYearLabel")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("EnrollmentCloseAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("EnrollmentOpenAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsCurrent")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.Property<string>("Season")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
-                    b.Property<int>("Year")
-                        .HasColumnType("integer");
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
 
                     b.ToTable("Terms");
                 });
@@ -265,23 +541,63 @@ namespace OnlineExam.Api.Migrations
                         });
                 });
 
+            modelBuilder.Entity("OnlineExam.Api.Models.CarryOverCourse", b =>
+                {
+                    b.HasOne("OnlineExam.Api.Models.Course", "Course")
+                        .WithMany("CarryOverCourses")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OnlineExam.Api.Models.Term", "OriginTerm")
+                        .WithMany()
+                        .HasForeignKey("OriginTermId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+
+                    b.Navigation("OriginTerm");
+                });
+
             modelBuilder.Entity("OnlineExam.Api.Models.CourseOffering", b =>
                 {
                     b.HasOne("OnlineExam.Api.Models.Course", "Course")
-                        .WithMany()
+                        .WithMany("CourseOfferings")
                         .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("OnlineExam.Api.Models.Term", "Term")
-                        .WithMany()
+                        .WithMany("CourseOfferings")
                         .HasForeignKey("TermId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Course");
 
                     b.Navigation("Term");
+                });
+
+            modelBuilder.Entity("OnlineExam.Api.Models.CourseOfferingStaffAssignment", b =>
+                {
+                    b.HasOne("OnlineExam.Api.Models.CourseOffering", "CourseOffering")
+                        .WithMany("StaffAssignments")
+                        .HasForeignKey("CourseOfferingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CourseOffering");
+                });
+
+            modelBuilder.Entity("OnlineExam.Api.Models.Exam", b =>
+                {
+                    b.HasOne("OnlineExam.Api.Models.CourseOffering", "CourseOffering")
+                        .WithMany("Exams")
+                        .HasForeignKey("CourseOfferingId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("CourseOffering");
                 });
 
             modelBuilder.Entity("OnlineExam.Api.Models.ExamAttempt", b =>
@@ -312,11 +628,68 @@ namespace OnlineExam.Api.Migrations
                     b.Navigation("Exam");
                 });
 
+            modelBuilder.Entity("OnlineExam.Api.Models.SemesterEnrollment", b =>
+                {
+                    b.HasOne("OnlineExam.Api.Models.Term", "Term")
+                        .WithMany("SemesterEnrollments")
+                        .HasForeignKey("TermId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Term");
+                });
+
+            modelBuilder.Entity("OnlineExam.Api.Models.StudentCourseEnrollment", b =>
+                {
+                    b.HasOne("OnlineExam.Api.Models.CourseOffering", "CourseOffering")
+                        .WithMany("StudentCourseEnrollments")
+                        .HasForeignKey("CourseOfferingId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OnlineExam.Api.Models.SemesterEnrollment", "LinkedSemesterEnrollment")
+                        .WithMany("StudentCourseEnrollments")
+                        .HasForeignKey("LinkedSemesterEnrollmentId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("CourseOffering");
+
+                    b.Navigation("LinkedSemesterEnrollment");
+                });
+
+            modelBuilder.Entity("OnlineExam.Api.Models.Course", b =>
+                {
+                    b.Navigation("CarryOverCourses");
+
+                    b.Navigation("CourseOfferings");
+                });
+
+            modelBuilder.Entity("OnlineExam.Api.Models.CourseOffering", b =>
+                {
+                    b.Navigation("Exams");
+
+                    b.Navigation("StaffAssignments");
+
+                    b.Navigation("StudentCourseEnrollments");
+                });
+
             modelBuilder.Entity("OnlineExam.Api.Models.Exam", b =>
                 {
                     b.Navigation("Attempts");
 
                     b.Navigation("Questions");
+                });
+
+            modelBuilder.Entity("OnlineExam.Api.Models.SemesterEnrollment", b =>
+                {
+                    b.Navigation("StudentCourseEnrollments");
+                });
+
+            modelBuilder.Entity("OnlineExam.Api.Models.Term", b =>
+                {
+                    b.Navigation("CourseOfferings");
+
+                    b.Navigation("SemesterEnrollments");
                 });
 #pragma warning restore 612, 618
         }
