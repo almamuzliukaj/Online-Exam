@@ -72,6 +72,7 @@ namespace OnlineExam.Api.Controllers
             if (existing == null) return NotFound();
 
             var exam = await _context.Exams.FindAsync(existing.ExamId);
+            if (exam == null) return NotFound("Exam not found");
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var role = User.FindFirst(ClaimTypes.Role)?.Value;
             if (role == "Professor" && exam.CreatedByUserId.ToString() != userId)
@@ -91,6 +92,7 @@ namespace OnlineExam.Api.Controllers
             if (existing == null) return NotFound();
 
             var exam = await _context.Exams.FindAsync(existing.ExamId);
+            if (exam == null) return NotFound("Exam not found");
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var role = User.FindFirst(ClaimTypes.Role)?.Value;
             if (role == "Professor" && exam.CreatedByUserId.ToString() != userId)

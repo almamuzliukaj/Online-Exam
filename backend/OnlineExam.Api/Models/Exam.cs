@@ -12,5 +12,8 @@ public class Exam
     public DateTime CreatedAt { get; set; }
     public bool IsPublished { get; set; }
 
+    public Guid? CourseOfferingId { get; set; }
+    public CourseOffering? CourseOffering { get; set; }
+
     public List<Question> Questions { get; set; } = new();
 }

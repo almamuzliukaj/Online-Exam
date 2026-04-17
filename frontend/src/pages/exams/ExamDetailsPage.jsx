@@ -120,6 +120,5 @@ export default function ExamDetailsPage() {
     </div>
   );
 }
-feature/admin-import-docs-ui
 
 
