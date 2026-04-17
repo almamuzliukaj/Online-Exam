@@ -36,11 +36,11 @@ export default function Dashboard() {
             {user ? (
               <span className="chip">
                 <strong style={{ color: "var(--text)" }}>{user.email}</strong>
-                <span>•</span>
+                <span>|</span>
                 <span>{user.role}</span>
               </span>
             ) : (
-              <span className="chip">Loading user…</span>
+              <span className="chip">Loading user...</span>
             )}
 
             <button className="btn btnDanger" onClick={onLogout}>
@@ -65,13 +65,12 @@ export default function Dashboard() {
                 <div>
                   <h2 style={{ margin: 0 }}>Dashboard</h2>
                   <p className="p" style={{ marginTop: 6 }}>
-                    This is a protected page. Below is the current user payload.
+                    Review your authenticated profile and continue into the exam workspace.
                   </p>
                 </div>
 
-                {/* Quick navigation */}
                 <Link className="btn" to="/exams">
-                  Go to Exams
+                  Open exams
                 </Link>
               </div>
             </div>
@@ -84,21 +83,17 @@ export default function Dashboard() {
 
           <aside className="card">
             <div className="cardHeader">
-              <h3 style={{ margin: 0 }}>Next steps</h3>
+              <h3 style={{ margin: 0 }}>Current focus</h3>
               <p className="p" style={{ marginTop: 6 }}>
-                When backend is ready, switch mock mode off and connect to real
-                endpoints.
+                The next milestone is role-specific dashboards for admin, professor, assistant, and student users.
               </p>
             </div>
-            <div
-              className="cardBody"
-              style={{ display: "flex", flexDirection: "column", gap: 12 }}
-            >
+            <div className="cardBody" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <div className="chip">POST /auth/login</div>
               <div className="chip">GET /auth/me</div>
+              <div className="chip">POST /api/Users/import</div>
               <div className="small">
-                Env: <span className="mono">VITE_API_BASE_URL</span> and{" "}
-                <span className="mono">VITE_USE_MOCK_AUTH</span>.
+                Environment: <span className="mono">VITE_API_BASE_URL</span>
               </div>
             </div>
           </aside>

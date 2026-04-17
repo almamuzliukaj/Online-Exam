@@ -1,144 +1,70 @@
-# OnlineExam
+# Online Exam System
 
-OnlineExam is a web platform for **secure online exams** with role-based access and support for **MCQ**, **theory (text)**, and **programming (code)** questions (MVP focuses on **C# code execution via Judge0**).
+Online Exam System is a faculty-focused web application for managing question banks, exam publishing, role-based access, and secure student assessment workflows.
 
-This repository contains:
-- **Backend**: ASP.NET Core Web API (`backend/OnlineExam.Api`)
-- **Frontend**: currently a **placeholder** React project (`frontend/`)
-- **Documentation**: full project docs in `docs/`
+## Current stack
+- Backend: ASP.NET Core Web API with Entity Framework Core and PostgreSQL
+- Frontend: React + Vite
+- Auth: JWT with role-based authorization
+- Roles: Admin, Professor, Assistant, Student
 
----
+## Current project status
+The repository already includes a functional backend foundation, a working React frontend shell, and a detailed documentation base in `docs/`.
 
-## Key rules (MVP)
-- Exams are **common for all students in a course** (groups/sections exist only for organization).
-- Students have **only 1 attempt** per exam.
-- Students can see results **only after the professor publishes** them.
-- For code questions:
-  - students can try multiple times during the exam,
-  - the system stores only the **final submission**,
-  - students see only **pass/fail** for test cases (no test details),
-  - authorized staff can do **manual override**.
+Implemented today:
+- login and protected routes
+- admin user creation
+- admin bulk user import endpoint
+- terms, courses, and course offerings foundation
+- exam CRUD and question CRUD foundation
+- English cleanup for the main shared frontend pages
 
----
+## Core academic rules
+- No public signup. All users are created by the admin.
+- Admin manages semesters, courses, professors, assistants, and student onboarding.
+- Professors and assistants work inside assigned course offerings.
+- Students should only see exams for eligible courses in their active semester plus approved carry-over courses.
+- Results should be visible only after publication.
 
-## Project structure
-
+## Repository structure
 ```text
-ONLINE-EXAM/
-  backend/
-    OnlineExam.Api/
-      Program.cs
-      OnlineExam.Api.csproj
-      appsettings.json
-      appsettings.Development.json
-      Properties/
-      bin/                (do not commit)
-      obj/                (do not commit)
-
-  frontend/              (placeholder)
-    package.json
-    package-lock.json
-
-  docs/
-    00-master.md
-    01-introduction.md
-    02-scope-and-roles.md
-    03-functional-requirements.md
-    04-nonfunctional-requirements.md
-    05-user-stories.md
-    06-use-cases.md
-    07-data-model.md
-    08-system-architecture.md
-    09-api-overview.md
-    10-ui-pages.md
-    11-security-proctoring.md
-    12-roadmap-and-mvp.md
-
-  OnlineExam.sln
-  .gitignore
-  README.md
+backend/                 ASP.NET Core API
+frontend/                React application
+docs/                    Project documentation, planning, and analysis
+docker-compose.yml       Local infrastructure
+README.md                Project overview
 ```
 
----
-
-## Documentation
-All project documentation is in `docs/`. Start here:
-- `docs/00-master.md` (Table of Contents)
-
----
-
-## Prerequisites
-- **.NET SDK 8.x**
-- **Node.js (LTS recommended)** + **npm**
-- **Git**
-
----
-
-## Run backend (ASP.NET Core)
-From the repository root:
-
+## Run the backend
 ```bash
 cd backend/OnlineExam.Api
 dotnet restore
 dotnet run
 ```
 
-Common local links (depending on your launch settings):
-- Swagger UI: `http://localhost:5045/swagger`
-- Test endpoint: `http://localhost:5045/weatherforecast`
-
-> If the port is different on your machine, check the console output after `dotnet run` or `Properties/launchSettings.json`.
-
----
-
-## Frontend status (placeholder)
-The `frontend/` folder is currently a **placeholder**. The scripts in `frontend/package.json` only print messages and do not start a real dev server yet.
-
-You can still install dependencies (there are none by default):
-
+## Run the frontend
 ```bash
 cd frontend
 npm install
-```
-
-Current scripts output placeholders:
-```bash
 npm run dev
-npm run build
-npm run lint
 ```
 
-### Next step (when implementing frontend)
-Replace the placeholder with a real React setup (for example **Vite**):
-- Add dependencies and a dev server
-- Update `scripts.dev`, `scripts.build`, and `scripts.lint`
-- Document the real frontend URL/port here
+## Important documents
+- [docs/13-project-status-gap-analysis.md](docs/13-project-status-gap-analysis.md)
+- [docs/14-delivery-plan-6-weeks.md](docs/14-delivery-plan-6-weeks.md)
+- [docs/15-week-1-team-split.md](docs/15-week-1-team-split.md)
+- [docs/16-notion-workspace-guide.md](docs/16-notion-workspace-guide.md)
+- [docs/17-chatgpt-prompts.md](docs/17-chatgpt-prompts.md)
+- [docs/18-six-week-team-allocation.md](docs/18-six-week-team-allocation.md)
 
----
+## Immediate next milestones
+1. Add enrollments and carry-over course visibility rules.
+2. Build admin onboarding UI.
+3. Build course-based question bank with difficulty levels.
+4. Build exam generator and publishing workflow.
+5. Build student attempt, grading, and security monitoring flow.
 
-## Configuration
-Backend configuration lives in:
-- `backend/OnlineExam.Api/appsettings.json`
-- `backend/OnlineExam.Api/appsettings.Development.json`
-
-Typical config items (depending on implementation):
-- Database connection string
-- JWT settings (issuer/audience/secret)
-- Judge0 base URL + API key (if integrated)
-
----
-
-## Development workflow (recommended)
-- Create a branch:
-  - `feature/...` for features
-  - `fix/...` for bug fixes
-  - `docs/...` for documentation
-- Open a Pull Request to `main`
-- Keep commits small and descriptive
-
----
-
-## Contributors
+## Team
 - Agnesa
 - Albiona
 - Alma

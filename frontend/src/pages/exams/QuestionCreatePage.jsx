@@ -9,10 +9,10 @@ export default function QuestionCreatePage() {
   const { examId } = useParams();
 
   const [role, setRole] = useState(null);
-  const [exam, setExam] = useState(null);
   const [text, setText] = useState("");
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [loadingExam, setLoadingExam] = useState(true);
+  const [examTitle, setExamTitle] = useState("");
   const [error, setError] = useState("");
 
   const canEdit = useMemo(() => canManageExams(role), [role]);
@@ -30,15 +30,16 @@ export default function QuestionCreatePage() {
 
   useEffect(() => {
     if (!examId) return;
+
     (async () => {
       try {
-        setLoading(true);
+        setLoadingExam(true);
         const data = await getExam(examId);
-        setExam(data);
-      } catch (err) {
+        setExamTitle(data?.title ?? "");
+      } catch {
         setError("Failed to load exam.");
       } finally {
-        setLoading(false);
+        setLoadingExam(false);
       }
     })();
   }, [examId]);
@@ -49,9 +50,10 @@ export default function QuestionCreatePage() {
 
     try {
       setSaving(true);
+      setError("");
       await addQuestion(examId, { text });
       nav(`/exams/${examId}`);
-    } catch (err) {
+    } catch {
       setError("Failed to add question.");
     } finally {
       setSaving(false);
@@ -62,26 +64,41 @@ export default function QuestionCreatePage() {
     <div className="shell">
       <header className="nav">
         <div className="container navInner">
-          <div className="brand"><span>Online Exam</span></div>
-          <div className="row"><Link className="btn" to={`/exams/${examId}`}>Back</Link></div>
+          <div className="brand">
+            <span className="logoDot" />
+            <span>Online Exam</span>
+          </div>
+          <div className="row">
+            <Link className="btn" to={`/exams/${examId}`}>Back</Link>
+          </div>
         </div>
       </header>
-      <main className="container">
-        <section className="card">
-          <div className="cardHeader"><h2>Add Question</h2></div>
+
+      <main className="container" style={{ padding: "26px 0 40px" }}>
+        <section className="card formCard">
+          <div className="cardHeader">
+            <h2 style={{ margin: 0 }}>Add Question</h2>
+            <p className="p" style={{ marginTop: 6 }}>
+              {loadingExam ? "Loading exam context..." : `Creating a question for ${examTitle || "this exam"}.`}
+            </p>
+          </div>
+
           <div className="cardBody">
             {error && <div className="alert">{error}</div>}
-            <form onSubmit={onSubmit}>
+            <form className="stackLg" onSubmit={onSubmit}>
               <textarea
-                className="input"
+                className="input inputLight textarea"
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 disabled={saving}
-                rows={4}
+                rows={5}
+                placeholder="Write the question prompt here."
               />
-              <button className="btn btnPrimary" type="submit" disabled={saving || !canEdit}>
-                {saving ? "Saving…" : "Save"}
-              </button>
+              <div className="row" style={{ justifyContent: "flex-end" }}>
+                <button className="btn btnPrimary" type="submit" disabled={saving || !canEdit || !text.trim()}>
+                  {saving ? "Saving..." : "Save question"}
+                </button>
+              </div>
             </form>
           </div>
         </section>
