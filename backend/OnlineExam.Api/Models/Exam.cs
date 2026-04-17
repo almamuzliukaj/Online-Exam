@@ -11,6 +11,11 @@ public class Exam
     public Guid CreatedByUserId { get; set; }
     public DateTime CreatedAt { get; set; }
     public bool IsPublished { get; set; }
+    public string Status { get; set; } = "Draft";
+
+    public Guid? CourseOfferingId { get; set; }
+    public CourseOffering? CourseOffering { get; set; }
 
     public List<Question> Questions { get; set; } = new();
+    public List<ExamAttempt> Attempts { get; set; } = new();
 }

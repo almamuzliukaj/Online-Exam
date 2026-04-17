@@ -21,10 +21,18 @@ export default function ExamCreatePage() {
 
     try {
       setSaving(true);
-      await createExam(form);
+      await createExam({
+        title: form.title,
+        description: form.description,
+        durationMinutes: Number(form.durationMinutes) || 60,
+      });
       nav("/exams");
     } catch (err) {
-      setError(err?.response?.data?.message || "Unable to create the exam right now.");
+      const apiMessage =
+        err?.response?.data?.message ||
+        (typeof err?.response?.data === "string" ? err.response.data : null) ||
+        err?.message;
+      setError(apiMessage || "Unable to create the exam right now.");
     } finally {
       setSaving(false);
     }
@@ -55,12 +63,11 @@ export default function ExamCreatePage() {
             {error ? <div className="alert">{error}</div> : null}
             <form className="stackLg" onSubmit={onSubmit}>
               <div className="field">
-                <label className="label">Exam title</label>
+                <div className="label">Title</div>
                 <input
                   className="input"
                   value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  placeholder="Algorithms Midterm"
+                  onChange={(e) => setForm((current) => ({ ...current, title: e.target.value }))}
                   required
                 />
               </div>
@@ -72,12 +79,12 @@ export default function ExamCreatePage() {
                   type="number"
                   min="1"
                   value={form.durationMinutes}
-                  onChange={(e) => setForm({ ...form, durationMinutes: Number(e.target.value) })}
+                  onChange={(e) => setForm((current) => ({ ...current, durationMinutes: Number(e.target.value) }))}
                 />
               </div>
 
               <div className="field">
-                <label className="label">Description</label>
+                <div className="label">Description</div>
                 <textarea
                   className="input textarea"
                   value={form.description}

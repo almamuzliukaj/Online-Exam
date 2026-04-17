@@ -9,10 +9,14 @@ export default function QuestionCreatePage() {
   const nav = useNavigate();
   const { examId } = useParams();
   const { user, loading: userLoading, error: userError } = useCurrentUser();
-  const [text, setText] = useState("");
+  const [exam, setExam] = useState(null);
+  const [form, setForm] = useState({
+    text: "",
+    type: "MCQ",
+    points: 10,
+  });
   const [saving, setSaving] = useState(false);
   const [loadingExam, setLoadingExam] = useState(true);
-  const [examTitle, setExamTitle] = useState("");
   const [error, setError] = useState("");
 
   const canEdit = useMemo(() => canManageExams(user?.role), [user?.role]);
@@ -24,7 +28,7 @@ export default function QuestionCreatePage() {
       try {
         setLoadingExam(true);
         const data = await getExam(examId);
-        setExamTitle(data?.title ?? "");
+        setExam(data);
       } catch {
         setError("Failed to load exam.");
       } finally {
@@ -35,15 +39,24 @@ export default function QuestionCreatePage() {
 
   async function onSubmit(e) {
     e.preventDefault();
-    if (!examId || !canEdit || !text.trim()) return;
+    if (!examId || !canEdit || !form.text.trim()) return;
 
     try {
       setSaving(true);
       setError("");
-      await addQuestion(examId, { text });
+      await addQuestion(examId, {
+        text: form.text.trim(),
+        type: form.type,
+        points: Number(form.points) || 0,
+      });
       nav(`/exams/${examId}`);
-    } catch {
-      setError("Failed to add question.");
+    } catch (err) {
+      const apiMessage =
+        err?.response?.data?.message ||
+        (typeof err?.response?.data === "string" ? err.response.data : null) ||
+        err?.message;
+
+      setError(apiMessage || "Failed to add question.");
     } finally {
       setSaving(false);
     }
@@ -62,7 +75,7 @@ export default function QuestionCreatePage() {
       user={user}
       badge="Question authoring"
       title="Add question"
-      subtitle={loadingExam ? "Loading exam context..." : `Create a new question for ${examTitle || "this exam"}.`}
+      subtitle={loadingExam ? "Loading exam context..." : `Create a new question for ${exam?.title || "this exam"}.`}
       actions={<Link className="btn" to={`/exams/${examId}`}>Back to exam</Link>}
     >
       <section className="formSurface">
@@ -77,16 +90,42 @@ export default function QuestionCreatePage() {
                 <label className="label">Prompt</label>
                 <textarea
                   className="input textarea"
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  disabled={saving}
+                  value={form.text}
+                  onChange={(e) => setForm((current) => ({ ...current, text: e.target.value }))}
+                  disabled={saving || loadingExam}
                   placeholder="Write the question prompt here."
                   rows={6}
                 />
               </div>
 
+              <div className="field">
+                <label className="label">Type</label>
+                <select
+                  className="input"
+                  value={form.type}
+                  onChange={(e) => setForm((current) => ({ ...current, type: e.target.value }))}
+                  disabled={saving || loadingExam}
+                >
+                  <option value="MCQ">MCQ</option>
+                  <option value="Text">Text</option>
+                  <option value="Code">Code</option>
+                </select>
+              </div>
+
+              <div className="field">
+                <label className="label">Points</label>
+                <input
+                  className="input"
+                  type="number"
+                  min="1"
+                  value={form.points}
+                  onChange={(e) => setForm((current) => ({ ...current, points: Number(e.target.value) }))}
+                  disabled={saving || loadingExam}
+                />
+              </div>
+
               <div className="row" style={{ justifyContent: "flex-end" }}>
-                <button className="btn btnPrimary" type="submit" disabled={saving || !canEdit || !text.trim()}>
+                <button className="btn btnPrimary" type="submit" disabled={saving || loadingExam || !canEdit || !form.text.trim()}>
                   {saving ? "Saving..." : "Save question"}
                 </button>
               </div>

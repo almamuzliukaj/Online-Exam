@@ -47,6 +47,9 @@ namespace OnlineExam.Api.Controllers
                 Id = Guid.NewGuid(),
                 Text = dto.Text,
                 Type = dto.Type,
+                CourseId = dto.CourseId,
+                Difficulty = dto.Difficulty,
+                CorrectAnswer = dto.CorrectAnswer,
                 Points = dto.Points,
                 ExamId = examId
             };
@@ -72,12 +75,18 @@ namespace OnlineExam.Api.Controllers
             if (existing == null) return NotFound();
 
             var exam = await _context.Exams.FindAsync(existing.ExamId);
+            if (exam == null) return NotFound("Exam not found");
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var role = User.FindFirst(ClaimTypes.Role)?.Value;
             if (role == "Professor" && exam.CreatedByUserId.ToString() != userId)
                 return Forbid();
 
             existing.Text = dto.Text;
+            existing.Type = dto.Type;
+            existing.CourseId = dto.CourseId;
+            existing.Difficulty = dto.Difficulty;
+            existing.CorrectAnswer = dto.CorrectAnswer;
+            existing.Points = dto.Points;
             await _context.SaveChangesAsync();
             return NoContent();
         }
@@ -91,6 +100,7 @@ namespace OnlineExam.Api.Controllers
             if (existing == null) return NotFound();
 
             var exam = await _context.Exams.FindAsync(existing.ExamId);
+            if (exam == null) return NotFound("Exam not found");
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var role = User.FindFirst(ClaimTypes.Role)?.Value;
             if (role == "Professor" && exam.CreatedByUserId.ToString() != userId)
