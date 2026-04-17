@@ -28,17 +28,17 @@ namespace OnlineExam.Api.Migrations
             migrationBuilder.DeleteData(
                 table: "Users",
                 keyColumn: "Id",
-                keyValue: new Guid("59f80a88-fc46-4377-a4bf-700099bd37ba"));
+                keyValue: new Guid("b5769729-e575-4789-b6e7-f7327ede1acc"));
 
             migrationBuilder.DeleteData(
                 table: "Users",
                 keyColumn: "Id",
-                keyValue: new Guid("636391af-8eb5-43c4-946d-482b7f901604"));
+                keyValue: new Guid("4c7b418b-5853-4c9c-9ef4-5e1d4e65cad1"));
 
             migrationBuilder.DeleteData(
                 table: "Users",
                 keyColumn: "Id",
-                keyValue: new Guid("ebe11f61-7c26-439f-8bdf-994c64844c96"));
+                keyValue: new Guid("f9635e15-1d90-4e3b-b722-331a8fc2fbe9"));
 
             migrationBuilder.DropColumn(
                 name: "Year",
@@ -358,9 +358,9 @@ namespace OnlineExam.Api.Migrations
                 columns: new[] { "Id", "CreatedAt", "Email", "FullName", "IsActive", "PasswordHash", "Role" },
                 values: new object[,]
                 {
-                    { new Guid("17ef169c-c82d-44e3-8d24-e1fdc6ecf3be"), new DateTime(2026, 4, 17, 9, 37, 25, 237, DateTimeKind.Utc).AddTicks(9923), "prof@onlineexam.com", "Professor", true, "Password123!", "Professor" },
-                    { new Guid("27f24067-053e-4af5-80de-2e508d57b0ee"), new DateTime(2026, 4, 17, 9, 37, 25, 237, DateTimeKind.Utc).AddTicks(9757), "admin@onlineexam.com", "Admin User", true, "Password123!", "Admin" },
-                    { new Guid("9cf9ce95-11b4-4da4-9e57-5ac0d787d651"), new DateTime(2026, 4, 17, 9, 37, 25, 237, DateTimeKind.Utc).AddTicks(9926), "student@onlineexam.com", "Student", true, "Password123!", "Student" }
+                    { new Guid("4c7b418b-5853-4c9c-9ef4-5e1d4e65cad1"), new DateTime(2026, 4, 17, 8, 21, 26, 122, DateTimeKind.Utc).AddTicks(549), "student@onlineexam.com", "Student", true, "Password123!", "Student" },
+                    { new Guid("b5769729-e575-4789-b6e7-f7327ede1acc"), new DateTime(2026, 4, 17, 8, 21, 26, 122, DateTimeKind.Utc).AddTicks(546), "prof@onlineexam.com", "Professor", true, "Password123!", "Professor" },
+                    { new Guid("f9635e15-1d90-4e3b-b722-331a8fc2fbe9"), new DateTime(2026, 4, 17, 8, 21, 26, 122, DateTimeKind.Utc).AddTicks(538), "admin@onlineexam.com", "Admin User", true, "Password123!", "Admin" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -493,17 +493,17 @@ namespace OnlineExam.Api.Migrations
             migrationBuilder.DeleteData(
                 table: "Users",
                 keyColumn: "Id",
-                keyValue: new Guid("17ef169c-c82d-44e3-8d24-e1fdc6ecf3be"));
+                keyValue: new Guid("4c7b418b-5853-4c9c-9ef4-5e1d4e65cad1"));
 
             migrationBuilder.DeleteData(
                 table: "Users",
                 keyColumn: "Id",
-                keyValue: new Guid("27f24067-053e-4af5-80de-2e508d57b0ee"));
+                keyValue: new Guid("b5769729-e575-4789-b6e7-f7327ede1acc"));
 
             migrationBuilder.DeleteData(
                 table: "Users",
                 keyColumn: "Id",
-                keyValue: new Guid("9cf9ce95-11b4-4da4-9e57-5ac0d787d651"));
+                keyValue: new Guid("f9635e15-1d90-4e3b-b722-331a8fc2fbe9"));
 
             migrationBuilder.DropColumn(
                 name: "AcademicYearLabel",
@@ -637,9 +637,9 @@ namespace OnlineExam.Api.Migrations
                 columns: new[] { "Id", "CreatedAt", "Email", "FullName", "IsActive", "PasswordHash", "Role" },
                 values: new object[,]
                 {
-                    { new Guid("59f80a88-fc46-4377-a4bf-700099bd37ba"), new DateTime(2026, 4, 13, 20, 44, 36, 925, DateTimeKind.Utc).AddTicks(1422), "prof@onlineexam.com", "Professor", true, "Password123!", "Professor" },
-                    { new Guid("636391af-8eb5-43c4-946d-482b7f901604"), new DateTime(2026, 4, 13, 20, 44, 36, 925, DateTimeKind.Utc).AddTicks(1426), "student@onlineexam.com", "Student", true, "Password123!", "Student" },
-                    { new Guid("ebe11f61-7c26-439f-8bdf-994c64844c96"), new DateTime(2026, 4, 13, 20, 44, 36, 925, DateTimeKind.Utc).AddTicks(1415), "admin@onlineexam.com", "Admin User", true, "Password123!", "Admin" }
+                    { new Guid("4c7b418b-5853-4c9c-9ef4-5e1d4e65cad1"), new DateTime(2026, 4, 17, 8, 21, 26, 122, DateTimeKind.Utc).AddTicks(549), "student@onlineexam.com", "Student", true, "Password123!", "Student" },
+                    { new Guid("b5769729-e575-4789-b6e7-f7327ede1acc"), new DateTime(2026, 4, 17, 8, 21, 26, 122, DateTimeKind.Utc).AddTicks(546), "prof@onlineexam.com", "Professor", true, "Password123!", "Professor" },
+                    { new Guid("f9635e15-1d90-4e3b-b722-331a8fc2fbe9"), new DateTime(2026, 4, 17, 8, 21, 26, 122, DateTimeKind.Utc).AddTicks(538), "admin@onlineexam.com", "Admin User", true, "Password123!", "Admin" }
                 });
 
             migrationBuilder.CreateIndex(

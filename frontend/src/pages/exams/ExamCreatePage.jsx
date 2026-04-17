@@ -16,11 +16,19 @@ export default function ExamCreatePage() {
     setError("");
 
     try {
-      await createExam(form);
+      await createExam({
+        title: form.title,
+        description: form.description,
+        durationMinutes: Number(form.durationMinutes) || 60,
+      });
       nav("/exams");
     } catch (err) {
-      setError(err?.response?.data?.message || "Unable to create the exam right now.");
-      console.error(err);
+      const apiMessage =
+        err?.response?.data?.message ||
+        (typeof err?.response?.data === "string" ? err.response.data : null) ||
+        err?.message;
+
+      setError(apiMessage || "Unable to create the exam right now.");
     }
   }
 
@@ -29,60 +37,61 @@ export default function ExamCreatePage() {
       <header className="nav">
         <div className="container navInner">
           <div className="brand">
-            <span className="logoDot" />
-            <span>Online Exam</span>
+            <img className="brandLogo" src="/logo-itm.svg" alt="ITM Exam logo" />
+            <span>ITM Exam</span>
           </div>
-          <Link className="btn" to="/exams">Cancel</Link>
+          <div className="row" style={{ gap: 12 }}>
+            <Link className="btn" to="/exams">Back</Link>
+          </div>
         </div>
       </header>
 
       <main className="container" style={{ padding: "26px 0 40px" }}>
-        <section className="card formCard">
+        <section className="card" style={{ maxWidth: 720, margin: "0 auto" }}>
           <div className="cardHeader">
             <h2 style={{ margin: 0 }}>Create Exam</h2>
-            <p className="p" style={{ marginTop: 6 }}>
-              Define the core settings for a new assessment. Question management comes next.
+            <p className="p" style={{ marginTop: 8 }}>
+              Add the basic exam information below.
             </p>
           </div>
 
           <div className="cardBody">
-            {error ? <div className="alert">{error}</div> : null}
+            {error ? <div className="alert" style={{ marginBottom: 14 }}>{error}</div> : null}
 
-            <form className="stackLg" onSubmit={onSubmit}>
+            <form className="authForm" onSubmit={onSubmit}>
               <div className="field">
-                <label className="label">Exam title</label>
+                <div className="label">Title</div>
                 <input
-                  className="input inputLight"
+                  className="input"
                   value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  placeholder="Algorithms Midterm"
+                  onChange={(e) => setForm((current) => ({ ...current, title: e.target.value }))}
                   required
                 />
               </div>
 
               <div className="field">
-                <label className="label">Duration (minutes)</label>
+                <div className="label">Duration (minutes)</div>
                 <input
-                  className="input inputLight"
+                  className="input"
                   type="number"
                   min="1"
                   value={form.durationMinutes}
-                  onChange={(e) => setForm({ ...form, durationMinutes: Number(e.target.value) })}
+                  onChange={(e) => setForm((current) => ({ ...current, durationMinutes: Number(e.target.value) }))}
                 />
               </div>
 
               <div className="field">
-                <label className="label">Description</label>
+                <div className="label">Description</div>
                 <textarea
-                  className="input inputLight textarea"
+                  className="input"
+                  rows={5}
                   value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  placeholder="Short instructions, scope, and allowed materials."
+                  onChange={(e) => setForm((current) => ({ ...current, description: e.target.value }))}
                 />
               </div>
 
-              <div className="row" style={{ justifyContent: "flex-end" }}>
-                <Link className="btn" to="/exams">Back</Link>
+              <div className="row" style={{ gap: 12, justifyContent: "flex-end" }}>
+                <Link className="btn" to="/exams">Cancel</Link>
                 <button className="btn btnPrimary" type="submit">
                   Create exam
                 </button>

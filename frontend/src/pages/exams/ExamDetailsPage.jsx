@@ -65,8 +65,8 @@ export default function ExamDetailsPage() {
       <header className="nav">
         <div className="container navInner">
           <div className="brand">
-            <span className="logoDot" />
-            <span>Online Exam</span>
+            <img className="brandLogo" src="/logo-itm.svg" alt="ITM Exam logo" />
+            <span>ITM Exam</span>
           </div>
           <div className="row" style={{ gap: 12 }}>
             <Link className="btn" to="/exams">Back</Link>
@@ -120,5 +120,3 @@ export default function ExamDetailsPage() {
     </div>
   );
 }
-
-

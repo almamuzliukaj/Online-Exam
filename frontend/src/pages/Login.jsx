@@ -35,8 +35,8 @@ export default function Login() {
         <div className="card authCard">
           <div className="cardHeader">
             <div className="brand">
-              <span className="logoDot" />
-              <span>Online Exam</span>
+              <img className="brandLogo" src="/logo-itm.svg" alt="ITM Exam logo" />
+              <span>ITM Exam</span>
             </div>
             <h1 className="h1" style={{ marginTop: 14 }}>Welcome back</h1>
             <p className="p">Sign in to access your exam workspace.</p>

@@ -47,6 +47,9 @@ namespace OnlineExam.Api.Controllers
                 Id = Guid.NewGuid(),
                 Text = dto.Text,
                 Type = dto.Type,
+                CourseId = dto.CourseId,
+                Difficulty = dto.Difficulty,
+                CorrectAnswer = dto.CorrectAnswer,
                 Points = dto.Points,
                 ExamId = examId
             };
@@ -79,6 +82,11 @@ namespace OnlineExam.Api.Controllers
                 return Forbid();
 
             existing.Text = dto.Text;
+            existing.Type = dto.Type;
+            existing.CourseId = dto.CourseId;
+            existing.Difficulty = dto.Difficulty;
+            existing.CorrectAnswer = dto.CorrectAnswer;
+            existing.Points = dto.Points;
             await _context.SaveChangesAsync();
             return NoContent();
         }

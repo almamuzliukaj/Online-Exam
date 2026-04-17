@@ -74,10 +74,13 @@ public class ExamsController : ControllerBase
     {
         if (string.IsNullOrWhiteSpace(dto.Title))
             return BadRequest(new { message = "Title is required." });
-        if (dto.StartsAt >= dto.EndsAt)
-            return BadRequest(new { message = "StartsAt must be earlier than EndsAt." });
-        if (dto.DurationMinutes <= 0)
-            return BadRequest(new { message = "DurationMinutes must be greater than zero." });
+
+        var durationMinutes = dto.DurationMinutes > 0 ? dto.DurationMinutes : 60;
+        var startsAt = dto.StartsAt?.ToUniversalTime() ?? DateTime.UtcNow;
+        var endsAt = dto.EndsAt?.ToUniversalTime() ?? startsAt.AddMinutes(durationMinutes);
+
+        if (endsAt <= startsAt)
+            return BadRequest(new { message = "EndsAt must be later than StartsAt." });
 
         var userId = GetCurrentUserId();
         if (userId == null)
@@ -105,11 +108,12 @@ public class ExamsController : ControllerBase
         {
             Id = Guid.NewGuid(),
             Title = dto.Title.Trim(),
-            Description = dto.Description.Trim(),
-            StartsAt = dto.StartsAt,
-            EndsAt = dto.EndsAt,
-            DurationMinutes = dto.DurationMinutes,
+            Description = dto.Description?.Trim() ?? string.Empty,
+            StartsAt = startsAt,
+            EndsAt = endsAt,
+            DurationMinutes = durationMinutes,
             IsPublished = dto.IsPublished,
+            Status = dto.IsPublished ? "Published" : "Draft",
             CreatedByUserId = userId.Value,
             CreatedAt = DateTime.UtcNow,
             CourseOfferingId = dto.CourseOfferingId
@@ -138,17 +142,21 @@ public class ExamsController : ControllerBase
 
         if (string.IsNullOrWhiteSpace(dto.Title))
             return BadRequest(new { message = "Title is required." });
-        if (dto.StartsAt >= dto.EndsAt)
-            return BadRequest(new { message = "StartsAt must be earlier than EndsAt." });
-        if (dto.DurationMinutes <= 0)
-            return BadRequest(new { message = "DurationMinutes must be greater than zero." });
+
+        var durationMinutes = dto.DurationMinutes > 0 ? dto.DurationMinutes : 60;
+        var startsAt = dto.StartsAt?.ToUniversalTime() ?? exam.StartsAt;
+        var endsAt = dto.EndsAt?.ToUniversalTime() ?? startsAt.AddMinutes(durationMinutes);
+
+        if (endsAt <= startsAt)
+            return BadRequest(new { message = "EndsAt must be later than StartsAt." });
 
         exam.Title = dto.Title.Trim();
-        exam.Description = dto.Description.Trim();
-        exam.StartsAt = dto.StartsAt;
-        exam.EndsAt = dto.EndsAt;
-        exam.DurationMinutes = dto.DurationMinutes;
+        exam.Description = dto.Description?.Trim() ?? string.Empty;
+        exam.StartsAt = startsAt;
+        exam.EndsAt = endsAt;
+        exam.DurationMinutes = durationMinutes;
         exam.IsPublished = dto.IsPublished;
+        exam.Status = dto.IsPublished ? "Published" : exam.Status;
         exam.CourseOfferingId = dto.CourseOfferingId;
 
         await _context.SaveChangesAsync();
@@ -174,6 +182,132 @@ public class ExamsController : ControllerBase
         await _context.SaveChangesAsync();
 
         return NoContent();
+    }
+
+    [HttpPost("{examId:guid}/attempt")]
+    [Authorize(Roles = "Student")]
+    public async Task<IActionResult> SubmitAttempt(Guid examId, [FromBody] CreateExamAttemptDto dto)
+    {
+        var userId = GetCurrentUserId();
+        if (userId == null)
+            return Unauthorized();
+
+        if (dto.ExamId != Guid.Empty && dto.ExamId != examId)
+            return BadRequest(new { message = "ExamId in body does not match route." });
+
+        var exam = await _context.Exams
+            .Include(e => e.Questions)
+            .FirstOrDefaultAsync(e => e.Id == examId);
+
+        if (exam == null)
+            return NotFound(new { message = "Exam not found." });
+
+        var details = new List<QuestionScoreDetailDto>();
+        double score = 0;
+
+        foreach (var answer in dto.Answers)
+        {
+            var question = exam.Questions.FirstOrDefault(x => x.Id == answer.QuestionId);
+            if (question == null)
+                continue;
+
+            var awarded = 0d;
+            if (string.Equals(question.Type, "MCQ", StringComparison.OrdinalIgnoreCase) &&
+                !string.IsNullOrWhiteSpace(question.CorrectAnswer) &&
+                string.Equals(question.CorrectAnswer.Trim(), answer.Response.Trim(), StringComparison.OrdinalIgnoreCase))
+            {
+                awarded = question.Points;
+            }
+
+            details.Add(new QuestionScoreDetailDto
+            {
+                QuestionId = question.Id,
+                PointsAwarded = awarded,
+                MaxPoints = question.Points
+            });
+
+            score += awarded;
+        }
+
+        var attempt = new ExamAttempt
+        {
+            Id = Guid.NewGuid(),
+            ExamId = examId,
+            StudentId = userId.Value,
+            SubmittedAt = DateTime.UtcNow,
+            AnswersJson = System.Text.Json.JsonSerializer.Serialize(dto.Answers),
+            Score = score
+        };
+
+        _context.ExamAttempts.Add(attempt);
+        await _context.SaveChangesAsync();
+
+        return Ok(new ExamAttemptResultDto
+        {
+            ExamAttemptId = attempt.Id,
+            Score = attempt.Score,
+            Questions = details
+        });
+    }
+
+    [HttpPost("{id:guid}/publish")]
+    [Authorize(Roles = "Admin,Professor")]
+    public async Task<IActionResult> PublishExam(Guid id)
+    {
+        var exam = await _context.Exams.FindAsync(id);
+        if (exam == null)
+            return NotFound();
+
+        exam.Status = "Published";
+        exam.IsPublished = true;
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "Exam published!", examId = id });
+    }
+
+    [HttpGet("{id:guid}/gradebook")]
+    [Authorize(Roles = "Admin,Professor")]
+    public async Task<IActionResult> GetGradebook(Guid id)
+    {
+        var attempts = await _context.ExamAttempts
+            .Where(a => a.ExamId == id)
+            .Select(a => new
+            {
+                a.Id,
+                a.StudentId,
+                a.Score,
+                a.SubmittedAt
+            })
+            .ToListAsync();
+
+        return Ok(attempts);
+    }
+
+    [HttpPost("build-random")]
+    [Authorize(Roles = "Admin,Professor")]
+    public async Task<IActionResult> BuildRandomExam([FromBody] BuildExamParamsDto dto)
+    {
+        if (dto.NumberOfQuestions <= 0)
+            return BadRequest(new { message = "NumberOfQuestions must be greater than 0." });
+
+        var query = _context.Questions.AsQueryable();
+
+        if (dto.CourseId != Guid.Empty)
+            query = query.Where(q => q.CourseId == dto.CourseId);
+
+        if (!string.IsNullOrWhiteSpace(dto.Difficulty))
+            query = query.Where(q => q.Difficulty != null && q.Difficulty.ToLower() == dto.Difficulty.ToLower());
+
+        if (!string.IsNullOrWhiteSpace(dto.Type))
+            query = query.Where(q => q.Type.ToLower() == dto.Type.ToLower());
+
+        var random = await query
+            .OrderBy(_ => Guid.NewGuid())
+            .Take(dto.NumberOfQuestions)
+            .Select(q => new { q.Id, q.Text, q.Points, q.Type })
+            .ToListAsync();
+
+        return Ok(random);
     }
 
     private Guid? GetCurrentUserId()
