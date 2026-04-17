@@ -120,9 +120,3 @@ export default function ExamDetailsPage() {
     </div>
   );
 }
-feature/exam-fixes-and-logo
-
-feature/admin-import-docs-ui
-
-
- main
