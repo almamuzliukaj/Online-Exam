@@ -4,66 +4,103 @@ import { createExam } from "../../lib/examsApi";
 
 export default function ExamCreatePage() {
   const nav = useNavigate();
-  const [form, setForm] = useState({ title: "", description: "", durationMinutes: 60 });
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    durationMinutes: 60,
+  });
   const [error, setError] = useState("");
 
   async function onSubmit(e) {
     e.preventDefault();
+    setError("");
+
     try {
-      await createExam(form);
+      await createExam({
+        title: form.title,
+        description: form.description,
+        durationMinutes: Number(form.durationMinutes) || 60,
+      });
       alert("Provimi u krijua me sukses!");
       nav("/exams");
     } catch (err) {
-      // Nëse jep error databaza, të paktën ta dimë pse
-      setError("Gabim në Databazë: Fjalëkalimi i pasaktë ose Docker i fikur.");
-      console.error(err);
+      const apiMessage =
+        err?.response?.data?.message ||
+        (typeof err?.response?.data === "string" ? err.response.data : null) ||
+        err?.message;
+
+      setError(apiMessage || "Provimi nuk u krijua. Kontrollo fushat dhe provo perseri.");
     }
   }
 
   return (
-    <div style={{ padding: "40px", backgroundColor: "#f3f4f6", minHeight: "100vh", color: "#333" }}>
-      <div style={{ maxWidth: "500px", margin: "0 auto", backgroundColor: "white", padding: "30px", borderRadius: "12px", boxShadow: "0 10px 15px rgba(0,0,0,0.1)" }}>
-        <h2 style={{ textAlign: "center", marginBottom: "20px", color: "#111" }}>Krijo Provim të Ri</h2>
-        
-        {error && <div style={{ color: "red", marginBottom: "15px", fontSize: "14px", textAlign: "center" }}>{error}</div>}
+    <div className="shell">
+      <header className="nav">
+        <div className="container navInner">
+          <div className="brand">
+            <img className="brandLogo" src="/logo-itm.svg" alt="ITM Exam logo" />
+            <span>ITM Exam</span>
+          </div>
+          <div className="row" style={{ gap: 12 }}>
+            <Link className="btn" to="/exams">Back</Link>
+          </div>
+        </div>
+      </header>
 
-        <form onSubmit={onSubmit} style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-          <div>
-            <label style={{ display: "block", fontWeight: "bold" }}>Titulli</label>
-            <input 
-              style={{ width: "100%", padding: "10px", border: "1px solid #ccc", borderRadius: "6px", color: "#000", backgroundColor: "#fff" }} 
-              value={form.title} 
-              onChange={e => setForm({...form, title: e.target.value})} 
-              required 
-            />
+      <main className="container" style={{ padding: "26px 0 40px" }}>
+        <section className="card" style={{ maxWidth: 720, margin: "0 auto" }}>
+          <div className="cardHeader">
+            <h2 style={{ margin: 0 }}>Create Exam</h2>
+            <p className="p" style={{ marginTop: 8 }}>
+              Add the basic exam information below.
+            </p>
           </div>
 
-          <div>
-            <label style={{ display: "block", fontWeight: "bold" }}>Kohëzgjatja (minuta)</label>
-            <input 
-              type="number"
-              style={{ width: "100%", padding: "10px", border: "1px solid #ccc", borderRadius: "6px", color: "#000", backgroundColor: "#fff" }} 
-              value={form.durationMinutes} 
-              onChange={e => setForm({...form, durationMinutes: e.target.value})} 
-            />
+          <div className="cardBody">
+            {error ? <div className="alert" style={{ marginBottom: 14 }}>{error}</div> : null}
+
+            <form className="authForm" onSubmit={onSubmit}>
+              <div className="field">
+                <div className="label">Title</div>
+                <input
+                  className="input"
+                  value={form.title}
+                  onChange={(e) => setForm((current) => ({ ...current, title: e.target.value }))}
+                  required
+                />
+              </div>
+
+              <div className="field">
+                <div className="label">Duration (minutes)</div>
+                <input
+                  className="input"
+                  type="number"
+                  min="1"
+                  value={form.durationMinutes}
+                  onChange={(e) => setForm((current) => ({ ...current, durationMinutes: Number(e.target.value) }))}
+                />
+              </div>
+
+              <div className="field">
+                <div className="label">Description</div>
+                <textarea
+                  className="input"
+                  rows={5}
+                  value={form.description}
+                  onChange={(e) => setForm((current) => ({ ...current, description: e.target.value }))}
+                />
+              </div>
+
+              <div className="row" style={{ gap: 12, justifyContent: "flex-end" }}>
+                <Link className="btn" to="/exams">Cancel</Link>
+                <button className="btn btnPrimary" type="submit">
+                  Krijo Provimin
+                </button>
+              </div>
+            </form>
           </div>
-
-          <div>
-            <label style={{ display: "block", fontWeight: "bold" }}>Përshkrimi</label>
-            <textarea 
-              style={{ width: "100%", padding: "10px", border: "1px solid #ccc", borderRadius: "6px", minHeight: "80px", color: "#000", backgroundColor: "#fff" }} 
-              value={form.description} 
-              onChange={e => setForm({...form, description: e.target.value})} 
-            />
-          </div>
-
-          <button type="submit" style={{ backgroundColor: "#4F46E5", color: "white", padding: "12px", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "bold" }}>
-            Krijo Provimin
-          </button>
-
-          <Link to="/exams" style={{ textAlign: "center", color: "#666", textDecoration: "none", fontSize: "14px" }}>Anulo</Link>
-        </form>
-      </div>
+        </section>
+      </main>
     </div>
   );
 }

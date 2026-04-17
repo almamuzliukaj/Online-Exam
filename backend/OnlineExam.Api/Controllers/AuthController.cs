@@ -26,11 +26,40 @@ namespace OnlineExam.Api.Controllers
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequestDto dto)
         {
-            // Kujdes: password kontrollohet si plaintext vetëm për demo!
-            var user = _db.Users
-                .FirstOrDefault(u => u.Email == dto.Email && u.PasswordHash == dto.Password);
+            var user = _db.Users.FirstOrDefault(u => u.Email == dto.Email);
 
             if (user == null || !user.IsActive)
+                return Unauthorized("Invalid credentials");
+
+            if (string.IsNullOrWhiteSpace(user.PasswordHash))
+                return Unauthorized("Invalid credentials");
+
+            var isValid = false;
+
+            // Backward compatibility for old plaintext records:
+            // accept once, then transparently upgrade to a BCrypt hash.
+            if (IsBcryptHash(user.PasswordHash))
+            {
+                try
+                {
+                    isValid = BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash);
+                }
+                catch (BCrypt.Net.SaltParseException)
+                {
+                    isValid = false;
+                }
+            }
+            else
+            {
+                isValid = user.PasswordHash == dto.Password;
+                if (isValid)
+                {
+                    user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+                    _db.SaveChanges();
+                }
+            }
+
+            if (!isValid)
                 return Unauthorized("Invalid credentials");
 
             var jwtKey = _config["Jwt:Key"];
@@ -96,6 +125,11 @@ namespace OnlineExam.Api.Controllers
         public IActionResult Ping()
         {
             return Ok("Hello Admin!");
+        }
+
+        private static bool IsBcryptHash(string value)
+        {
+            return value.StartsWith("$2a$") || value.StartsWith("$2b$") || value.StartsWith("$2y$");
         }
     }
 }
