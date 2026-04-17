@@ -1,7 +1,6 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.EntityFrameworkCore;
 using OnlineExam.Api.Data;
 using OnlineExam.Api.DTOs;
 using System.IdentityModel.Tokens.Jwt;
@@ -26,11 +25,9 @@ namespace OnlineExam.Api.Controllers
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequestDto dto)
         {
-            // Kujdes: password kontrollohet si plaintext vetëm për demo!
-            var user = _db.Users
-                .FirstOrDefault(u => u.Email == dto.Email && u.PasswordHash == dto.Password);
+            var user = _db.Users.FirstOrDefault(u => u.Email == dto.Email);
 
-            if (user == null || !user.IsActive)
+            if (user == null || !user.IsActive || !PasswordMatches(user.PasswordHash, dto.Password))
                 return Unauthorized("Invalid credentials");
 
             var jwtKey = _config["Jwt:Key"];
@@ -41,11 +38,10 @@ namespace OnlineExam.Api.Controllers
 
             var key = Encoding.UTF8.GetBytes(jwtKey);
 
-            // Claims në JWT -- Përfshi gjithmonë edhe NameIdentifier!
             var claims = new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),               // <-- DETAJ I RËNDËSISHËM!
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),             // (Opsionale, standard JWT)
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Email),
                 new Claim(ClaimTypes.Role, user.Role)
             };
@@ -78,14 +74,13 @@ namespace OnlineExam.Api.Controllers
         [HttpGet("me")]
         public IActionResult Me()
         {
-            // KTU lexo GUID-in në mënyrë të sigurt (nga NameIdentifier)
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var email = User.FindFirst(ClaimTypes.Name)?.Value;
             var role = User.FindFirst(ClaimTypes.Role)?.Value;
 
             return Ok(new
             {
-                userId,  // TANI NUK ËSHTË MË null!
+                userId,
                 email,
                 role
             });
@@ -96,6 +91,17 @@ namespace OnlineExam.Api.Controllers
         public IActionResult Ping()
         {
             return Ok("Hello Admin!");
+        }
+
+        private static bool PasswordMatches(string storedHash, string inputPassword)
+        {
+            if (string.IsNullOrWhiteSpace(storedHash) || string.IsNullOrWhiteSpace(inputPassword))
+                return false;
+
+            if (storedHash == inputPassword)
+                return true;
+
+            return BCrypt.Net.BCrypt.Verify(inputPassword, storedHash);
         }
     }
 }
