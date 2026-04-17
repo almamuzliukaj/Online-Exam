@@ -55,7 +55,9 @@ export default function ExamDetailsPage() {
       }
     })();
 
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [examId]);
 
   return (
@@ -82,19 +84,19 @@ export default function ExamDetailsPage() {
           <div className="cardHeader">
             <h2 style={{ margin: 0 }}>{exam?.title ?? "Exam details"}</h2>
             <p className="p" style={{ marginTop: 6 }}>
-              {exam?.description ? exam.description : "View exam info and questions."}
+              {exam?.description ? exam.description : "View exam information and question coverage."}
             </p>
           </div>
 
           <div className="cardBody" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {loading && <div className="chip">Loading…</div>}
+            {loading && <div className="chip">Loading...</div>}
             {error && <div className="alert">{error}</div>}
 
             {!loading && !error && (
               <>
                 <h3 style={{ margin: "8px 0 0" }}>Questions</h3>
                 {questions.length === 0 ? (
-                  <div className="small">No questions yet.</div>
+                  <div className="small">No questions have been added yet.</div>
                 ) : (
                   <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                     {questions.map((q) => (
@@ -103,7 +105,7 @@ export default function ExamDetailsPage() {
                           <strong style={{ color: "var(--text)" }}>{q.text ?? "(no text)"}</strong>
                           <span className="small">
                             {q.type ? `Type: ${q.type}` : "Type: -"}
-                            {typeof q.points === "number" ? ` • Points: ${q.points}` : ""}
+                            {typeof q.points === "number" ? ` | Points: ${q.points}` : ""}
                           </span>
                         </div>
                       </div>
@@ -118,3 +120,9 @@ export default function ExamDetailsPage() {
     </div>
   );
 }
+feature/exam-fixes-and-logo
+
+feature/admin-import-docs-ui
+
+
+ main

@@ -4,10 +4,9 @@ import { login } from "../lib/auth";
 
 export default function Login() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("admin@test.com");
-  const [password, setPassword] = useState("123");
+  const [email, setEmail] = useState("admin@onlineexam.com");
+  const [password, setPassword] = useState("Password123!");
   const [show, setShow] = useState(false);
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -35,7 +34,7 @@ export default function Login() {
               <span>ITM Exam</span>
             </div>
             <h1 className="h1" style={{ marginTop: 14 }}>Welcome back</h1>
-            <p className="p">Sign in to continue to your dashboard.</p>
+            <p className="p">Sign in to access your exam workspace.</p>
           </div>
 
           <div className="cardBody">
@@ -64,7 +63,7 @@ export default function Login() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     type={show ? "text" : "password"}
-                    placeholder="••••••••"
+                    placeholder="Enter your password"
                     autoComplete="current-password"
                     required
                     disabled={loading}
@@ -84,8 +83,7 @@ export default function Login() {
                 {loading ? "Signing in..." : "Sign in"}
               </button>
 
-              <div className="small">
-              </div>
+              <div className="small">Account creation is managed by the administrator.</div>
             </form>
           </div>
         </div>
