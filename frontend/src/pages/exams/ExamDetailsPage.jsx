@@ -1,30 +1,17 @@
-import React, { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getExam, listQuestions } from "../../lib/examsApi";
-import { me } from "../../lib/auth";
 import { canManageExams } from "../../lib/permissions";
+import { useCurrentUser } from "../../hooks/useCurrentUser";
+import AppShell from "../../components/AppShell";
+import { useEffect, useState } from "react";
 
 export default function ExamDetailsPage() {
   const { examId } = useParams();
-
-  const [role, setRole] = useState(null);
+  const { user, loading: userLoading, error: userError } = useCurrentUser();
   const [exam, setExam] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
-  const canEdit = useMemo(() => canManageExams(role), [role]);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const info = await me();
-        setRole(info?.role ?? null);
-      } catch {
-        setRole(null);
-      }
-    })();
-  }, []);
 
   useEffect(() => {
     if (!examId) return;
@@ -35,21 +22,12 @@ export default function ExamDetailsPage() {
       try {
         setLoading(true);
         setError("");
-
-        const [examData, qData] = await Promise.all([
-          getExam(examId),
-          listQuestions(examId),
-        ]);
-
+        const [examData, questionData] = await Promise.all([getExam(examId), listQuestions(examId)]);
         if (!active) return;
-
         setExam(examData);
-        setQuestions(Array.isArray(qData) ? qData : []);
-      } catch (err) {
-        if (!active) return;
-        const statusPart = err?.status ? ` (HTTP ${err.status})` : "";
-        const msgPart = err?.message ? ` ${err.message}` : "";
-        setError(`Failed to load exam details.${statusPart}${msgPart}`.trim());
+        setQuestions(Array.isArray(questionData) ? questionData : []);
+      } catch {
+        if (active) setError("Failed to load exam details.");
       } finally {
         if (active) setLoading(false);
       }
@@ -60,63 +38,83 @@ export default function ExamDetailsPage() {
     };
   }, [examId]);
 
+  if (userLoading) {
+    return <div className="pageState">Loading exam details...</div>;
+  }
+
+  if (!user) {
+    return <div className="pageState">{userError || "Unable to load user profile."}</div>;
+  }
+
+  const canEdit = canManageExams(user.role);
+
   return (
-    <div className="shell">
-      <header className="nav">
-        <div className="container navInner">
-          <div className="brand">
-            <img className="brandLogo" src="/logo-itm.svg" alt="ITM Exam logo" />
-            <span>ITM Exam</span>
-          </div>
-          <div className="row" style={{ gap: 12 }}>
-            <Link className="btn" to="/exams">Back</Link>
-            {examId && canEdit && (
-              <Link className="btn btnPrimary" to={`/exams/${examId}/questions/new`}>
-                Add question
-              </Link>
-            )}
-          </div>
-        </div>
-      </header>
+    <AppShell
+      user={user}
+      badge="Exam details"
+      title={exam?.title || "Exam detail"}
+      subtitle={exam?.description || "Inspect the exam structure, question coverage, and next authoring actions."}
+      actions={
+        <>
+          <Link className="btn" to="/exams">Back to exams</Link>
+          {canEdit && examId ? <Link className="btn btnPrimary" to={`/exams/${examId}/questions/new`}>Add question</Link> : null}
+        </>
+      }
+    >
+      <div className="stackXl">
+        {error ? <div className="alert">{error}</div> : null}
 
-      <main className="container" style={{ padding: "26px 0 40px" }}>
-        <section className="card">
-          <div className="cardHeader">
-            <h2 style={{ margin: 0 }}>{exam?.title ?? "Exam details"}</h2>
-            <p className="p" style={{ marginTop: 6 }}>
-              {exam?.description ? exam.description : "View exam information and question coverage."}
-            </p>
-          </div>
+        {loading ? (
+          <div className="pageStateCard">Loading exam structure...</div>
+        ) : (
+          <>
+            <section className="summaryStrip">
+              <article className="summaryCard">
+                <span className="summaryLabel">Status</span>
+                <strong>{exam?.isPublished ? "Published" : "Draft"}</strong>
+              </article>
+              <article className="summaryCard">
+                <span className="summaryLabel">Duration</span>
+                <strong>{exam?.durationMinutes || 60} min</strong>
+              </article>
+              <article className="summaryCard">
+                <span className="summaryLabel">Questions</span>
+                <strong>{questions.length}</strong>
+              </article>
+            </section>
 
-          <div className="cardBody" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {loading && <div className="chip">Loading...</div>}
-            {error && <div className="alert">{error}</div>}
-
-            {!loading && !error && (
-              <>
-                <h3 style={{ margin: "8px 0 0" }}>Questions</h3>
+            <section className="surfaceCard">
+              <div className="sectionHeader">
+                <h3>Question coverage</h3>
+                <span className="small">Current authoring progress for this assessment</span>
+              </div>
+              <div className="sectionBody">
                 {questions.length === 0 ? (
-                  <div className="small">No questions have been added yet.</div>
+                  <div className="emptyState">
+                    <p>No questions have been added yet.</p>
+                    <p>Add the first question to start building the exam.</p>
+                  </div>
                 ) : (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                    {questions.map((q) => (
-                      <div key={q.id} className="chip">
-                        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                          <strong style={{ color: "var(--text)" }}>{q.text ?? "(no text)"}</strong>
-                          <span className="small">
-                            {q.type ? `Type: ${q.type}` : "Type: -"}
-                            {typeof q.points === "number" ? ` | Points: ${q.points}` : ""}
-                          </span>
+                  <div className="questionList">
+                    {questions.map((question, index) => (
+                      <article key={question.id} className="questionCard">
+                        <div className="questionIndex">{String(index + 1).padStart(2, "0")}</div>
+                        <div className="questionBody">
+                          <strong>{question.text || "(no text)"}</strong>
+                          <div className="questionMeta">
+                            <span>{question.type ? `Type: ${question.type}` : "Type: -"}</span>
+                            <span>{typeof question.points === "number" ? `Points: ${question.points}` : "Points: -"}</span>
+                          </div>
                         </div>
-                      </div>
+                      </article>
                     ))}
                   </div>
                 )}
-              </>
-            )}
-          </div>
-        </section>
-      </main>
-    </div>
+              </div>
+            </section>
+          </>
+        )}
+      </div>
+    </AppShell>
   );
 }

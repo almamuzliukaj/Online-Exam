@@ -1,14 +1,14 @@
-import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { addQuestion, getExam } from "../../lib/examsApi";
-import { me } from "../../lib/auth";
 import { canManageExams } from "../../lib/permissions";
+import { useCurrentUser } from "../../hooks/useCurrentUser";
+import AppShell from "../../components/AppShell";
+import { useEffect, useMemo, useState } from "react";
 
 export default function QuestionCreatePage() {
   const nav = useNavigate();
   const { examId } = useParams();
-
-  const [role, setRole] = useState(null);
+  const { user, loading: userLoading, error: userError } = useCurrentUser();
   const [exam, setExam] = useState(null);
   const [form, setForm] = useState({
     text: "",
@@ -19,18 +19,7 @@ export default function QuestionCreatePage() {
   const [loadingExam, setLoadingExam] = useState(true);
   const [error, setError] = useState("");
 
-  const canEdit = useMemo(() => canManageExams(role), [role]);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const info = await me();
-        setRole(info?.role ?? null);
-      } catch {
-        setRole(null);
-      }
-    })();
-  }, []);
+  const canEdit = useMemo(() => canManageExams(user?.role), [user?.role]);
 
   useEffect(() => {
     if (!examId) return;
@@ -73,46 +62,44 @@ export default function QuestionCreatePage() {
     }
   }
 
+  if (userLoading) {
+    return <div className="pageState">Loading question editor...</div>;
+  }
+
+  if (!user) {
+    return <div className="pageState">{userError || "Unable to load user profile."}</div>;
+  }
+
   return (
-    <div className="shell">
-      <header className="nav">
-        <div className="container navInner">
-          <div className="brand">
-            <img className="brandLogo" src="/logo-itm.svg" alt="ITM Exam logo" />
-            <span>ITM Exam</span>
+    <AppShell
+      user={user}
+      badge="Question authoring"
+      title="Add question"
+      subtitle={loadingExam ? "Loading exam context..." : `Create a new question for ${exam?.title || "this exam"}.`}
+      actions={<Link className="btn" to={`/exams/${examId}`}>Back to exam</Link>}
+    >
+      <section className="formSurface">
+        <div className="surfaceCard">
+          <div className="sectionHeader">
+            <h3>Question content</h3>
           </div>
-          <div className="row">
-            <Link className="btn" to={`/exams/${examId}`}>Back</Link>
-          </div>
-        </div>
-      </header>
-
-      <main className="container" style={{ padding: "26px 0 40px" }}>
-        <section className="card" style={{ maxWidth: 720, margin: "0 auto" }}>
-          <div className="cardHeader">
-            <h2 style={{ margin: 0 }}>Add Question</h2>
-            <p className="p" style={{ marginTop: 8 }}>
-              {loadingExam ? "Loading exam context..." : (exam?.title ? `Exam: ${exam.title}` : "Add a question to this exam.")}
-            </p>
-          </div>
-
-          <div className="cardBody">
-            {error ? <div className="alert" style={{ marginBottom: 14 }}>{error}</div> : null}
-
-            <form className="authForm" onSubmit={onSubmit}>
+          <div className="sectionBody">
+            {error ? <div className="alert">{error}</div> : null}
+            <form className="stackLg" onSubmit={onSubmit}>
               <div className="field">
-                <div className="label">Question text</div>
+                <label className="label">Prompt</label>
                 <textarea
-                  className="input"
+                  className="input textarea"
                   value={form.text}
                   onChange={(e) => setForm((current) => ({ ...current, text: e.target.value }))}
                   disabled={saving || loadingExam}
-                  rows={5}
+                  placeholder="Write the question prompt here."
+                  rows={6}
                 />
               </div>
 
               <div className="field">
-                <div className="label">Type</div>
+                <label className="label">Type</label>
                 <select
                   className="input"
                   value={form.type}
@@ -126,7 +113,7 @@ export default function QuestionCreatePage() {
               </div>
 
               <div className="field">
-                <div className="label">Points</div>
+                <label className="label">Points</label>
                 <input
                   className="input"
                   type="number"
@@ -137,16 +124,15 @@ export default function QuestionCreatePage() {
                 />
               </div>
 
-              <div className="row" style={{ gap: 12, justifyContent: "flex-end" }}>
-                <Link className="btn" to={`/exams/${examId}`}>Cancel</Link>
-                <button className="btn btnPrimary" type="submit" disabled={saving || loadingExam || !canEdit}>
+              <div className="row" style={{ justifyContent: "flex-end" }}>
+                <button className="btn btnPrimary" type="submit" disabled={saving || loadingExam || !canEdit || !form.text.trim()}>
                   {saving ? "Saving..." : "Save question"}
                 </button>
               </div>
             </form>
           </div>
-        </section>
-      </main>
-    </div>
+        </div>
+      </section>
+    </AppShell>
   );
 }
