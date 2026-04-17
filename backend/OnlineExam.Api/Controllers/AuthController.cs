@@ -30,6 +30,37 @@ namespace OnlineExam.Api.Controllers
             if (user == null || !user.IsActive || !PasswordMatches(user.PasswordHash, dto.Password))
                 return Unauthorized("Invalid credentials");
 
+            if (string.IsNullOrWhiteSpace(user.PasswordHash))
+                return Unauthorized("Invalid credentials");
+
+            var isValid = false;
+
+            // Backward compatibility for old plaintext records:
+            // accept once, then transparently upgrade to a BCrypt hash.
+            if (IsBcryptHash(user.PasswordHash))
+            {
+                try
+                {
+                    isValid = BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash);
+                }
+                catch (BCrypt.Net.SaltParseException)
+                {
+                    isValid = false;
+                }
+            }
+            else
+            {
+                isValid = user.PasswordHash == dto.Password;
+                if (isValid)
+                {
+                    user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+                    _db.SaveChanges();
+                }
+            }
+
+            if (!isValid)
+                return Unauthorized("Invalid credentials");
+
             var jwtKey = _config["Jwt:Key"];
             var jwtIssuer = _config["Jwt:Issuer"];
 
@@ -93,6 +124,11 @@ namespace OnlineExam.Api.Controllers
             return Ok("Hello Admin!");
         }
 
+ feature/exam-fixes-and-logo
+        private static bool IsBcryptHash(string value)
+        {
+            return value.StartsWith("$2a$") || value.StartsWith("$2b$") || value.StartsWith("$2y$");
+
         private static bool PasswordMatches(string storedHash, string inputPassword)
         {
             if (string.IsNullOrWhiteSpace(storedHash) || string.IsNullOrWhiteSpace(inputPassword))
@@ -102,6 +138,7 @@ namespace OnlineExam.Api.Controllers
                 return true;
 
             return BCrypt.Net.BCrypt.Verify(inputPassword, storedHash);
+ main
         }
     }
 }
