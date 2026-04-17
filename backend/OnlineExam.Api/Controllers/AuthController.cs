@@ -27,45 +27,29 @@ namespace OnlineExam.Api.Controllers
         {
             var user = _db.Users.FirstOrDefault(u => u.Email == dto.Email);
 
-            if (user == null || !user.IsActive || !PasswordMatches(user.PasswordHash, dto.Password))
-                return Unauthorized("Invalid credentials");
-
-            if (string.IsNullOrWhiteSpace(user.PasswordHash))
-                return Unauthorized("Invalid credentials");
-
-            var isValid = false;
-
-            // Backward compatibility for old plaintext records:
-            // accept once, then transparently upgrade to a BCrypt hash.
-            if (IsBcryptHash(user.PasswordHash))
+            if (user == null || !user.IsActive)
             {
-                try
-                {
-                    isValid = BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash);
-                }
-                catch (BCrypt.Net.SaltParseException)
-                {
-                    isValid = false;
-                }
-            }
-            else
-            {
-                isValid = user.PasswordHash == dto.Password;
-                if (isValid)
-                {
-                    user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
-                    _db.SaveChanges();
-                }
+                return Unauthorized("Invalid credentials");
             }
 
-            if (!isValid)
+            if (!PasswordMatches(user.PasswordHash, dto.Password))
+            {
                 return Unauthorized("Invalid credentials");
+            }
+
+            if (!IsBcryptHash(user.PasswordHash))
+            {
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+                _db.SaveChanges();
+            }
 
             var jwtKey = _config["Jwt:Key"];
             var jwtIssuer = _config["Jwt:Issuer"];
 
             if (string.IsNullOrEmpty(jwtKey) || string.IsNullOrEmpty(jwtIssuer))
+            {
                 return StatusCode(500, "JWT config missing");
+            }
 
             var key = Encoding.UTF8.GetBytes(jwtKey);
 
@@ -124,21 +108,32 @@ namespace OnlineExam.Api.Controllers
             return Ok("Hello Admin!");
         }
 
- feature/exam-fixes-and-logo
         private static bool IsBcryptHash(string value)
         {
-            return value.StartsWith("$2a$") || value.StartsWith("$2b$") || value.StartsWith("$2y$");
+            return !string.IsNullOrWhiteSpace(value) &&
+                (value.StartsWith("$2a$") || value.StartsWith("$2b$") || value.StartsWith("$2y$"));
+        }
 
         private static bool PasswordMatches(string storedHash, string inputPassword)
         {
             if (string.IsNullOrWhiteSpace(storedHash) || string.IsNullOrWhiteSpace(inputPassword))
+            {
                 return false;
+            }
 
-            if (storedHash == inputPassword)
-                return true;
+            if (!IsBcryptHash(storedHash))
+            {
+                return storedHash == inputPassword;
+            }
 
-            return BCrypt.Net.BCrypt.Verify(inputPassword, storedHash);
- main
+            try
+            {
+                return BCrypt.Net.BCrypt.Verify(inputPassword, storedHash);
+            }
+            catch (BCrypt.Net.SaltParseException)
+            {
+                return false;
+            }
         }
     }
 }

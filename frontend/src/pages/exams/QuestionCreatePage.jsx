@@ -9,7 +9,6 @@ export default function QuestionCreatePage() {
   const { examId } = useParams();
 
   const [role, setRole] = useState(null);
-feature/exam-fixes-and-logo
   const [exam, setExam] = useState(null);
   const [form, setForm] = useState({
     text: "",
@@ -17,12 +16,7 @@ feature/exam-fixes-and-logo
     points: 10,
   });
   const [loading, setLoading] = useState(true);
-
-  const [text, setText] = useState("");
-  main
   const [saving, setSaving] = useState(false);
-  const [loadingExam, setLoadingExam] = useState(true);
-  const [examTitle, setExamTitle] = useState("");
   const [error, setError] = useState("");
 
   const canEdit = useMemo(() => canManageExams(role), [role]);
@@ -43,17 +37,13 @@ feature/exam-fixes-and-logo
 
     (async () => {
       try {
-        setLoadingExam(true);
+        setLoading(true);
         const data = await getExam(examId);
- feature/exam-fixes-and-logo
         setExam(data);
-
-        setExamTitle(data?.title ?? "");
- main
       } catch {
         setError("Failed to load exam.");
       } finally {
-        setLoadingExam(false);
+        setLoading(false);
       }
     })();
   }, [examId]);
@@ -65,7 +55,6 @@ feature/exam-fixes-and-logo
     try {
       setSaving(true);
       setError("");
- feature/exam-fixes-and-logo
       await addQuestion(examId, {
         text: form.text.trim(),
         type: form.type,
@@ -79,12 +68,6 @@ feature/exam-fixes-and-logo
         err?.message;
 
       setError(apiMessage || "Failed to add question.");
-
-      await addQuestion(examId, { text });
-      nav(`/exams/${examId}`);
-    } catch {
-      setError("Failed to add question.");
- main
     } finally {
       setSaving(false);
     }
@@ -95,13 +78,8 @@ feature/exam-fixes-and-logo
       <header className="nav">
         <div className="container navInner">
           <div className="brand">
-feature/exam-fixes-and-logo
             <img className="brandLogo" src="/logo-itm.svg" alt="ITM Exam logo" />
             <span>ITM Exam</span>
-
-            <span className="logoDot" />
-            <span>Online Exam</span>
- main
           </div>
           <div className="row">
             <Link className="btn" to={`/exams/${examId}`}>Back</Link>
@@ -110,24 +88,15 @@ feature/exam-fixes-and-logo
       </header>
 
       <main className="container" style={{ padding: "26px 0 40px" }}>
- feature/exam-fixes-and-logo
         <section className="card" style={{ maxWidth: 720, margin: "0 auto" }}>
           <div className="cardHeader">
             <h2 style={{ margin: 0 }}>Add Question</h2>
             <p className="p" style={{ marginTop: 8 }}>
               {exam?.title ? `Exam: ${exam.title}` : "Add a question to this exam."}
-
-        <section className="card formCard">
-          <div className="cardHeader">
-            <h2 style={{ margin: 0 }}>Add Question</h2>
-            <p className="p" style={{ marginTop: 6 }}>
-              {loadingExam ? "Loading exam context..." : `Creating a question for ${examTitle || "this exam"}.`}
- main
             </p>
           </div>
 
           <div className="cardBody">
- feature/exam-fixes-and-logo
             {error ? <div className="alert" style={{ marginBottom: 14 }}>{error}</div> : null}
 
             <form className="authForm" onSubmit={onSubmit}>
@@ -172,20 +141,6 @@ feature/exam-fixes-and-logo
                 <Link className="btn" to={`/exams/${examId}`}>Cancel</Link>
                 <button className="btn btnPrimary" type="submit" disabled={saving || loading || !canEdit}>
                   {saving ? "Saving..." : "Save"}
-            {error && <div className="alert">{error}</div>}
-            <form className="stackLg" onSubmit={onSubmit}>
-              <textarea
-                className="input inputLight textarea"
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                disabled={saving}
-                rows={5}
-                placeholder="Write the question prompt here."
-              />
-              <div className="row" style={{ justifyContent: "flex-end" }}>
-                <button className="btn btnPrimary" type="submit" disabled={saving || !canEdit || !text.trim()}>
-                  {saving ? "Saving..." : "Save question"}
-main
                 </button>
               </div>
             </form>
