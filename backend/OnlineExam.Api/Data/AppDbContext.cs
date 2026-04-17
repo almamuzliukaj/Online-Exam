@@ -10,6 +10,9 @@ namespace OnlineExam.Api.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Exam> Exams { get; set; }
         public DbSet<Question> Questions { get; set; }
+        public DbSet<Term> Terms { get; set; }
+        public DbSet<Course> Courses { get; set; }
+        public DbSet<CourseOffering> CourseOfferings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

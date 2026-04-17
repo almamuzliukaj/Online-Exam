@@ -85,16 +85,10 @@ export default function Login() {
               </button>
 
               <div className="small">
-                Mock mode works without backend. When backend is ready, set{" "}
-                <span className="mono">VITE_USE_MOCK_AUTH=false</span>.
               </div>
             </form>
           </div>
         </div>
-      </div>
-
-      <div style={{ padding: "14px 0" }} className="container small">
-        Tip: use <span className="mono">admin@test.com</span> to get role <span className="mono">Admin</span> in mock mode.
       </div>
     </div>
   );
