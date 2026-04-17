@@ -1,58 +1,63 @@
-import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { createExam } from "../../lib/examsApi";
+import AppShell from "../../components/AppShell";
+import { useCurrentUser } from "../../hooks/useCurrentUser";
+import { useState } from "react";
 
 export default function ExamCreatePage() {
   const nav = useNavigate();
+  const { user, loading, error: userError } = useCurrentUser();
   const [form, setForm] = useState({
     title: "",
     description: "",
     durationMinutes: 60,
   });
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
 
   async function onSubmit(e) {
     e.preventDefault();
     setError("");
 
     try {
+      setSaving(true);
       await createExam(form);
       nav("/exams");
     } catch (err) {
       setError(err?.response?.data?.message || "Unable to create the exam right now.");
-      console.error(err);
+    } finally {
+      setSaving(false);
     }
   }
 
+  if (loading) {
+    return <div className="pageState">Loading creation workspace...</div>;
+  }
+
+  if (!user) {
+    return <div className="pageState">{userError || "Unable to load user profile."}</div>;
+  }
+
   return (
-    <div className="shell">
-      <header className="nav">
-        <div className="container navInner">
-          <div className="brand">
-            <span className="logoDot" />
-            <span>Online Exam</span>
+    <AppShell
+      user={user}
+      badge="Exam authoring"
+      title="Create exam"
+      subtitle="Set the assessment foundation first. Question selection, scheduling, and publishing will build on this record."
+      actions={<Link className="btn" to="/exams">Cancel</Link>}
+    >
+      <section className="formSurface">
+        <div className="surfaceCard">
+          <div className="sectionHeader">
+            <h3>Exam configuration</h3>
           </div>
-          <Link className="btn" to="/exams">Cancel</Link>
-        </div>
-      </header>
-
-      <main className="container" style={{ padding: "26px 0 40px" }}>
-        <section className="card formCard">
-          <div className="cardHeader">
-            <h2 style={{ margin: 0 }}>Create Exam</h2>
-            <p className="p" style={{ marginTop: 6 }}>
-              Define the core settings for a new assessment. Question management comes next.
-            </p>
-          </div>
-
-          <div className="cardBody">
+          <div className="sectionBody">
             {error ? <div className="alert">{error}</div> : null}
-
             <form className="stackLg" onSubmit={onSubmit}>
               <div className="field">
                 <label className="label">Exam title</label>
                 <input
-                  className="input inputLight"
+                  className="input"
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
                   placeholder="Algorithms Midterm"
@@ -61,9 +66,9 @@ export default function ExamCreatePage() {
               </div>
 
               <div className="field">
-                <label className="label">Duration (minutes)</label>
+                <label className="label">Duration in minutes</label>
                 <input
-                  className="input inputLight"
+                  className="input"
                   type="number"
                   min="1"
                   value={form.durationMinutes}
@@ -74,23 +79,23 @@ export default function ExamCreatePage() {
               <div className="field">
                 <label className="label">Description</label>
                 <textarea
-                  className="input inputLight textarea"
+                  className="input textarea"
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  placeholder="Short instructions, scope, and allowed materials."
+                  placeholder="Describe scope, instructions, allowed materials, and intended delivery notes."
                 />
               </div>
 
               <div className="row" style={{ justifyContent: "flex-end" }}>
                 <Link className="btn" to="/exams">Back</Link>
-                <button className="btn btnPrimary" type="submit">
-                  Create exam
+                <button className="btn btnPrimary" type="submit" disabled={saving}>
+                  {saving ? "Creating..." : "Create exam"}
                 </button>
               </div>
             </form>
           </div>
-        </section>
-      </main>
-    </div>
+        </div>
+      </section>
+    </AppShell>
   );
 }

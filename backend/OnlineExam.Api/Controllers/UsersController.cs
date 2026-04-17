@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using OnlineExam.Api.Data;
 using OnlineExam.Api.DTOs;
 using OnlineExam.Api.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace OnlineExam.Api.Controllers
 {
@@ -12,7 +13,7 @@ namespace OnlineExam.Api.Controllers
     [Authorize(Roles = "Admin")]
     public class UsersController : ControllerBase
     {
-        private static readonly string[] AllowedRoles = ["Admin", "Professor", "Assistant", "Student"];
+        private static readonly string[] AllowedRoles = ["Professor", "Assistant", "Student", "Admin"];
         private readonly AppDbContext _context;
 
         public UsersController(AppDbContext context)
@@ -23,17 +24,15 @@ namespace OnlineExam.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromBody] CreateUserDto dto)
         {
-            if (!IsRoleAllowed(dto.Role))
-                return BadRequest(new { message = "Role must be Admin, Professor, Assistant, or Student." });
+            var validationError = ValidateCreateOrUpdate(dto.FullName, dto.Email, dto.Role, dto.Password, requirePassword: true);
+            if (validationError != null)
+                return validationError;
 
-            if (string.IsNullOrWhiteSpace(dto.Password) || dto.Password.Length < 6)
-                return BadRequest(new { message = "Password must be at least 6 characters long." });
-
-            if (await _context.Users.AnyAsync(x => x.Email == dto.Email.Trim().ToLower()))
+            var normalizedEmail = NormalizeEmail(dto.Email);
+            if (await _context.Users.AnyAsync(x => x.Email == normalizedEmail))
                 return Conflict(new { message = "Email already exists." });
 
-            var user = BuildUser(dto.Email, dto.FullName, dto.Role, dto.Password, dto.IsActive);
-
+            var user = BuildUser(normalizedEmail, dto.FullName, dto.Role, dto.Password, dto.IsActive);
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
@@ -48,33 +47,31 @@ namespace OnlineExam.Api.Controllers
 
             var importedUsers = new List<object>();
             var errors = new List<object>();
+            var seenEmails = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var row in dto.Users)
             {
-                var normalizedEmail = row.Email.Trim().ToLowerInvariant();
+                var normalizedEmail = NormalizeEmail(row.Email);
+                var fullName = row.FullName?.Trim() ?? string.Empty;
+                var role = row.Role?.Trim() ?? string.Empty;
                 var password = ResolvePassword(dto, row);
 
                 if (string.IsNullOrWhiteSpace(normalizedEmail))
                 {
-                    errors.Add(new { email = row.Email, message = "Email is required." });
+                    errors.Add(new { email = row.Email ?? string.Empty, message = "Email is required." });
                     continue;
                 }
 
-                if (string.IsNullOrWhiteSpace(row.FullName))
+                if (!seenEmails.Add(normalizedEmail))
                 {
-                    errors.Add(new { email = normalizedEmail, message = "Full name is required." });
+                    errors.Add(new { email = normalizedEmail, message = "Duplicate email in import file." });
                     continue;
                 }
 
-                if (!IsRoleAllowed(row.Role))
+                var validationError = ValidateCreateOrUpdate(fullName, normalizedEmail, role, password, requirePassword: true);
+                if (validationError is BadRequestObjectResult badRequest)
                 {
-                    errors.Add(new { email = normalizedEmail, message = "Invalid role." });
-                    continue;
-                }
-
-                if (string.IsNullOrWhiteSpace(password) || password.Length < 6)
-                {
-                    errors.Add(new { email = normalizedEmail, message = "Password must be at least 6 characters long." });
+                    errors.Add(new { email = normalizedEmail, message = ExtractMessage(badRequest.Value) });
                     continue;
                 }
 
@@ -84,7 +81,7 @@ namespace OnlineExam.Api.Controllers
                     continue;
                 }
 
-                var user = BuildUser(normalizedEmail, row.FullName, row.Role, password, row.IsActive);
+                var user = BuildUser(normalizedEmail, fullName, role, password, row.IsActive);
                 _context.Users.Add(user);
 
                 importedUsers.Add(new
@@ -93,9 +90,7 @@ namespace OnlineExam.Api.Controllers
                     user.Email,
                     user.FullName,
                     user.Role,
-                    TemporaryPassword = dto.GeneratePasswords && string.IsNullOrWhiteSpace(row.Password) && string.IsNullOrWhiteSpace(dto.DefaultPassword)
-                        ? password
-                        : null
+                    TemporaryPassword = row.Password.IsNullOrWhiteSpace() && dto.DefaultPassword.IsNullOrWhiteSpace() ? password : null
                 });
             }
 
@@ -112,9 +107,29 @@ namespace OnlineExam.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetUsers()
+        public async Task<IActionResult> GetUsers([FromQuery] string? role, [FromQuery] bool? isActive, [FromQuery] string? search)
         {
-            var users = await _context.Users
+            var query = _context.Users.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(role))
+            {
+                var normalizedRole = role.Trim();
+                query = query.Where(x => x.Role == normalizedRole);
+            }
+
+            if (isActive.HasValue)
+                query = query.Where(x => x.IsActive == isActive.Value);
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var term = search.Trim().ToLower();
+                query = query.Where(x =>
+                    x.FullName.ToLower().Contains(term) ||
+                    x.Email.ToLower().Contains(term));
+            }
+
+            var users = await query
+                .OrderBy(x => x.FullName)
                 .Select(user => new UserResponseDto
                 {
                     Id = user.Id,
@@ -139,15 +154,109 @@ namespace OnlineExam.Api.Controllers
             return Ok(ToResponse(user));
         }
 
-        private static bool IsRoleAllowed(string role) =>
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserDto dto)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+                return NotFound();
+
+            var validationError = ValidateUpdate(dto.FullName, dto.Role);
+            if (validationError != null)
+                return validationError;
+
+            user.FullName = dto.FullName.Trim();
+            user.Role = dto.Role.Trim();
+            user.IsActive = dto.IsActive;
+
+            await _context.SaveChangesAsync();
+            return Ok(ToResponse(user));
+        }
+
+        [HttpPut("{id}/status")]
+        public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] UpdateUserStatusDto dto)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+                return NotFound();
+
+            user.IsActive = dto.IsActive;
+            await _context.SaveChangesAsync();
+
+            return Ok(ToResponse(user));
+        }
+
+        [HttpPut("{id}/reset-password")]
+        public async Task<IActionResult> ResetPassword(Guid id, [FromBody] ResetPasswordDto dto)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+                return NotFound();
+
+            if (!IsValidPassword(dto.NewPassword))
+                return BadRequest(new { message = "Password must be at least 8 characters and include upper, lower, and number." });
+
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Password reset successfully." });
+        }
+
+        private IActionResult? ValidateCreateOrUpdate(string? fullName, string? email, string? role, string? password, bool requirePassword)
+        {
+            if (string.IsNullOrWhiteSpace(fullName) || fullName.Trim().Length < 2 || fullName.Trim().Length > 120)
+                return BadRequest(new { message = "Full name must be between 2 and 120 characters." });
+
+            if (string.IsNullOrWhiteSpace(email))
+                return BadRequest(new { message = "Email is required." });
+
+            var emailValidator = new EmailAddressAttribute();
+            if (!emailValidator.IsValid(email))
+                return BadRequest(new { message = "Email format is invalid." });
+
+            if (!IsRoleAllowed(role))
+                return BadRequest(new { message = "Role must be Student, Professor, Assistant, or Admin." });
+
+            if (requirePassword && !IsValidPassword(password))
+                return BadRequest(new { message = "Password must be at least 8 characters and include upper, lower, and number." });
+
+            return null;
+        }
+
+        private IActionResult? ValidateUpdate(string? fullName, string? role)
+        {
+            if (string.IsNullOrWhiteSpace(fullName) || fullName.Trim().Length < 2 || fullName.Trim().Length > 120)
+                return BadRequest(new { message = "Full name must be between 2 and 120 characters." });
+
+            if (!IsRoleAllowed(role))
+                return BadRequest(new { message = "Role must be Student, Professor, Assistant, or Admin." });
+
+            return null;
+        }
+
+        private static bool IsRoleAllowed(string? role) =>
             AllowedRoles.Contains(role?.Trim(), StringComparer.OrdinalIgnoreCase);
+
+        private static bool IsValidPassword(string? password)
+        {
+            if (string.IsNullOrWhiteSpace(password) || password.Length < 8)
+                return false;
+
+            var hasUpper = password.Any(char.IsUpper);
+            var hasLower = password.Any(char.IsLower);
+            var hasDigit = password.Any(char.IsDigit);
+            return hasUpper && hasLower && hasDigit;
+        }
+
+        private static string NormalizeEmail(string? email) =>
+            email?.Trim().ToLowerInvariant() ?? string.Empty;
 
         private static User BuildUser(string email, string fullName, string role, string password, bool isActive)
         {
             return new User
             {
                 Id = Guid.NewGuid(),
-                Email = email.Trim().ToLowerInvariant(),
+                Email = email,
                 FullName = fullName.Trim(),
                 Role = role.Trim(),
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
@@ -179,5 +288,19 @@ namespace OnlineExam.Api.Controllers
                 CreatedAt = user.CreatedAt
             };
         }
+
+        private static string ExtractMessage(object? value)
+        {
+            if (value == null)
+                return "Validation failed.";
+
+            var messageProperty = value.GetType().GetProperty("message");
+            return messageProperty?.GetValue(value)?.ToString() ?? "Validation failed.";
+        }
+    }
+
+    internal static class StringExtensions
+    {
+        public static bool IsNullOrWhiteSpace(this string? value) => string.IsNullOrWhiteSpace(value);
     }
 }
