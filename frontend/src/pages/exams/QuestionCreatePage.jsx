@@ -1,32 +1,25 @@
-import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { addQuestion, getExam } from "../../lib/examsApi";
-import { me } from "../../lib/auth";
 import { canManageExams } from "../../lib/permissions";
+import { useCurrentUser } from "../../hooks/useCurrentUser";
+import AppShell from "../../components/AppShell";
+import { useEffect, useMemo, useState } from "react";
 
 export default function QuestionCreatePage() {
   const nav = useNavigate();
   const { examId } = useParams();
-
-  const [role, setRole] = useState(null);
-  const [text, setText] = useState("");
+  const { user, loading: userLoading, error: userError } = useCurrentUser();
+  const [exam, setExam] = useState(null);
+  const [form, setForm] = useState({
+    text: "",
+    type: "MCQ",
+    points: 10,
+  });
   const [saving, setSaving] = useState(false);
   const [loadingExam, setLoadingExam] = useState(true);
-  const [examTitle, setExamTitle] = useState("");
   const [error, setError] = useState("");
 
-  const canEdit = useMemo(() => canManageExams(role), [role]);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const info = await me();
-        setRole(info?.role ?? null);
-      } catch {
-        setRole(null);
-      }
-    })();
-  }, []);
+  const canEdit = useMemo(() => canManageExams(user?.role), [user?.role]);
 
   useEffect(() => {
     if (!examId) return;
@@ -35,7 +28,7 @@ export default function QuestionCreatePage() {
       try {
         setLoadingExam(true);
         const data = await getExam(examId);
-        setExamTitle(data?.title ?? "");
+        setExam(data);
       } catch {
         setError("Failed to load exam.");
       } finally {
@@ -46,63 +39,100 @@ export default function QuestionCreatePage() {
 
   async function onSubmit(e) {
     e.preventDefault();
-    if (!examId || !canEdit || !text.trim()) return;
+    if (!examId || !canEdit || !form.text.trim()) return;
 
     try {
       setSaving(true);
       setError("");
-      await addQuestion(examId, { text });
+      await addQuestion(examId, {
+        text: form.text.trim(),
+        type: form.type,
+        points: Number(form.points) || 0,
+      });
       nav(`/exams/${examId}`);
-    } catch {
-      setError("Failed to add question.");
+    } catch (err) {
+      const apiMessage =
+        err?.response?.data?.message ||
+        (typeof err?.response?.data === "string" ? err.response.data : null) ||
+        err?.message;
+
+      setError(apiMessage || "Failed to add question.");
     } finally {
       setSaving(false);
     }
   }
 
+  if (userLoading) {
+    return <div className="pageState">Loading question editor...</div>;
+  }
+
+  if (!user) {
+    return <div className="pageState">{userError || "Unable to load user profile."}</div>;
+  }
+
   return (
-    <div className="shell">
-      <header className="nav">
-        <div className="container navInner">
-          <div className="brand">
-            <span className="logoDot" />
-            <span>Online Exam</span>
+    <AppShell
+      user={user}
+      badge="Question authoring"
+      title="Add question"
+      subtitle={loadingExam ? "Loading exam context..." : `Create a new question for ${exam?.title || "this exam"}.`}
+      actions={<Link className="btn" to={`/exams/${examId}`}>Back to exam</Link>}
+    >
+      <section className="formSurface">
+        <div className="surfaceCard">
+          <div className="sectionHeader">
+            <h3>Question content</h3>
           </div>
-          <div className="row">
-            <Link className="btn" to={`/exams/${examId}`}>Back</Link>
-          </div>
-        </div>
-      </header>
-
-      <main className="container" style={{ padding: "26px 0 40px" }}>
-        <section className="card formCard">
-          <div className="cardHeader">
-            <h2 style={{ margin: 0 }}>Add Question</h2>
-            <p className="p" style={{ marginTop: 6 }}>
-              {loadingExam ? "Loading exam context..." : `Creating a question for ${examTitle || "this exam"}.`}
-            </p>
-          </div>
-
-          <div className="cardBody">
-            {error && <div className="alert">{error}</div>}
+          <div className="sectionBody">
+            {error ? <div className="alert">{error}</div> : null}
             <form className="stackLg" onSubmit={onSubmit}>
-              <textarea
-                className="input inputLight textarea"
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                disabled={saving}
-                rows={5}
-                placeholder="Write the question prompt here."
-              />
+              <div className="field">
+                <label className="label">Prompt</label>
+                <textarea
+                  className="input textarea"
+                  value={form.text}
+                  onChange={(e) => setForm((current) => ({ ...current, text: e.target.value }))}
+                  disabled={saving || loadingExam}
+                  placeholder="Write the question prompt here."
+                  rows={6}
+                />
+              </div>
+
+              <div className="field">
+                <label className="label">Type</label>
+                <select
+                  className="input"
+                  value={form.type}
+                  onChange={(e) => setForm((current) => ({ ...current, type: e.target.value }))}
+                  disabled={saving || loadingExam}
+                >
+                  <option value="MCQ">MCQ</option>
+                  <option value="Text">Text</option>
+                  <option value="Code">Code</option>
+                </select>
+              </div>
+
+              <div className="field">
+                <label className="label">Points</label>
+                <input
+                  className="input"
+                  type="number"
+                  min="1"
+                  value={form.points}
+                  onChange={(e) => setForm((current) => ({ ...current, points: Number(e.target.value) }))}
+                  disabled={saving || loadingExam}
+                />
+              </div>
+
               <div className="row" style={{ justifyContent: "flex-end" }}>
-                <button className="btn btnPrimary" type="submit" disabled={saving || !canEdit || !text.trim()}>
+                <button className="btn btnPrimary" type="submit" disabled={saving || loadingExam || !canEdit || !form.text.trim()}>
                   {saving ? "Saving..." : "Save question"}
                 </button>
               </div>
             </form>
           </div>
-        </section>
-      </main>
-    </div>
+        </div>
+      </section>
+    </AppShell>
   );
 }

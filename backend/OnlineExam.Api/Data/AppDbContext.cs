@@ -9,6 +9,7 @@ public class AppDbContext : DbContext
 
     public DbSet<User> Users { get; set; }
     public DbSet<Exam> Exams { get; set; }
+    public DbSet<ExamAttempt> ExamAttempts { get; set; }
     public DbSet<Question> Questions { get; set; }
     public DbSet<Term> Terms { get; set; }
     public DbSet<Course> Courses { get; set; }
@@ -25,7 +26,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<User>().HasData(
             new User
             {
-                Id = Guid.Parse("27f24067-053e-4af5-80de-2e508d57b0ee"),
+                Id = Guid.Parse("f9635e15-1d90-4e3b-b722-331a8fc2fbe9"),
                 FullName = "Admin User",
                 Email = "admin@onlineexam.com",
                 PasswordHash = "Password123!",
@@ -35,7 +36,7 @@ public class AppDbContext : DbContext
             },
             new User
             {
-                Id = Guid.Parse("17ef169c-c82d-44e3-8d24-e1fdc6ecf3be"),
+                Id = Guid.Parse("b5769729-e575-4789-b6e7-f7327ede1acc"),
                 FullName = "Professor",
                 Email = "prof@onlineexam.com",
                 PasswordHash = "Password123!",
@@ -45,7 +46,7 @@ public class AppDbContext : DbContext
             },
             new User
             {
-                Id = Guid.Parse("9cf9ce95-11b4-4da4-9e57-5ac0d787d651"),
+                Id = Guid.Parse("4c7b418b-5853-4c9c-9ef4-5e1d4e65cad1"),
                 FullName = "Student",
                 Email = "student@onlineexam.com",
                 PasswordHash = "Password123!",
@@ -60,6 +61,18 @@ public class AppDbContext : DbContext
             .WithMany(e => e.Questions)
             .HasForeignKey(q => q.ExamId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ExamAttempt>()
+            .HasOne(a => a.Exam)
+            .WithMany(e => e.Attempts)
+            .HasForeignKey(a => a.ExamId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ExamAttempt>()
+            .HasOne<User>()
+            .WithMany()
+            .HasForeignKey(a => a.StudentId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<Term>()
             .HasIndex(x => x.Code)

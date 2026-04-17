@@ -1,16 +1,14 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+#pragma warning disable CA1814
 
 namespace OnlineExam.Api.Migrations
 {
-    /// <inheritdoc />
     public partial class ImplementAcademicStructure : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
@@ -28,21 +26,19 @@ namespace OnlineExam.Api.Migrations
             migrationBuilder.DeleteData(
                 table: "Users",
                 keyColumn: "Id",
-                keyValue: new Guid("59f80a88-fc46-4377-a4bf-700099bd37ba"));
+                keyValue: new Guid("b5769729-e575-4789-b6e7-f7327ede1acc"));
 
             migrationBuilder.DeleteData(
                 table: "Users",
                 keyColumn: "Id",
-                keyValue: new Guid("636391af-8eb5-43c4-946d-482b7f901604"));
+                keyValue: new Guid("4c7b418b-5853-4c9c-9ef4-5e1d4e65cad1"));
 
             migrationBuilder.DeleteData(
                 table: "Users",
                 keyColumn: "Id",
-                keyValue: new Guid("ebe11f61-7c26-439f-8bdf-994c64844c96"));
+                keyValue: new Guid("f9635e15-1d90-4e3b-b722-331a8fc2fbe9"));
 
-            migrationBuilder.DropColumn(
-                name: "Year",
-                table: "Terms");
+            migrationBuilder.DropColumn(name: "Year", table: "Terms");
 
             migrationBuilder.RenameColumn(
                 name: "ProfessorId",
@@ -58,78 +54,16 @@ namespace OnlineExam.Api.Migrations
                 oldClrType: typeof(string),
                 oldType: "text");
 
-            migrationBuilder.AddColumn<string>(
-                name: "AcademicYearLabel",
-                table: "Terms",
-                type: "character varying(20)",
-                maxLength: 20,
-                nullable: false,
-                defaultValue: "");
-
-            migrationBuilder.AddColumn<string>(
-                name: "Code",
-                table: "Terms",
-                type: "character varying(50)",
-                maxLength: 50,
-                nullable: false,
-                defaultValue: "");
-
-            migrationBuilder.AddColumn<DateTime>(
-                name: "EndDate",
-                table: "Terms",
-                type: "timestamp with time zone",
-                nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
-
-            migrationBuilder.AddColumn<DateTime>(
-                name: "EnrollmentCloseAt",
-                table: "Terms",
-                type: "timestamp with time zone",
-                nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
-
-            migrationBuilder.AddColumn<DateTime>(
-                name: "EnrollmentOpenAt",
-                table: "Terms",
-                type: "timestamp with time zone",
-                nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
-
-            migrationBuilder.AddColumn<bool>(
-                name: "IsCurrent",
-                table: "Terms",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
-
-            migrationBuilder.AddColumn<string>(
-                name: "Name",
-                table: "Terms",
-                type: "character varying(100)",
-                maxLength: 100,
-                nullable: false,
-                defaultValue: "");
-
-            migrationBuilder.AddColumn<DateTime>(
-                name: "StartDate",
-                table: "Terms",
-                type: "timestamp with time zone",
-                nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
-
-            migrationBuilder.AddColumn<string>(
-                name: "Status",
-                table: "Terms",
-                type: "character varying(20)",
-                maxLength: 20,
-                nullable: false,
-                defaultValue: "");
-
-            migrationBuilder.AddColumn<Guid>(
-                name: "CourseOfferingId",
-                table: "Exams",
-                type: "uuid",
-                nullable: true);
+            migrationBuilder.AddColumn<string>(name: "AcademicYearLabel", table: "Terms", type: "character varying(20)", maxLength: 20, nullable: false, defaultValue: "");
+            migrationBuilder.AddColumn<string>(name: "Code", table: "Terms", type: "character varying(50)", maxLength: 50, nullable: false, defaultValue: "");
+            migrationBuilder.AddColumn<DateTime>(name: "EndDate", table: "Terms", type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+            migrationBuilder.AddColumn<DateTime>(name: "EnrollmentCloseAt", table: "Terms", type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+            migrationBuilder.AddColumn<DateTime>(name: "EnrollmentOpenAt", table: "Terms", type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+            migrationBuilder.AddColumn<bool>(name: "IsCurrent", table: "Terms", type: "boolean", nullable: false, defaultValue: false);
+            migrationBuilder.AddColumn<string>(name: "Name", table: "Terms", type: "character varying(100)", maxLength: 100, nullable: false, defaultValue: "");
+            migrationBuilder.AddColumn<DateTime>(name: "StartDate", table: "Terms", type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+            migrationBuilder.AddColumn<string>(name: "Status", table: "Terms", type: "character varying(20)", maxLength: 20, nullable: false, defaultValue: "");
+            migrationBuilder.AddColumn<Guid>(name: "CourseOfferingId", table: "Exams", type: "uuid", nullable: true);
 
             migrationBuilder.AlterColumn<string>(
                 name: "Name",
@@ -149,93 +83,19 @@ namespace OnlineExam.Api.Migrations
                 oldClrType: typeof(string),
                 oldType: "text");
 
-            migrationBuilder.AddColumn<int>(
-                name: "Credits",
-                table: "Courses",
-                type: "integer",
-                nullable: false,
-                defaultValue: 0);
+            migrationBuilder.AddColumn<int>(name: "Credits", table: "Courses", type: "integer", nullable: false, defaultValue: 0);
+            migrationBuilder.AddColumn<int>(name: "DefaultSemesterNo", table: "Courses", type: "integer", nullable: false, defaultValue: 0);
+            migrationBuilder.AddColumn<string>(name: "Description", table: "Courses", type: "character varying(1000)", maxLength: 1000, nullable: false, defaultValue: "");
+            migrationBuilder.AddColumn<bool>(name: "IsActive", table: "Courses", type: "boolean", nullable: false, defaultValue: false);
+            migrationBuilder.AddColumn<bool>(name: "IsElective", table: "Courses", type: "boolean", nullable: false, defaultValue: false);
+            migrationBuilder.AddColumn<int>(name: "YearOfStudy", table: "Courses", type: "integer", nullable: false, defaultValue: 0);
 
-            migrationBuilder.AddColumn<int>(
-                name: "DefaultSemesterNo",
-                table: "Courses",
-                type: "integer",
-                nullable: false,
-                defaultValue: 0);
-
-            migrationBuilder.AddColumn<string>(
-                name: "Description",
-                table: "Courses",
-                type: "character varying(1000)",
-                maxLength: 1000,
-                nullable: false,
-                defaultValue: "");
-
-            migrationBuilder.AddColumn<bool>(
-                name: "IsActive",
-                table: "Courses",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
-
-            migrationBuilder.AddColumn<bool>(
-                name: "IsElective",
-                table: "Courses",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
-
-            migrationBuilder.AddColumn<int>(
-                name: "YearOfStudy",
-                table: "Courses",
-                type: "integer",
-                nullable: false,
-                defaultValue: 0);
-
-            migrationBuilder.AddColumn<int>(
-                name: "Capacity",
-                table: "CourseOfferings",
-                type: "integer",
-                nullable: false,
-                defaultValue: 0);
-
-            migrationBuilder.AddColumn<DateTime>(
-                name: "CreatedAt",
-                table: "CourseOfferings",
-                type: "timestamp with time zone",
-                nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
-
-            migrationBuilder.AddColumn<string>(
-                name: "DeliveryType",
-                table: "CourseOfferings",
-                type: "character varying(20)",
-                maxLength: 20,
-                nullable: false,
-                defaultValue: "");
-
-            migrationBuilder.AddColumn<string>(
-                name: "SectionCode",
-                table: "CourseOfferings",
-                type: "character varying(50)",
-                maxLength: 50,
-                nullable: false,
-                defaultValue: "");
-
-            migrationBuilder.AddColumn<string>(
-                name: "Status",
-                table: "CourseOfferings",
-                type: "character varying(20)",
-                maxLength: 20,
-                nullable: false,
-                defaultValue: "");
-
-            migrationBuilder.AddColumn<DateTime>(
-                name: "UpdatedAt",
-                table: "CourseOfferings",
-                type: "timestamp with time zone",
-                nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+            migrationBuilder.AddColumn<int>(name: "Capacity", table: "CourseOfferings", type: "integer", nullable: false, defaultValue: 0);
+            migrationBuilder.AddColumn<DateTime>(name: "CreatedAt", table: "CourseOfferings", type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+            migrationBuilder.AddColumn<string>(name: "DeliveryType", table: "CourseOfferings", type: "character varying(20)", maxLength: 20, nullable: false, defaultValue: "");
+            migrationBuilder.AddColumn<string>(name: "SectionCode", table: "CourseOfferings", type: "character varying(50)", maxLength: 50, nullable: false, defaultValue: "");
+            migrationBuilder.AddColumn<string>(name: "Status", table: "CourseOfferings", type: "character varying(20)", maxLength: 20, nullable: false, defaultValue: "");
+            migrationBuilder.AddColumn<DateTime>(name: "UpdatedAt", table: "CourseOfferings", type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
 
             migrationBuilder.CreateTable(
                 name: "CarryOverCourses",
@@ -256,18 +116,8 @@ namespace OnlineExam.Api.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_CarryOverCourses", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_CarryOverCourses_Courses_CourseId",
-                        column: x => x.CourseId,
-                        principalTable: "Courses",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_CarryOverCourses_Terms_OriginTermId",
-                        column: x => x.OriginTermId,
-                        principalTable: "Terms",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(name: "FK_CarryOverCourses_Courses_CourseId", column: x => x.CourseId, principalTable: "Courses", principalColumn: "Id", onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(name: "FK_CarryOverCourses_Terms_OriginTermId", column: x => x.OriginTermId, principalTable: "Terms", principalColumn: "Id", onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -289,12 +139,7 @@ namespace OnlineExam.Api.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_CourseOfferingStaffAssignments", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_CourseOfferingStaffAssignments_CourseOfferings_CourseOfferi~",
-                        column: x => x.CourseOfferingId,
-                        principalTable: "CourseOfferings",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(name: "FK_CourseOfferingStaffAssignments_CourseOfferings_CourseOfferi~", column: x => x.CourseOfferingId, principalTable: "CourseOfferings", principalColumn: "Id", onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -314,12 +159,7 @@ namespace OnlineExam.Api.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_SemesterEnrollments", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_SemesterEnrollments_Terms_TermId",
-                        column: x => x.TermId,
-                        principalTable: "Terms",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(name: "FK_SemesterEnrollments_Terms_TermId", column: x => x.TermId, principalTable: "Terms", principalColumn: "Id", onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -339,18 +179,8 @@ namespace OnlineExam.Api.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_StudentCourseEnrollments", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_StudentCourseEnrollments_CourseOfferings_CourseOfferingId",
-                        column: x => x.CourseOfferingId,
-                        principalTable: "CourseOfferings",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_StudentCourseEnrollments_SemesterEnrollments_LinkedSemester~",
-                        column: x => x.LinkedSemesterEnrollmentId,
-                        principalTable: "SemesterEnrollments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(name: "FK_StudentCourseEnrollments_CourseOfferings_CourseOfferingId", column: x => x.CourseOfferingId, principalTable: "CourseOfferings", principalColumn: "Id", onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(name: "FK_StudentCourseEnrollments_SemesterEnrollments_LinkedSemester~", column: x => x.LinkedSemesterEnrollmentId, principalTable: "SemesterEnrollments", principalColumn: "Id", onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.InsertData(
@@ -358,310 +188,89 @@ namespace OnlineExam.Api.Migrations
                 columns: new[] { "Id", "CreatedAt", "Email", "FullName", "IsActive", "PasswordHash", "Role" },
                 values: new object[,]
                 {
-                    { new Guid("17ef169c-c82d-44e3-8d24-e1fdc6ecf3be"), new DateTime(2026, 4, 17, 9, 37, 25, 237, DateTimeKind.Utc).AddTicks(9923), "prof@onlineexam.com", "Professor", true, "Password123!", "Professor" },
-                    { new Guid("27f24067-053e-4af5-80de-2e508d57b0ee"), new DateTime(2026, 4, 17, 9, 37, 25, 237, DateTimeKind.Utc).AddTicks(9757), "admin@onlineexam.com", "Admin User", true, "Password123!", "Admin" },
-                    { new Guid("9cf9ce95-11b4-4da4-9e57-5ac0d787d651"), new DateTime(2026, 4, 17, 9, 37, 25, 237, DateTimeKind.Utc).AddTicks(9926), "student@onlineexam.com", "Student", true, "Password123!", "Student" }
+                    { new Guid("4c7b418b-5853-4c9c-9ef4-5e1d4e65cad1"), new DateTime(2026, 4, 17, 8, 21, 26, 122, DateTimeKind.Utc).AddTicks(549), "student@onlineexam.com", "Student", true, "Password123!", "Student" },
+                    { new Guid("b5769729-e575-4789-b6e7-f7327ede1acc"), new DateTime(2026, 4, 17, 8, 21, 26, 122, DateTimeKind.Utc).AddTicks(546), "prof@onlineexam.com", "Professor", true, "Password123!", "Professor" },
+                    { new Guid("f9635e15-1d90-4e3b-b722-331a8fc2fbe9"), new DateTime(2026, 4, 17, 8, 21, 26, 122, DateTimeKind.Utc).AddTicks(538), "admin@onlineexam.com", "Admin User", true, "Password123!", "Admin" }
                 });
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Terms_Code",
-                table: "Terms",
-                column: "Code",
-                unique: true);
+            migrationBuilder.CreateIndex(name: "IX_Terms_Code", table: "Terms", column: "Code", unique: true);
+            migrationBuilder.CreateIndex(name: "IX_Exams_CourseOfferingId", table: "Exams", column: "CourseOfferingId");
+            migrationBuilder.CreateIndex(name: "IX_Courses_Code", table: "Courses", column: "Code", unique: true);
+            migrationBuilder.CreateIndex(name: "IX_CourseOfferings_CourseId_TermId_SectionCode", table: "CourseOfferings", columns: new[] { "CourseId", "TermId", "SectionCode" }, unique: true);
+            migrationBuilder.CreateIndex(name: "IX_CarryOverCourses_CourseId", table: "CarryOverCourses", column: "CourseId");
+            migrationBuilder.CreateIndex(name: "IX_CarryOverCourses_OriginTermId", table: "CarryOverCourses", column: "OriginTermId");
+            migrationBuilder.CreateIndex(name: "IX_CourseOfferingStaffAssignments_CourseOfferingId", table: "CourseOfferingStaffAssignments", column: "CourseOfferingId");
+            migrationBuilder.CreateIndex(name: "IX_SemesterEnrollments_TermId", table: "SemesterEnrollments", column: "TermId");
+            migrationBuilder.CreateIndex(name: "IX_StudentCourseEnrollments_CourseOfferingId", table: "StudentCourseEnrollments", column: "CourseOfferingId");
+            migrationBuilder.CreateIndex(name: "IX_StudentCourseEnrollments_LinkedSemesterEnrollmentId", table: "StudentCourseEnrollments", column: "LinkedSemesterEnrollmentId");
+            migrationBuilder.CreateIndex(name: "IX_StudentCourseEnrollments_StudentId_CourseOfferingId", table: "StudentCourseEnrollments", columns: new[] { "StudentId", "CourseOfferingId" }, unique: true);
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Exams_CourseOfferingId",
-                table: "Exams",
-                column: "CourseOfferingId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Courses_Code",
-                table: "Courses",
-                column: "Code",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CourseOfferings_CourseId_TermId_SectionCode",
-                table: "CourseOfferings",
-                columns: new[] { "CourseId", "TermId", "SectionCode" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CarryOverCourses_CourseId",
-                table: "CarryOverCourses",
-                column: "CourseId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CarryOverCourses_OriginTermId",
-                table: "CarryOverCourses",
-                column: "OriginTermId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CourseOfferingStaffAssignments_CourseOfferingId",
-                table: "CourseOfferingStaffAssignments",
-                column: "CourseOfferingId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SemesterEnrollments_TermId",
-                table: "SemesterEnrollments",
-                column: "TermId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_StudentCourseEnrollments_CourseOfferingId",
-                table: "StudentCourseEnrollments",
-                column: "CourseOfferingId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_StudentCourseEnrollments_LinkedSemesterEnrollmentId",
-                table: "StudentCourseEnrollments",
-                column: "LinkedSemesterEnrollmentId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_StudentCourseEnrollments_StudentId_CourseOfferingId",
-                table: "StudentCourseEnrollments",
-                columns: new[] { "StudentId", "CourseOfferingId" },
-                unique: true);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_CourseOfferings_Courses_CourseId",
-                table: "CourseOfferings",
-                column: "CourseId",
-                principalTable: "Courses",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_CourseOfferings_Terms_TermId",
-                table: "CourseOfferings",
-                column: "TermId",
-                principalTable: "Terms",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Exams_CourseOfferings_CourseOfferingId",
-                table: "Exams",
-                column: "CourseOfferingId",
-                principalTable: "CourseOfferings",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.SetNull);
+            migrationBuilder.AddForeignKey(name: "FK_CourseOfferings_Courses_CourseId", table: "CourseOfferings", column: "CourseId", principalTable: "Courses", principalColumn: "Id", onDelete: ReferentialAction.Restrict);
+            migrationBuilder.AddForeignKey(name: "FK_CourseOfferings_Terms_TermId", table: "CourseOfferings", column: "TermId", principalTable: "Terms", principalColumn: "Id", onDelete: ReferentialAction.Restrict);
+            migrationBuilder.AddForeignKey(name: "FK_Exams_CourseOfferings_CourseOfferingId", table: "Exams", column: "CourseOfferingId", principalTable: "CourseOfferings", principalColumn: "Id", onDelete: ReferentialAction.SetNull);
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_CourseOfferings_Courses_CourseId",
-                table: "CourseOfferings");
+            migrationBuilder.DropForeignKey(name: "FK_CourseOfferings_Courses_CourseId", table: "CourseOfferings");
+            migrationBuilder.DropForeignKey(name: "FK_CourseOfferings_Terms_TermId", table: "CourseOfferings");
+            migrationBuilder.DropForeignKey(name: "FK_Exams_CourseOfferings_CourseOfferingId", table: "Exams");
+            migrationBuilder.DropTable(name: "CarryOverCourses");
+            migrationBuilder.DropTable(name: "CourseOfferingStaffAssignments");
+            migrationBuilder.DropTable(name: "StudentCourseEnrollments");
+            migrationBuilder.DropTable(name: "SemesterEnrollments");
+            migrationBuilder.DropIndex(name: "IX_Terms_Code", table: "Terms");
+            migrationBuilder.DropIndex(name: "IX_Exams_CourseOfferingId", table: "Exams");
+            migrationBuilder.DropIndex(name: "IX_Courses_Code", table: "Courses");
+            migrationBuilder.DropIndex(name: "IX_CourseOfferings_CourseId_TermId_SectionCode", table: "CourseOfferings");
 
-            migrationBuilder.DropForeignKey(
-                name: "FK_CourseOfferings_Terms_TermId",
-                table: "CourseOfferings");
+            migrationBuilder.DeleteData(table: "Users", keyColumn: "Id", keyValue: new Guid("4c7b418b-5853-4c9c-9ef4-5e1d4e65cad1"));
+            migrationBuilder.DeleteData(table: "Users", keyColumn: "Id", keyValue: new Guid("b5769729-e575-4789-b6e7-f7327ede1acc"));
+            migrationBuilder.DeleteData(table: "Users", keyColumn: "Id", keyValue: new Guid("f9635e15-1d90-4e3b-b722-331a8fc2fbe9"));
 
-            migrationBuilder.DropForeignKey(
-                name: "FK_Exams_CourseOfferings_CourseOfferingId",
-                table: "Exams");
+            migrationBuilder.DropColumn(name: "AcademicYearLabel", table: "Terms");
+            migrationBuilder.DropColumn(name: "Code", table: "Terms");
+            migrationBuilder.DropColumn(name: "EndDate", table: "Terms");
+            migrationBuilder.DropColumn(name: "EnrollmentCloseAt", table: "Terms");
+            migrationBuilder.DropColumn(name: "EnrollmentOpenAt", table: "Terms");
+            migrationBuilder.DropColumn(name: "IsCurrent", table: "Terms");
+            migrationBuilder.DropColumn(name: "Name", table: "Terms");
+            migrationBuilder.DropColumn(name: "StartDate", table: "Terms");
+            migrationBuilder.DropColumn(name: "Status", table: "Terms");
+            migrationBuilder.DropColumn(name: "CourseOfferingId", table: "Exams");
+            migrationBuilder.DropColumn(name: "Credits", table: "Courses");
+            migrationBuilder.DropColumn(name: "DefaultSemesterNo", table: "Courses");
+            migrationBuilder.DropColumn(name: "Description", table: "Courses");
+            migrationBuilder.DropColumn(name: "IsActive", table: "Courses");
+            migrationBuilder.DropColumn(name: "IsElective", table: "Courses");
+            migrationBuilder.DropColumn(name: "YearOfStudy", table: "Courses");
+            migrationBuilder.DropColumn(name: "Capacity", table: "CourseOfferings");
+            migrationBuilder.DropColumn(name: "CreatedAt", table: "CourseOfferings");
+            migrationBuilder.DropColumn(name: "DeliveryType", table: "CourseOfferings");
+            migrationBuilder.DropColumn(name: "SectionCode", table: "CourseOfferings");
+            migrationBuilder.DropColumn(name: "Status", table: "CourseOfferings");
+            migrationBuilder.DropColumn(name: "UpdatedAt", table: "CourseOfferings");
 
-            migrationBuilder.DropTable(
-                name: "CarryOverCourses");
+            migrationBuilder.RenameColumn(name: "PrimaryProfessorId", table: "CourseOfferings", newName: "ProfessorId");
 
-            migrationBuilder.DropTable(
-                name: "CourseOfferingStaffAssignments");
-
-            migrationBuilder.DropTable(
-                name: "StudentCourseEnrollments");
-
-            migrationBuilder.DropTable(
-                name: "SemesterEnrollments");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Terms_Code",
-                table: "Terms");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Exams_CourseOfferingId",
-                table: "Exams");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Courses_Code",
-                table: "Courses");
-
-            migrationBuilder.DropIndex(
-                name: "IX_CourseOfferings_CourseId_TermId_SectionCode",
-                table: "CourseOfferings");
-
-            migrationBuilder.DeleteData(
-                table: "Users",
-                keyColumn: "Id",
-                keyValue: new Guid("17ef169c-c82d-44e3-8d24-e1fdc6ecf3be"));
-
-            migrationBuilder.DeleteData(
-                table: "Users",
-                keyColumn: "Id",
-                keyValue: new Guid("27f24067-053e-4af5-80de-2e508d57b0ee"));
-
-            migrationBuilder.DeleteData(
-                table: "Users",
-                keyColumn: "Id",
-                keyValue: new Guid("9cf9ce95-11b4-4da4-9e57-5ac0d787d651"));
-
-            migrationBuilder.DropColumn(
-                name: "AcademicYearLabel",
-                table: "Terms");
-
-            migrationBuilder.DropColumn(
-                name: "Code",
-                table: "Terms");
-
-            migrationBuilder.DropColumn(
-                name: "EndDate",
-                table: "Terms");
-
-            migrationBuilder.DropColumn(
-                name: "EnrollmentCloseAt",
-                table: "Terms");
-
-            migrationBuilder.DropColumn(
-                name: "EnrollmentOpenAt",
-                table: "Terms");
-
-            migrationBuilder.DropColumn(
-                name: "IsCurrent",
-                table: "Terms");
-
-            migrationBuilder.DropColumn(
-                name: "Name",
-                table: "Terms");
-
-            migrationBuilder.DropColumn(
-                name: "StartDate",
-                table: "Terms");
-
-            migrationBuilder.DropColumn(
-                name: "Status",
-                table: "Terms");
-
-            migrationBuilder.DropColumn(
-                name: "CourseOfferingId",
-                table: "Exams");
-
-            migrationBuilder.DropColumn(
-                name: "Credits",
-                table: "Courses");
-
-            migrationBuilder.DropColumn(
-                name: "DefaultSemesterNo",
-                table: "Courses");
-
-            migrationBuilder.DropColumn(
-                name: "Description",
-                table: "Courses");
-
-            migrationBuilder.DropColumn(
-                name: "IsActive",
-                table: "Courses");
-
-            migrationBuilder.DropColumn(
-                name: "IsElective",
-                table: "Courses");
-
-            migrationBuilder.DropColumn(
-                name: "YearOfStudy",
-                table: "Courses");
-
-            migrationBuilder.DropColumn(
-                name: "Capacity",
-                table: "CourseOfferings");
-
-            migrationBuilder.DropColumn(
-                name: "CreatedAt",
-                table: "CourseOfferings");
-
-            migrationBuilder.DropColumn(
-                name: "DeliveryType",
-                table: "CourseOfferings");
-
-            migrationBuilder.DropColumn(
-                name: "SectionCode",
-                table: "CourseOfferings");
-
-            migrationBuilder.DropColumn(
-                name: "Status",
-                table: "CourseOfferings");
-
-            migrationBuilder.DropColumn(
-                name: "UpdatedAt",
-                table: "CourseOfferings");
-
-            migrationBuilder.RenameColumn(
-                name: "PrimaryProfessorId",
-                table: "CourseOfferings",
-                newName: "ProfessorId");
-
-            migrationBuilder.AlterColumn<string>(
-                name: "Season",
-                table: "Terms",
-                type: "text",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "character varying(20)",
-                oldMaxLength: 20);
-
-            migrationBuilder.AddColumn<int>(
-                name: "Year",
-                table: "Terms",
-                type: "integer",
-                nullable: false,
-                defaultValue: 0);
-
-            migrationBuilder.AlterColumn<string>(
-                name: "Name",
-                table: "Courses",
-                type: "text",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "character varying(200)",
-                oldMaxLength: 200);
-
-            migrationBuilder.AlterColumn<string>(
-                name: "Code",
-                table: "Courses",
-                type: "text",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "character varying(50)",
-                oldMaxLength: 50);
+            migrationBuilder.AlterColumn<string>(name: "Season", table: "Terms", type: "text", nullable: false, oldClrType: typeof(string), oldType: "character varying(20)", oldMaxLength: 20);
+            migrationBuilder.AddColumn<int>(name: "Year", table: "Terms", type: "integer", nullable: false, defaultValue: 0);
+            migrationBuilder.AlterColumn<string>(name: "Name", table: "Courses", type: "text", nullable: false, oldClrType: typeof(string), oldType: "character varying(200)", oldMaxLength: 200);
+            migrationBuilder.AlterColumn<string>(name: "Code", table: "Courses", type: "text", nullable: false, oldClrType: typeof(string), oldType: "character varying(50)", oldMaxLength: 50);
 
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "CreatedAt", "Email", "FullName", "IsActive", "PasswordHash", "Role" },
                 values: new object[,]
                 {
-                    { new Guid("59f80a88-fc46-4377-a4bf-700099bd37ba"), new DateTime(2026, 4, 13, 20, 44, 36, 925, DateTimeKind.Utc).AddTicks(1422), "prof@onlineexam.com", "Professor", true, "Password123!", "Professor" },
-                    { new Guid("636391af-8eb5-43c4-946d-482b7f901604"), new DateTime(2026, 4, 13, 20, 44, 36, 925, DateTimeKind.Utc).AddTicks(1426), "student@onlineexam.com", "Student", true, "Password123!", "Student" },
-                    { new Guid("ebe11f61-7c26-439f-8bdf-994c64844c96"), new DateTime(2026, 4, 13, 20, 44, 36, 925, DateTimeKind.Utc).AddTicks(1415), "admin@onlineexam.com", "Admin User", true, "Password123!", "Admin" }
+                    { new Guid("4c7b418b-5853-4c9c-9ef4-5e1d4e65cad1"), new DateTime(2026, 4, 17, 8, 21, 26, 122, DateTimeKind.Utc).AddTicks(549), "student@onlineexam.com", "Student", true, "Password123!", "Student" },
+                    { new Guid("b5769729-e575-4789-b6e7-f7327ede1acc"), new DateTime(2026, 4, 17, 8, 21, 26, 122, DateTimeKind.Utc).AddTicks(546), "prof@onlineexam.com", "Professor", true, "Password123!", "Professor" },
+                    { new Guid("f9635e15-1d90-4e3b-b722-331a8fc2fbe9"), new DateTime(2026, 4, 17, 8, 21, 26, 122, DateTimeKind.Utc).AddTicks(538), "admin@onlineexam.com", "Admin User", true, "Password123!", "Admin" }
                 });
 
-            migrationBuilder.CreateIndex(
-                name: "IX_CourseOfferings_CourseId",
-                table: "CourseOfferings",
-                column: "CourseId");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_CourseOfferings_Courses_CourseId",
-                table: "CourseOfferings",
-                column: "CourseId",
-                principalTable: "Courses",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_CourseOfferings_Terms_TermId",
-                table: "CourseOfferings",
-                column: "TermId",
-                principalTable: "Terms",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+            migrationBuilder.CreateIndex(name: "IX_CourseOfferings_CourseId", table: "CourseOfferings", column: "CourseId");
+            migrationBuilder.AddForeignKey(name: "FK_CourseOfferings_Courses_CourseId", table: "CourseOfferings", column: "CourseId", principalTable: "Courses", principalColumn: "Id", onDelete: ReferentialAction.Cascade);
+            migrationBuilder.AddForeignKey(name: "FK_CourseOfferings_Terms_TermId", table: "CourseOfferings", column: "TermId", principalTable: "Terms", principalColumn: "Id", onDelete: ReferentialAction.Cascade);
         }
     }
 }
