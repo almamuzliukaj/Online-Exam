@@ -23,14 +23,27 @@ export default function Dashboard() {
       subtitle="A role-based workspace designed for real academic operations, exam preparation, and secure assessment delivery."
       actions={
         <>
+ feature/alma-sprint1-shell-role-entry
           {canAccessExamWorkspace(user.role) ? <Link className="btn" to="/exams">Exam workspace</Link> : null}
           {canManageUsers(user.role) ? (
+
+          <Link className="btn" to="/exams">Exam workspace</Link>
+ feature/agnesa-admin-academic-structure
+          {isAdmin(user.role) ? <Link className="btn" to="/admin/academic">Academic setup</Link> : null}
+          {isAdmin(user.role) ? <Link className="btn btnPrimary" to="/admin/users">User management</Link> : null}
+
+          {isAdmin(user.role) ? (
+main
             <>
               <Link className="btn" to="/admin/courses">Academic catalog</Link>
               <Link className="btn btnPrimary" to="/admin/users">User management</Link>
             </>
           ) : null}
+ feature/alma-sprint1-shell-role-entry
           {!isAdmin(user.role) && !canAccessExamWorkspace(user.role) ? <Link className="btn" to="/dashboard">Refresh workspace</Link> : null}
+
+main
+main
         </>
       }
     >

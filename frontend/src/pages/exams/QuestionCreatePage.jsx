@@ -24,6 +24,12 @@ export default function QuestionCreatePage() {
     testCases: [{ ...EMPTY_TEST_CASE }],
     points: 10,
   });
+feature/alma-sprint1-shell-role-entry
+
+  const [loadingExam, setLoadingExam] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+ main
 
   const canEdit = useMemo(() => canCreateQuestions(user?.role), [user?.role]);
 
@@ -35,7 +41,10 @@ export default function QuestionCreatePage() {
     (async () => {
       try {
         setLoadingExam(true);
+ feature/alma-sprint1-shell-role-entry
         setError("");
+
+ main
         const data = await getExam(examId);
         if (active) {
           setExam(data);
@@ -45,9 +54,13 @@ export default function QuestionCreatePage() {
           setError("Failed to load exam.");
         }
       } finally {
+ feature/alma-sprint1-shell-role-entry
         if (active) {
           setLoadingExam(false);
         }
+
+        setLoadingExam(false);
+ main
       }
     })();
 
@@ -280,7 +293,11 @@ export default function QuestionCreatePage() {
                     </div>
                   </div>
                 </>
+ feature/alma-sprint1-shell-role-entry
               )}
+
+              ) : null}
+ main
 
               <div className="row" style={{ justifyContent: "flex-end" }}>
                 <Link className="btn" to={`/exams/${examId}`}>Cancel</Link>

@@ -20,7 +20,10 @@ export default function ExamCreatePage() {
 
     try {
       setSaving(true);
+ feature/alma-sprint1-shell-role-entry
       setError("");
+
+ main
       await createExam({
         title: form.title.trim(),
         description: form.description.trim(),
@@ -65,6 +68,7 @@ export default function ExamCreatePage() {
 
             <form className="stackLg" onSubmit={onSubmit}>
               <div className="field">
+ feature/alma-sprint1-shell-role-entry
                 <label className="label">Title</label>
                 <input
                   className="input"
@@ -72,10 +76,19 @@ export default function ExamCreatePage() {
                   onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
                   placeholder="Midterm Assessment - Database Systems"
                   disabled={saving}
+
+                <label className="label">Exam title</label>
+                <input
+                  className="input"
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  placeholder="Algorithms Midterm"
+ main
                   required
                 />
               </div>
 
+ feature/alma-sprint1-shell-role-entry
               <div className="gridTwo">
                 <div className="field">
                   <label className="label">Duration in minutes</label>
@@ -95,6 +108,17 @@ export default function ExamCreatePage() {
                     <div className="cellMeta">The backend attaches ownership to the signed-in staff member.</div>
                   </div>
                 </div>
+
+              <div className="field">
+                <label className="label">Duration in minutes</label>
+                <input
+                  className="input"
+                  type="number"
+                  min="1"
+                  value={form.durationMinutes}
+                  onChange={(e) => setForm({ ...form, durationMinutes: Number(e.target.value) })}
+                />
+ main
               </div>
 
               <div className="field">

@@ -9,8 +9,12 @@ import ExamCreatePage from "../pages/exams/ExamCreatePage";
 import ExamDetailsPage from "../pages/exams/ExamDetailsPage";
 import QuestionCreatePage from "../pages/exams/QuestionCreatePage";
 import AdminUsersPage from "../pages/admin/AdminUsersPage";
+ feature/agnesa-admin-academic-structure
+import AdminAcademicStructurePage from "../pages/admin/AdminAcademicStructurePage";
+
 import AdminCoursesPage from "../pages/admin/AdminCoursesPage";
 import AdminOfferingsPage from "../pages/admin/AdminOfferingsPage";
+ main
 
 export default function AppRoutes() {
   return (
@@ -23,8 +27,12 @@ export default function AppRoutes() {
 
         <Route element={<RoleGuard allow={["Admin"]} />}>
           <Route path="/admin/users" element={<AdminUsersPage />} />
+ feature/agnesa-admin-academic-structure
+          <Route path="/admin/academic" element={<AdminAcademicStructurePage />} />
+
           <Route path="/admin/courses" element={<AdminCoursesPage />} />
           <Route path="/admin/offerings" element={<AdminOfferingsPage />} />
+ main
         </Route>
 
         <Route element={<RoleGuard allow={["Professor", "Assistant", "Student"]} />}>

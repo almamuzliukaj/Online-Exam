@@ -1,7 +1,34 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { logout } from "../lib/auth";
+ feature/alma-sprint1-shell-role-entry
 import { getRoleNavigation, normalizeRole } from "../lib/permissions";
+
+
+const navigationByRole = {
+  Admin: [
+    { to: "/dashboard", label: "Overview" },
+    { to: "/admin/academic", label: "Academic" },
+    { to: "/admin/users", label: "Users" },
+    { to: "/admin/courses", label: "Courses" },
+    { to: "/admin/offerings", label: "Offerings" },
+    { to: "/exams", label: "Exams" },
+  ],
+  Professor: [
+    { to: "/dashboard", label: "Overview" },
+    { to: "/exams", label: "My exams" },
+    { to: "/exams/new", label: "Create exam" },
+  ],
+  Assistant: [
+    { to: "/dashboard", label: "Overview" },
+    { to: "/exams", label: "Assigned exams" },
+  ],
+  Student: [
+    { to: "/dashboard", label: "Overview" },
+    { to: "/exams", label: "Available exams" },
+  ],
+};
+ main
 
 export default function AppShell({
   user,

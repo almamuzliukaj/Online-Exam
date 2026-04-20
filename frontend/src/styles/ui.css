@@ -416,6 +416,18 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+feature/agnesa-admin-academic-structure
+.twoColGrid{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.threeColGrid{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+
 .gridTwo,
 .gridThree{
   display: grid;
@@ -428,6 +440,7 @@
 
 .gridThree{
   grid-template-columns: repeat(3, minmax(0, 1fr));
+ main
 }
 
 .surfaceCard{
@@ -685,6 +698,10 @@
 .textarea{
   min-height: 140px;
   resize: vertical;
+}
+
+.textareaCompact{
+  min-height: 110px;
 }
 
 .btn{
@@ -1037,6 +1054,7 @@
     align-items: stretch;
   }
 
+ feature/alma-sprint1-shell-role-entry
   .topbar{
     padding: 18px;
   }
@@ -1051,6 +1069,11 @@
 
   .topbarUserBlock{
     align-items: flex-start;
+
+  .twoColGrid,
+  .threeColGrid{
+    grid-template-columns: 1fr;
+main
   }
 
   .topbarActions{
