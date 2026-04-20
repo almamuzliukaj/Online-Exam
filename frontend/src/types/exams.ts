@@ -11,6 +11,9 @@ export type QuestionDto = {
   id: string;
   examId: string;
   text: string;
-  type?: "Theory" | "SQL" | "Code";
+  type?: "MCQ" | "Text" | "CSharp" | "SQL";
+  difficulty?: "Easy" | "Medium" | "Hard";
+  answerLanguage?: "CSharp" | "SQL";
+  testCaseCount?: number;
   points?: number;
 };
