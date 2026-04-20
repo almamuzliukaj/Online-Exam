@@ -1,0 +1,771 @@
+import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
+
+export const LANGUAGE_STORAGE_KEY = "app-language";
+
+const resources = {
+  en: {
+    translation: {
+      common: {
+        appName: "Online Exam",
+        language: "Language",
+        english: "English",
+        albanian: "Albanian",
+        logout: "Logout",
+        dashboard: "Dashboard",
+        exams: "Exams",
+        users: "Manage Users",
+        loading: "Loading...",
+        error: "Error",
+        cancel: "Cancel",
+        back: "Back",
+        signedIn: "Signed in",
+        unknownUser: "Unknown user",
+        guest: "Guest",
+        workspace: "Workspace",
+        operationalNote: "Operational note",
+        operationalNoteText: "This workspace is structured for role-based academic operations and secure exam delivery.",
+        facultyWorkspace: "Faculty Operations Suite",
+        departmentWorkspace: "Department workspace",
+        examOperationsPlatform: "Exam operations platform",
+        academicCatalog: "Academic catalog",
+        enterWorkspace: "Enter workspace",
+        text: "Text",
+        code: "Code"
+      },
+      login: {
+        title: "Run academic assessment with clarity, structure, and control.",
+        text: "Built for departments that need role-based onboarding, exam preparation, question bank workflows, and a clean student-facing experience.",
+        signIn: "Sign in",
+        signInText: "Access your role-based workspace. Account provisioning is handled by the administrator.",
+        emailLabel: "Email address",
+        passwordLabel: "Password",
+        emailPlaceholder: "name@faculty.edu",
+        passwordPlaceholder: "Enter your password",
+        show: "Show",
+        hide: "Hide",
+        signingIn: "Signing in...",
+        loginFailed: "Login failed",
+        presets: {
+          admin: "Admin demo",
+          professor: "Professor demo",
+          student: "Student demo"
+        },
+        features: {
+          adminTitle: "Admin operations",
+          adminText: "User onboarding, imports, staff management, and semester control.",
+          teachingTitle: "Teaching workflows",
+          teachingText: "Question authoring, exam setup, publishing, and grading readiness.",
+          studentTitle: "Student delivery",
+          studentText: "Focused access to eligible exams, results, and carry-over opportunities."
+        }
+      },
+      dashboard: {
+        loading: "Loading workspace...",
+        error: "Unable to load dashboard.",
+        title: "Operational overview",
+        subtitle: "A role-based workspace designed for real academic operations, exam preparation, and secure assessment delivery.",
+        examWorkspace: "Exam workspace",
+        academicSetup: "Academic setup",
+        userManagement: "User management",
+        badges: {
+          Admin: "Admin dashboard",
+          Professor: "Professor dashboard",
+          Assistant: "Assistant dashboard",
+          Student: "Student dashboard"
+        }
+      },
+      examsList: {
+        loading: "Loading exams...",
+        error: "Failed to load exam data.",
+        userError: "Unable to load user profile.",
+        badge: "Exam workspace",
+        title: "Exams",
+        subtitle: "Review current assessments, drafts, and publishing readiness in a cleaner operational view.",
+        create: "Create exam",
+        total: "Total exams",
+        published: "Published",
+        draft: "Draft",
+        loadingRecords: "Loading exam records...",
+        emptyTitle: "No exams are available yet.",
+        emptyText: "Once faculty workflows are connected, current, scheduled, and published exams will appear here.",
+        noDescription: "No description has been provided for this assessment yet.",
+        openHint: "Open the exam to manage questions, review details, and continue the workflow.",
+        open: "Open"
+      },
+      examCreate: {
+        loading: "Loading creation workspace...",
+        userError: "Unable to load user profile.",
+        error: "Unable to create the exam right now.",
+        badge: "Exam authoring",
+        title: "Create exam",
+        subtitle: "Set the assessment foundation first. Question selection, scheduling, and publishing will build on this record.",
+        configuration: "Exam configuration",
+        titleLabel: "Title",
+        durationLabel: "Duration in minutes",
+        descriptionLabel: "Description",
+        descriptionPlaceholder: "Describe scope, instructions, allowed materials, and intended delivery notes.",
+        creating: "Creating...",
+        create: "Create exam"
+      },
+      examDetails: {
+        loading: "Loading exam details...",
+        error: "Failed to load exam details.",
+        userError: "Unable to load user profile.",
+        badge: "Exam details",
+        titleFallback: "Exam detail",
+        subtitleFallback: "Inspect the exam structure, question coverage, and next authoring actions.",
+        backToExams: "Back to exams",
+        addQuestion: "Add question",
+        loadingStructure: "Loading exam structure...",
+        status: "Status",
+        duration: "Duration",
+        questions: "Questions",
+        coverage: "Question coverage",
+        progress: "Current authoring progress for this assessment",
+        noQuestionsTitle: "No questions have been added yet.",
+        noQuestionsText: "Add the first question to start building the exam.",
+        type: "Type",
+        points: "Points"
+      },
+      questionCreate: {
+        loading: "Loading question editor...",
+        loadExamError: "Failed to load exam.",
+        userError: "Unable to load user profile.",
+        saveError: "Failed to add question.",
+        badge: "Question authoring",
+        title: "Add question",
+        subtitleLoading: "Loading exam context...",
+        subtitle: "Create a new question for {{title}}.",
+        backToExam: "Back to exam",
+        content: "Question content",
+        prompt: "Prompt",
+        promptPlaceholder: "Write the question prompt here.",
+        type: "Type",
+        points: "Points",
+        saving: "Saving...",
+        save: "Save question"
+      },
+      adminUsers: {
+        loading: "Loading administration workspace...",
+        userError: "Unable to load user profile.",
+        loadUsersError: "Failed to load users.",
+        createError: "Failed to create user.",
+        createSuccess: "User created successfully.",
+        previewIssue: "Some CSV rows need attention before import.",
+        fixCsv: "Fix CSV validation issues before importing.",
+        importError: "Failed to import users.",
+        importSuccess: "Import completed. {{count}} users added.",
+        updateSuccess: "User updated successfully.",
+        updateError: "Failed to update user.",
+        statusError: "Failed to update user status.",
+        statusSuccess: "User {{action}} successfully.",
+        resetMissing: "Enter a new password before resetting.",
+        resetSuccess: "Password reset successfully.",
+        resetError: "Failed to reset password.",
+        badge: "Administration",
+        title: "User management",
+        subtitle: "Provision students, professors, and assistants with an interface designed for real departmental operations.",
+        backToOverview: "Back to overview",
+        createUser: "Create user",
+        fullName: "Full name",
+        email: "Email",
+        role: "Role",
+        temporaryPassword: "Temporary password",
+        activeAccount: "Active account",
+        creating: "Creating...",
+        createButton: "Create user",
+        bulkImport: "Bulk import",
+        defaultPassword: "Default password",
+        defaultPasswordPlaceholder: "Used when a row password is empty",
+        generatePasswords: "Generate passwords when none are provided",
+        csvRows: "CSV rows",
+        validateFile: "Validate file",
+        importing: "Importing...",
+        importUsers: "Import users",
+        importPreview: "Import preview",
+        previewHint: "Validate the CSV content to preview rows before import.",
+        line: "Line",
+        status: "Status",
+        validation: "Validation",
+        ready: "Ready",
+        importSummary: "Import summary",
+        requested: "Requested",
+        imported: "Imported",
+        failed: "Failed",
+        importedAccounts: "Imported accounts",
+        failedRows: "Failed rows",
+        userDirectory: "User directory",
+        searchPlaceholder: "Search by full name or email",
+        allRoles: "All roles",
+        allStatuses: "All statuses",
+        active: "Active",
+        inactive: "Inactive",
+        activated: "activated",
+        deactivated: "deactivated",
+        loadingRecords: "Loading user records...",
+        created: "Created",
+        actions: "Actions",
+        edit: "Edit",
+        deactivate: "Deactivate",
+        activate: "Activate",
+        newPassword: "New password",
+        reset: "Reset",
+        save: "Save",
+        roles: {
+          Student: "Student",
+          Professor: "Professor",
+          Assistant: "Assistant",
+          Admin: "Admin"
+        },
+        csvErrors: {
+          required: "FullName, Email, and Role are required.",
+          invalidRole: "Role must be Student, Professor, Assistant, or Admin.",
+          duplicate: "Duplicate email in CSV.",
+          weakPassword: "Password must be at least 8 characters and include upper, lower, and number."
+        }
+      },
+      shell: {
+        nav: {
+          adminOverview: "Overview",
+          adminAcademic: "Academic",
+          adminUsers: "Users",
+          adminExams: "Exams",
+          professorOverview: "Overview",
+          professorExams: "My exams",
+          professorCreateExam: "Create exam",
+          assistantOverview: "Overview",
+          assistantExams: "Assigned exams",
+          studentOverview: "Overview",
+          studentExams: "Available exams"
+        }
+      },
+      rolePanels: {
+        admin: {
+          badge: "Administration",
+          heroTitle: "Control the academic cycle from one operational workspace.",
+          heroText: "Manage user onboarding, monitor platform readiness, and keep semesters, staff assignments, and exam operations aligned.",
+          stats: {
+            activeUsers: { label: "Active users", meta: "+12 this week" },
+            offerings: { label: "Course offerings", meta: "Across 6 semesters" },
+            imports: { label: "Pending imports", meta: "Require review" },
+            alerts: { label: "Policy alerts", meta: "Need admin action" }
+          },
+          quickActions: {
+            academicSetup: "Academic setup",
+            manageUsers: "Manage users",
+            reviewExams: "Review exams"
+          },
+          sections: {
+            priorities: {
+              title: "Operational priorities",
+              items: [
+                "Review newly imported students before semester activation.",
+                "Confirm professor and assistant assignments for course offerings.",
+                "Validate inactive accounts before the next exam window."
+              ]
+            },
+            nextMoves: {
+              title: "Recommended next moves",
+              items: [
+                "Add enrollment workflows so students map to current and carry-over subjects.",
+                "Connect role dashboards to real aggregate APIs.",
+                "Finalize exam publishing and monitoring flows."
+              ]
+            }
+          }
+        },
+        professor: {
+          badge: "Professor Workspace",
+          heroTitle: "Design exams, manage question quality, and supervise assessment readiness.",
+          heroText: "Your dashboard groups teaching responsibilities, exam creation tasks, and grading priorities in one place.",
+          stats: {
+            assignedCourses: { label: "Assigned courses", meta: "Across Years 1-3" },
+            draftExams: { label: "Draft exams", meta: "Awaiting completion" },
+            questionBank: { label: "Question bank", meta: "Tagged by difficulty" },
+            grading: { label: "Pending grading", meta: "Assistant-linked included" }
+          },
+          quickActions: {
+            openExams: "Open exam workspace",
+            createExam: "Create exam"
+          },
+          sections: {
+            focus: {
+              title: "This week's focus",
+              items: [
+                "Build exams from approved question banks per semester.",
+                "Review assistant-created assessments and their grading progress.",
+                "Prepare publish-ready schedules for active exam windows."
+              ]
+            },
+            courses: {
+              title: "Course organization",
+              items: [
+                "Year 1: Programming Fundamentals, Database Systems",
+                "Year 2: Algorithms, Operating Systems",
+                "Year 3: Software Engineering"
+              ]
+            }
+          }
+        },
+        assistant: {
+          badge: "Assistant Workspace",
+          heroTitle: "Support course delivery, exam execution, and grading coordination.",
+          heroText: "Use this area to track assigned offerings, exam support tasks, and grading responsibilities under your professor's courses.",
+          stats: {
+            assignedOfferings: { label: "Assigned offerings", meta: "Current semester" },
+            supportExams: { label: "Support exams", meta: "Including live sessions" },
+            reviewTasks: { label: "Review tasks", meta: "Short-answer grading" },
+            activeSessions: { label: "Active sessions", meta: "Monitoring enabled soon" }
+          },
+          quickActions: {
+            assignedExams: "Open assigned exams"
+          },
+          sections: {
+            responsibilities: {
+              title: "Responsibilities",
+              items: [
+                "Support exam preparation and monitor assigned assessments.",
+                "Review student outcomes for exams created under your course offerings.",
+                "Escalate publishing and unlock decisions to the professor."
+              ]
+            },
+            notes: {
+              title: "Operational notes",
+              items: [
+                "Assistant dashboards should expose grades and support actions, not global exam ownership.",
+                "Live monitoring and violation logs will appear here once the proctoring module is implemented."
+              ]
+            }
+          }
+        },
+        student: {
+          badge: "Student Workspace",
+          heroTitle: "Track eligible exams, upcoming deadlines, and your result history.",
+          heroText: "Your dashboard is focused on what you can actually act on: active-semester exams, carry-over opportunities, and published outcomes.",
+          stats: {
+            eligibleExams: { label: "Eligible exams", meta: "Current visibility rules" },
+            upcoming: { label: "Upcoming windows", meta: "Next 7 days" },
+            results: { label: "Published results", meta: "Ready to download" },
+            carryOver: { label: "Carry-over exams", meta: "Professor unlock required" }
+          },
+          quickActions: {
+            viewExams: "View exams"
+          },
+          sections: {
+            visible: {
+              title: "What you should see here",
+              items: [
+                "Only subjects from your active semester.",
+                "Carry-over exams only when explicitly unlocked.",
+                "Published results after staff approval."
+              ]
+            },
+            security: {
+              title: "Security expectations",
+              items: [
+                "Exam access will later include QR entry and focused-session rules.",
+                "Attempt status, timer, and result downloads will appear as the student flow is completed."
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  sq: {
+    translation: {
+      common: {
+        appName: "Online Exam",
+        language: "Gjuha",
+        english: "Anglisht",
+        albanian: "Shqip",
+        logout: "Dil",
+        dashboard: "Ballina",
+        exams: "Provimet",
+        users: "Menaxho përdoruesit",
+        loading: "Duke u ngarkuar...",
+        error: "Gabim",
+        cancel: "Anulo",
+        back: "Kthehu",
+        signedIn: "I kyçur",
+        unknownUser: "Përdorues i panjohur",
+        guest: "Vizitor",
+        workspace: "Hapësira e punës",
+        operationalNote: "Shënim operacional",
+        operationalNoteText: "Kjo hapësirë është ndërtuar për operacione akademike me role dhe shpërndarje të sigurt të provimeve.",
+        facultyWorkspace: "Paketa operative e fakultetit",
+        departmentWorkspace: "Hapësira e departamentit",
+        examOperationsPlatform: "Platforma e operimit të provimeve",
+        academicCatalog: "Katalogu akademik",
+        enterWorkspace: "Hyr në sistem",
+        text: "Tekst",
+        code: "Kod"
+      },
+      login: {
+        title: "Menaxho vlerësimin akademik me qartësi, strukturë dhe kontroll.",
+        text: "Ndërtuar për departamente që kërkojnë onboarding me role, përgatitje provimesh, rrjedha për bankën e pyetjeve dhe një përvojë të pastër për studentin.",
+        signIn: "Kyçu",
+        signInText: "Hyr në hapësirën tënde sipas rolit. Krijimi i llogarive menaxhohet nga administratori.",
+        emailLabel: "Adresa e email-it",
+        passwordLabel: "Fjalëkalimi",
+        emailPlaceholder: "emri@fakulteti.edu",
+        passwordPlaceholder: "Shkruaj fjalëkalimin",
+        show: "Shfaq",
+        hide: "Fsheh",
+        signingIn: "Duke u kyçur...",
+        loginFailed: "Kyçja dështoi",
+        presets: {
+          admin: "Demo admin",
+          professor: "Demo profesor",
+          student: "Demo student"
+        },
+        features: {
+          adminTitle: "Operacione admini",
+          adminText: "Onboarding i përdoruesve, importe, menaxhim i stafit dhe kontroll i semestrit.",
+          teachingTitle: "Rrjedha mësimore",
+          teachingText: "Krijim pyetjesh, konfigurim provimesh, publikim dhe gatishmëri për vlerësim.",
+          studentTitle: "Përvoja e studentit",
+          studentText: "Qasje e fokusuar te provimet e lejuara, rezultatet dhe mundësitë carry-over."
+        }
+      },
+      dashboard: {
+        loading: "Duke u ngarkuar hapësira...",
+        error: "Ballina nuk mund të ngarkohet.",
+        title: "Pasqyra operative",
+        subtitle: "Një hapësirë me role për operacione reale akademike, përgatitje provimesh dhe zhvillim të sigurt të vlerësimit.",
+        examWorkspace: "Hapësira e provimeve",
+        academicSetup: "Konfigurimi akademik",
+        userManagement: "Menaxhimi i përdoruesve",
+        badges: {
+          Admin: "Paneli i adminit",
+          Professor: "Paneli i profesorit",
+          Assistant: "Paneli i asistentit",
+          Student: "Paneli i studentit"
+        }
+      },
+      examsList: {
+        loading: "Duke u ngarkuar provimet...",
+        error: "Të dhënat e provimeve nuk u ngarkuan.",
+        userError: "Profili i përdoruesit nuk mund të ngarkohet.",
+        badge: "Hapësira e provimeve",
+        title: "Provimet",
+        subtitle: "Shiko vlerësimet aktuale, draftet dhe gatishmërinë për publikim në një pamje më të pastër operative.",
+        create: "Krijo provim",
+        total: "Totali i provimeve",
+        published: "Publikuara",
+        draft: "Draft",
+        loadingRecords: "Duke u ngarkuar regjistrat e provimeve...",
+        emptyTitle: "Ende nuk ka provime.",
+        emptyText: "Pasi të lidhen rrjedhat e fakultetit, këtu do të shfaqen provimet aktuale, të planifikuara dhe të publikuara.",
+        noDescription: "Për këtë provim ende nuk është dhënë përshkrim.",
+        openHint: "Hap provimin për të menaxhuar pyetjet, detajet dhe për të vazhduar rrjedhën e punës.",
+        open: "Hap"
+      },
+      examCreate: {
+        loading: "Duke u ngarkuar hapësira e krijimit...",
+        userError: "Profili i përdoruesit nuk mund të ngarkohet.",
+        error: "Për momentin provimi nuk mund të krijohet.",
+        badge: "Krijimi i provimit",
+        title: "Krijo provim",
+        subtitle: "Vendos fillimisht bazën e vlerësimit. Përzgjedhja e pyetjeve, orari dhe publikimi do të ndërtohen mbi këtë regjistër.",
+        configuration: "Konfigurimi i provimit",
+        titleLabel: "Titulli",
+        durationLabel: "Kohëzgjatja në minuta",
+        descriptionLabel: "Përshkrimi",
+        descriptionPlaceholder: "Përshkruaj përmbajtjen, udhëzimet, materialet e lejuara dhe shënimet e zhvillimit.",
+        creating: "Duke u krijuar...",
+        create: "Krijo provim"
+      },
+      examDetails: {
+        loading: "Duke u ngarkuar detajet e provimit...",
+        error: "Detajet e provimit nuk u ngarkuan.",
+        userError: "Profili i përdoruesit nuk mund të ngarkohet.",
+        badge: "Detajet e provimit",
+        titleFallback: "Detaji i provimit",
+        subtitleFallback: "Shiko strukturën e provimit, mbulimin e pyetjeve dhe hapat e ardhshëm të authoring-ut.",
+        backToExams: "Kthehu te provimet",
+        addQuestion: "Shto pyetje",
+        loadingStructure: "Duke u ngarkuar struktura e provimit...",
+        status: "Statusi",
+        duration: "Kohëzgjatja",
+        questions: "Pyetjet",
+        coverage: "Mbulimi i pyetjeve",
+        progress: "Progresi aktual i authoring-ut për këtë vlerësim",
+        noQuestionsTitle: "Ende nuk është shtuar asnjë pyetje.",
+        noQuestionsText: "Shto pyetjen e parë për të nisur ndërtimin e provimit.",
+        type: "Lloji",
+        points: "Pikët"
+      },
+      questionCreate: {
+        loading: "Duke u ngarkuar edituesi i pyetjes...",
+        loadExamError: "Provimi nuk u ngarkua.",
+        userError: "Profili i përdoruesit nuk mund të ngarkohet.",
+        saveError: "Pyetja nuk u shtua.",
+        badge: "Authoring i pyetjeve",
+        title: "Shto pyetje",
+        subtitleLoading: "Duke u ngarkuar konteksti i provimit...",
+        subtitle: "Krijo një pyetje të re për {{title}}.",
+        backToExam: "Kthehu te provimi",
+        content: "Përmbajtja e pyetjes",
+        prompt: "Prompt-i",
+        promptPlaceholder: "Shkruaj këtu përmbajtjen e pyetjes.",
+        type: "Lloji",
+        points: "Pikët",
+        saving: "Duke u ruajtur...",
+        save: "Ruaj pyetjen"
+      },
+      adminUsers: {
+        loading: "Duke u ngarkuar hapësira e administrimit...",
+        userError: "Profili i përdoruesit nuk mund të ngarkohet.",
+        loadUsersError: "Përdoruesit nuk u ngarkuan.",
+        createError: "Përdoruesi nuk u krijua.",
+        createSuccess: "Përdoruesi u krijua me sukses.",
+        previewIssue: "Disa rreshta të CSV kërkojnë vëmendje para importit.",
+        fixCsv: "Rregullo problemet e CSV para importit.",
+        importError: "Importi i përdoruesve dështoi.",
+        importSuccess: "Importi përfundoi. U shtuan {{count}} përdorues.",
+        updateSuccess: "Përdoruesi u përditësua me sukses.",
+        updateError: "Përdoruesi nuk u përditësua.",
+        statusError: "Statusi i përdoruesit nuk u ndryshua.",
+        statusSuccess: "Përdoruesi u {{action}} me sukses.",
+        resetMissing: "Shkruaj fjalëkalimin e ri para reset-it.",
+        resetSuccess: "Fjalëkalimi u resetua me sukses.",
+        resetError: "Reset-i i fjalëkalimit dështoi.",
+        badge: "Administrim",
+        title: "Menaxhimi i përdoruesve",
+        subtitle: "Menaxho studentët, profesorët dhe asistentët me një ndërfaqe të ndërtuar për operacione reale departamenti.",
+        backToOverview: "Kthehu te përmbledhja",
+        createUser: "Krijo përdorues",
+        fullName: "Emri i plotë",
+        email: "Email",
+        role: "Roli",
+        temporaryPassword: "Fjalëkalimi i përkohshëm",
+        activeAccount: "Llogari aktive",
+        creating: "Duke u krijuar...",
+        createButton: "Krijo përdorues",
+        bulkImport: "Import masiv",
+        defaultPassword: "Fjalëkalimi bazë",
+        defaultPasswordPlaceholder: "Përdoret kur rreshti nuk ka fjalëkalim",
+        generatePasswords: "Gjenero fjalëkalime kur mungojnë",
+        csvRows: "Rreshtat CSV",
+        validateFile: "Valido file-in",
+        importing: "Duke importuar...",
+        importUsers: "Importo përdorues",
+        importPreview: "Parapamja e importit",
+        previewHint: "Valido përmbajtjen CSV për të parë rreshtat para importit.",
+        line: "Rreshti",
+        status: "Statusi",
+        validation: "Validimi",
+        ready: "Gati",
+        importSummary: "Përmbledhja e importit",
+        requested: "Kërkuara",
+        imported: "Importuara",
+        failed: "Dështuara",
+        importedAccounts: "Llogaritë e importuara",
+        failedRows: "Rreshtat e dështuar",
+        userDirectory: "Direktoria e përdoruesve",
+        searchPlaceholder: "Kërko sipas emrit ose email-it",
+        allRoles: "Të gjitha rolet",
+        allStatuses: "Të gjitha statuset",
+        active: "Aktiv",
+        inactive: "Joaktiv",
+        activated: "aktivizua",
+        deactivated: "çaktivizua",
+        loadingRecords: "Duke u ngarkuar regjistrat e përdoruesve...",
+        created: "Krijuar",
+        actions: "Veprimet",
+        edit: "Ndrysho",
+        deactivate: "Çaktivizo",
+        activate: "Aktivizo",
+        newPassword: "Fjalëkalim i ri",
+        reset: "Reset",
+        save: "Ruaj",
+        roles: {
+          Student: "Student",
+          Professor: "Profesor",
+          Assistant: "Asistent",
+          Admin: "Admin"
+        },
+        csvErrors: {
+          required: "FullName, Email dhe Role janë të detyrueshme.",
+          invalidRole: "Roli duhet të jetë Student, Professor, Assistant ose Admin.",
+          duplicate: "Email i dyfishtë në CSV.",
+          weakPassword: "Fjalëkalimi duhet të ketë të paktën 8 karaktere dhe të përfshijë shkronjë të madhe, të vogël dhe numër."
+        }
+      },
+      shell: {
+        nav: {
+          adminOverview: "Përmbledhje",
+          adminAcademic: "Akademike",
+          adminUsers: "Përdoruesit",
+          adminExams: "Provimet",
+          professorOverview: "Përmbledhje",
+          professorExams: "Provimet e mia",
+          professorCreateExam: "Krijo provim",
+          assistantOverview: "Përmbledhje",
+          assistantExams: "Provimet e caktuara",
+          studentOverview: "Përmbledhje",
+          studentExams: "Provimet e lejuara"
+        }
+      },
+      rolePanels: {
+        admin: {
+          badge: "Administrim",
+          heroTitle: "Kontrollo ciklin akademik nga një hapësirë e vetme operative.",
+          heroText: "Menaxho onboarding-un e përdoruesve, monitoro gatishmërinë e platformës dhe mbaj të sinkronizuara semestrat, caktimet e stafit dhe operacionet e provimeve.",
+          stats: {
+            activeUsers: { label: "Përdorues aktivë", meta: "+12 këtë javë" },
+            offerings: { label: "Ofrime lëndësh", meta: "Në 6 semestra" },
+            imports: { label: "Importe në pritje", meta: "Kërkojnë kontroll" },
+            alerts: { label: "Njoftime politike", meta: "Kërkojnë veprim admini" }
+          },
+          quickActions: {
+            academicSetup: "Konfigurimi akademik",
+            manageUsers: "Menaxho përdoruesit",
+            reviewExams: "Shiko provimet"
+          },
+          sections: {
+            priorities: {
+              title: "Prioritetet operative",
+              items: [
+                "Kontrollo studentët e importuar para aktivizimit të semestrit.",
+                "Konfirmo caktimet e profesorëve dhe asistentëve për ofrimet e lëndëve.",
+                "Verifiko llogaritë joaktive para dritares së ardhshme të provimeve."
+              ]
+            },
+            nextMoves: {
+              title: "Hapat e rekomanduar",
+              items: [
+                "Shto rrjedhat e regjistrimit që studentët të lidhen me lëndët aktuale dhe carry-over.",
+                "Lidhi panelet sipas roleve me API aggregate reale.",
+                "Finalizo publikimin e provimeve dhe rrjedhat e monitorimit."
+              ]
+            }
+          }
+        },
+        professor: {
+          badge: "Hapësira e profesorit",
+          heroTitle: "Dizenjo provime, menaxho cilësinë e pyetjeve dhe mbikëqyr gatishmërinë e vlerësimit.",
+          heroText: "Paneli yt grupon përgjegjësitë mësimore, detyrat për krijimin e provimeve dhe prioritetet e notimit në një vend.",
+          stats: {
+            assignedCourses: { label: "Lëndë të caktuara", meta: "Në vitet 1-3" },
+            draftExams: { label: "Provime draft", meta: "Në pritje të plotësimit" },
+            questionBank: { label: "Banka e pyetjeve", meta: "Të etiketuar sipas vështirësisë" },
+            grading: { label: "Notime në pritje", meta: "Përfshirë ato të lidhura me asistentë" }
+          },
+          quickActions: {
+            openExams: "Hape hapësirën e provimeve",
+            createExam: "Krijo provim"
+          },
+          sections: {
+            focus: {
+              title: "Fokusi i kësaj jave",
+              items: [
+                "Ndërto provime nga bankat e aprovuara të pyetjeve për semestër.",
+                "Kontrollo provimet e krijuara nga asistentët dhe progresin e tyre në notim.",
+                "Përgatit oraret gati për publikim për dritaret aktive të provimeve."
+              ]
+            },
+            courses: {
+              title: "Organizimi i lëndëve",
+              items: [
+                "Viti 1: Bazat e Programimit, Sisteme të Databazave",
+                "Viti 2: Algoritme, Sisteme Operative",
+                "Viti 3: Inxhinieri Softuerike"
+              ]
+            }
+          }
+        },
+        assistant: {
+          badge: "Hapësira e asistentit",
+          heroTitle: "Mbështet zhvillimin e lëndës, ekzekutimin e provimit dhe koordinimin e notimit.",
+          heroText: "Përdor këtë zonë për të ndjekur ofrimet e caktuara, detyrat mbështetëse të provimeve dhe përgjegjësitë e notimit nën lëndët e profesorit.",
+          stats: {
+            assignedOfferings: { label: "Ofrime të caktuara", meta: "Semestri aktual" },
+            supportExams: { label: "Provime mbështetëse", meta: "Përfshirë sesionet live" },
+            reviewTasks: { label: "Detyra rishikimi", meta: "Notim i pyetjeve me përgjigje të shkurtra" },
+            activeSessions: { label: "Sesione aktive", meta: "Monitorimi vjen së shpejti" }
+          },
+          quickActions: {
+            assignedExams: "Hap provimet e caktuara"
+          },
+          sections: {
+            responsibilities: {
+              title: "Përgjegjësitë",
+              items: [
+                "Mbështet përgatitjen e provimeve dhe monitoro vlerësimet e caktuara.",
+                "Rishiko rezultatet e studentëve për provimet e krijuara nën ofrimet e lëndëve tuaja.",
+                "Kaloi te profesori vendimet për publikim dhe unlock."
+              ]
+            },
+            notes: {
+              title: "Shënime operative",
+              items: [
+                "Panelet e asistentit duhet të ekspozojnë nota dhe veprime mbështetëse, jo pronësi globale të provimeve.",
+                "Monitorimi live dhe logjet e shkeljeve do të shfaqen këtu pasi të implementohet moduli i proctoring."
+              ]
+            }
+          }
+        },
+        student: {
+          badge: "Hapësira e studentit",
+          heroTitle: "Ndiq provimet e lejuara, afatet e ardhshme dhe historikun e rezultateve.",
+          heroText: "Paneli yt fokusohet vetëm te ajo që mund të veprosh realisht: provimet e semestrit aktiv, mundësitë carry-over dhe rezultatet e publikuara.",
+          stats: {
+            eligibleExams: { label: "Provime të lejuara", meta: "Sipas rregullave aktuale" },
+            upcoming: { label: "Dritare të ardhshme", meta: "7 ditët e ardhshme" },
+            results: { label: "Rezultate të publikuara", meta: "Gati për shkarkim" },
+            carryOver: { label: "Provime carry-over", meta: "Kërkohet unlock nga profesori" }
+          },
+          quickActions: {
+            viewExams: "Shiko provimet"
+          },
+          sections: {
+            visible: {
+              title: "Çfarë duhet të shohësh këtu",
+              items: [
+                "Vetëm lëndët nga semestri yt aktiv.",
+                "Provime carry-over vetëm kur janë zhbllokuar shprehimisht.",
+                "Rezultate të publikuara pas aprovimit të stafit."
+              ]
+            },
+            security: {
+              title: "Pritshmëritë e sigurisë",
+              items: [
+                "Qasja në provim do të përfshijë më vonë hyrje me QR dhe rregulla për sesion të fokusuar.",
+                "Statusi i tentimit, kohëmatësi dhe shkarkimet e rezultateve do të shfaqen kur rrjedha e studentit të përfundohet."
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+};
+
+function resolveInitialLanguage() {
+  const savedLanguage = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+  if (savedLanguage === "en" || savedLanguage === "sq") {
+    return savedLanguage;
+  }
+
+  return navigator.language?.toLowerCase().startsWith("sq") ? "sq" : "en";
+}
+
+i18n
+  .use(initReactI18next)
+  .init({
+    resources,
+    lng: resolveInitialLanguage(),
+    fallbackLng: "en",
+    interpolation: {
+      escapeValue: false
+    }
+  });
+
+i18n.on("languageChanged", (language) => {
+  localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+});
+
+export default i18n;

@@ -4,8 +4,10 @@ import { canManageExams } from "../../lib/permissions";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
 import AppShell from "../../components/AppShell";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function ExamDetailsPage() {
+  const { t } = useTranslation();
   const { examId } = useParams();
   const { user, loading: userLoading, error: userError } = useCurrentUser();
   const [exam, setExam] = useState(null);
@@ -27,7 +29,7 @@ export default function ExamDetailsPage() {
         setExam(examData);
         setQuestions(Array.isArray(questionData) ? questionData : []);
       } catch {
-        if (active) setError("Failed to load exam details.");
+        if (active) setError(t("examDetails.error"));
       } finally {
         if (active) setLoading(false);
       }
@@ -36,14 +38,14 @@ export default function ExamDetailsPage() {
     return () => {
       active = false;
     };
-  }, [examId]);
+  }, [examId, t]);
 
   if (userLoading) {
-    return <div className="pageState">Loading exam details...</div>;
+    return <div className="pageState">{t("examDetails.loading")}</div>;
   }
 
   if (!user) {
-    return <div className="pageState">{userError || "Unable to load user profile."}</div>;
+    return <div className="pageState">{userError || t("examDetails.userError")}</div>;
   }
 
   const canEdit = canManageExams(user.role);
@@ -51,13 +53,13 @@ export default function ExamDetailsPage() {
   return (
     <AppShell
       user={user}
-      badge="Exam details"
-      title={exam?.title || "Exam detail"}
-      subtitle={exam?.description || "Inspect the exam structure, question coverage, and next authoring actions."}
+      badge={t("examDetails.badge")}
+      title={exam?.title || t("examDetails.titleFallback")}
+      subtitle={exam?.description || t("examDetails.subtitleFallback")}
       actions={
         <>
-          <Link className="btn" to="/exams">Back to exams</Link>
-          {canEdit && examId ? <Link className="btn btnPrimary" to={`/exams/${examId}/questions/new`}>Add question</Link> : null}
+          <Link className="btn" to="/exams">{t("examDetails.backToExams")}</Link>
+          {canEdit && examId ? <Link className="btn btnPrimary" to={`/exams/${examId}/questions/new`}>{t("examDetails.addQuestion")}</Link> : null}
         </>
       }
     >
@@ -65,34 +67,34 @@ export default function ExamDetailsPage() {
         {error ? <div className="alert">{error}</div> : null}
 
         {loading ? (
-          <div className="pageStateCard">Loading exam structure...</div>
+          <div className="pageStateCard">{t("examDetails.loadingStructure")}</div>
         ) : (
           <>
             <section className="summaryStrip">
               <article className="summaryCard">
-                <span className="summaryLabel">Status</span>
-                <strong>{exam?.isPublished ? "Published" : "Draft"}</strong>
+                <span className="summaryLabel">{t("examDetails.status")}</span>
+                <strong>{exam?.isPublished ? t("examsList.published") : t("examsList.draft")}</strong>
               </article>
               <article className="summaryCard">
-                <span className="summaryLabel">Duration</span>
+                <span className="summaryLabel">{t("examDetails.duration")}</span>
                 <strong>{exam?.durationMinutes || 60} min</strong>
               </article>
               <article className="summaryCard">
-                <span className="summaryLabel">Questions</span>
+                <span className="summaryLabel">{t("examDetails.questions")}</span>
                 <strong>{questions.length}</strong>
               </article>
             </section>
 
             <section className="surfaceCard">
               <div className="sectionHeader">
-                <h3>Question coverage</h3>
-                <span className="small">Current authoring progress for this assessment</span>
+                <h3>{t("examDetails.coverage")}</h3>
+                <span className="small">{t("examDetails.progress")}</span>
               </div>
               <div className="sectionBody">
                 {questions.length === 0 ? (
                   <div className="emptyState">
-                    <p>No questions have been added yet.</p>
-                    <p>Add the first question to start building the exam.</p>
+                    <p>{t("examDetails.noQuestionsTitle")}</p>
+                    <p>{t("examDetails.noQuestionsText")}</p>
                   </div>
                 ) : (
                   <div className="questionList">
@@ -102,8 +104,8 @@ export default function ExamDetailsPage() {
                         <div className="questionBody">
                           <strong>{question.text || "(no text)"}</strong>
                           <div className="questionMeta">
-                            <span>{question.type ? `Type: ${question.type}` : "Type: -"}</span>
-                            <span>{typeof question.points === "number" ? `Points: ${question.points}` : "Points: -"}</span>
+                            <span>{question.type ? `${t("examDetails.type")}: ${question.type}` : `${t("examDetails.type")}: -`}</span>
+                            <span>{typeof question.points === "number" ? `${t("examDetails.points")}: ${question.points}` : `${t("examDetails.points")}: -`}</span>
                           </div>
                         </div>
                       </article>

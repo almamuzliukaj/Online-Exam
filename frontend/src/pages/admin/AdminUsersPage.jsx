@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import AppShell from "../../components/AppShell";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
 import {
@@ -26,6 +27,7 @@ const initialCreateForm = {
 };
 
 export default function AdminUsersPage() {
+  const { t } = useTranslation();
   const { user, loading: userLoading, error: userError } = useCurrentUser();
   const [users, setUsers] = useState([]);
   const [filters, setFilters] = useState({ search: "", role: "", status: "all" });
@@ -60,11 +62,11 @@ export default function AdminUsersPage() {
       const data = await listUsers(queryFilters);
       setUsers(Array.isArray(data) ? data : []);
     } catch (error) {
-      setPageError(readError(error, "Failed to load users."));
+      setPageError(readError(error, t("adminUsers.loadUsersError")));
     } finally {
       setLoadingUsers(false);
     }
-  }, [queryFilters]);
+  }, [queryFilters, t]);
 
   useEffect(() => {
     loadUsers();
@@ -78,28 +80,28 @@ export default function AdminUsersPage() {
       setPageSuccess("");
       await createUser(createForm);
       setCreateForm(initialCreateForm);
-      setPageSuccess("User created successfully.");
+      setPageSuccess(t("adminUsers.createSuccess"));
       await loadUsers();
     } catch (error) {
-      setPageError(readError(error, "Failed to create user."));
+      setPageError(readError(error, t("adminUsers.createError")));
     } finally {
       setCreating(false);
     }
   }
 
   function handlePreviewImport() {
-    const { rows, errors } = parseCsvRows(importText);
+    const { rows, errors } = parseCsvRows(importText, t);
     setImportPreview(rows.map((row) => ({ ...row, error: errors[row.__line] || "" })));
     setImportResult(null);
-    setPageError(Object.keys(errors).length > 0 ? "Some CSV rows need attention before import." : "");
+    setPageError(Object.keys(errors).length > 0 ? t("adminUsers.previewIssue") : "");
   }
 
   async function handleImportUsers() {
     try {
-      const { rows, errors } = parseCsvRows(importText);
+      const { rows, errors } = parseCsvRows(importText, t);
       setImportPreview(rows.map((row) => ({ ...row, error: errors[row.__line] || "" })));
       if (Object.keys(errors).length > 0) {
-        setPageError("Fix CSV validation issues before importing.");
+        setPageError(t("adminUsers.fixCsv"));
         return;
       }
 
@@ -119,10 +121,10 @@ export default function AdminUsersPage() {
 
       const result = await importUsers(payload);
       setImportResult(result);
-      setPageSuccess(`Import completed. ${result.imported} users added.`);
+      setPageSuccess(t("adminUsers.importSuccess", { count: result.imported }));
       await loadUsers();
     } catch (error) {
-      setPageError(readError(error, "Failed to import users."));
+      setPageError(readError(error, t("adminUsers.importError")));
     } finally {
       setImporting(false);
     }
@@ -142,10 +144,10 @@ export default function AdminUsersPage() {
       setPageError("");
       await updateUser(userId, editForm);
       setEditingId(null);
-      setPageSuccess("User updated successfully.");
+      setPageSuccess(t("adminUsers.updateSuccess"));
       await loadUsers();
     } catch (error) {
-      setPageError(readError(error, "Failed to update user."));
+      setPageError(readError(error, t("adminUsers.updateError")));
     }
   }
 
@@ -153,17 +155,21 @@ export default function AdminUsersPage() {
     try {
       setPageError("");
       await updateUserStatus(account.id, !account.isActive);
-      setPageSuccess(`User ${account.isActive ? "deactivated" : "activated"} successfully.`);
+      setPageSuccess(
+        t("adminUsers.statusSuccess", {
+          action: account.isActive ? t("adminUsers.deactivated") : t("adminUsers.activated")
+        })
+      );
       await loadUsers();
     } catch (error) {
-      setPageError(readError(error, "Failed to update user status."));
+      setPageError(readError(error, t("adminUsers.statusError")));
     }
   }
 
   async function handleResetPassword(userId) {
     const newPassword = passwordDrafts[userId];
     if (!newPassword) {
-      setPageError("Enter a new password before resetting.");
+      setPageError(t("adminUsers.resetMissing"));
       return;
     }
 
@@ -171,27 +177,27 @@ export default function AdminUsersPage() {
       setPageError("");
       await resetUserPassword(userId, newPassword);
       setPasswordDrafts((current) => ({ ...current, [userId]: "" }));
-      setPageSuccess("Password reset successfully.");
+      setPageSuccess(t("adminUsers.resetSuccess"));
     } catch (error) {
-      setPageError(readError(error, "Failed to reset password."));
+      setPageError(readError(error, t("adminUsers.resetError")));
     }
   }
 
   if (userLoading) {
-    return <div className="pageState">Loading administration workspace...</div>;
+    return <div className="pageState">{t("adminUsers.loading")}</div>;
   }
 
   if (!user) {
-    return <div className="pageState">{userError || "Unable to load user profile."}</div>;
+    return <div className="pageState">{userError || t("adminUsers.userError")}</div>;
   }
 
   return (
     <AppShell
       user={user}
-      badge="Administration"
-      title="User management"
-      subtitle="Provision students, professors, and assistants with an interface designed for real departmental operations."
-      actions={<Link className="btn" to="/dashboard">Back to overview</Link>}
+      badge={t("adminUsers.badge")}
+      title={t("adminUsers.title")}
+      subtitle={t("adminUsers.subtitle")}
+      actions={<Link className="btn" to="/dashboard">{t("adminUsers.backToOverview")}</Link>}
     >
       <div className="stackXl">
         {pageError ? <div className="alert">{pageError}</div> : null}
@@ -199,55 +205,55 @@ export default function AdminUsersPage() {
 
         <section className="dashboardGrid dashboardGridWide">
           <article className="surfaceCard">
-            <div className="sectionHeader"><h3>Create user</h3></div>
+            <div className="sectionHeader"><h3>{t("adminUsers.createUser")}</h3></div>
             <div className="sectionBody">
               <form className="stackLg" onSubmit={handleCreateUser}>
                 <div className="field">
-                  <label className="label">Full name</label>
+                  <label className="label">{t("adminUsers.fullName")}</label>
                   <input className="input" value={createForm.fullName} onChange={(e) => setCreateForm((c) => ({ ...c, fullName: e.target.value }))} required />
                 </div>
                 <div className="field">
-                  <label className="label">Email</label>
+                  <label className="label">{t("adminUsers.email")}</label>
                   <input className="input" type="email" value={createForm.email} onChange={(e) => setCreateForm((c) => ({ ...c, email: e.target.value }))} required />
                 </div>
                 <div className="field">
-                  <label className="label">Role</label>
+                  <label className="label">{t("adminUsers.role")}</label>
                   <select className="input" value={createForm.role} onChange={(e) => setCreateForm((c) => ({ ...c, role: e.target.value }))}>
-                    {ROLE_OPTIONS.map((role) => <option key={role} value={role}>{role}</option>)}
+                    {ROLE_OPTIONS.map((role) => <option key={role} value={role}>{t(`adminUsers.roles.${role}`)}</option>)}
                   </select>
                 </div>
                 <div className="field">
-                  <label className="label">Temporary password</label>
+                  <label className="label">{t("adminUsers.temporaryPassword")}</label>
                   <input className="input" value={createForm.password} onChange={(e) => setCreateForm((c) => ({ ...c, password: e.target.value }))} required />
                 </div>
                 <label className="checkboxRow">
                   <input type="checkbox" checked={createForm.isActive} onChange={(e) => setCreateForm((c) => ({ ...c, isActive: e.target.checked }))} />
-                  <span>Active account</span>
+                  <span>{t("adminUsers.activeAccount")}</span>
                 </label>
-                <button className="btn btnPrimary" type="submit" disabled={creating}>{creating ? "Creating..." : "Create user"}</button>
+                <button className="btn btnPrimary" type="submit" disabled={creating}>{creating ? t("adminUsers.creating") : t("adminUsers.createButton")}</button>
               </form>
             </div>
           </article>
 
           <article className="surfaceCard">
-            <div className="sectionHeader"><h3>Bulk import</h3></div>
+            <div className="sectionHeader"><h3>{t("adminUsers.bulkImport")}</h3></div>
             <div className="sectionBody stackLg">
               <div className="field">
-                <label className="label">Default password</label>
-                <input className="input" value={defaultPassword} onChange={(e) => setDefaultPassword(e.target.value)} placeholder="Used when a row password is empty" />
+                <label className="label">{t("adminUsers.defaultPassword")}</label>
+                <input className="input" value={defaultPassword} onChange={(e) => setDefaultPassword(e.target.value)} placeholder={t("adminUsers.defaultPasswordPlaceholder")} />
               </div>
               <label className="checkboxRow">
                 <input type="checkbox" checked={generatePasswords} onChange={(e) => setGeneratePasswords(e.target.checked)} />
-                <span>Generate passwords when none are provided</span>
+                <span>{t("adminUsers.generatePasswords")}</span>
               </label>
               <div className="field">
-                <label className="label">CSV rows</label>
+                <label className="label">{t("adminUsers.csvRows")}</label>
                 <textarea className="input textarea" value={importText} onChange={(e) => setImportText(e.target.value)} />
               </div>
               <div className="row" style={{ justifyContent: "flex-start", gap: 10, flexWrap: "wrap" }}>
-                <button className="btn" type="button" onClick={handlePreviewImport}>Validate file</button>
+                <button className="btn" type="button" onClick={handlePreviewImport}>{t("adminUsers.validateFile")}</button>
                 <button className="btn btnPrimary" type="button" onClick={handleImportUsers} disabled={importing}>
-                  {importing ? "Importing..." : "Import users"}
+                  {importing ? t("adminUsers.importing") : t("adminUsers.importUsers")}
                 </button>
               </div>
             </div>
@@ -255,21 +261,21 @@ export default function AdminUsersPage() {
         </section>
 
         <section className="surfaceCard">
-          <div className="sectionHeader"><h3>Import preview</h3></div>
+          <div className="sectionHeader"><h3>{t("adminUsers.importPreview")}</h3></div>
           <div className="sectionBody">
             {importPreview.length === 0 ? (
-              <div className="pageStateCard">Validate the CSV content to preview rows before import.</div>
+              <div className="pageStateCard">{t("adminUsers.previewHint")}</div>
             ) : (
               <div className="tableWrap">
                 <table className="dataTable">
                   <thead>
                     <tr>
-                      <th>Line</th>
-                      <th>Full name</th>
-                      <th>Email</th>
-                      <th>Role</th>
-                      <th>Status</th>
-                      <th>Validation</th>
+                      <th>{t("adminUsers.line")}</th>
+                      <th>{t("adminUsers.fullName")}</th>
+                      <th>{t("adminUsers.email")}</th>
+                      <th>{t("adminUsers.role")}</th>
+                      <th>{t("adminUsers.status")}</th>
+                      <th>{t("adminUsers.validation")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -278,9 +284,9 @@ export default function AdminUsersPage() {
                         <td>{row.__line}</td>
                         <td>{row.fullName}</td>
                         <td>{row.email}</td>
-                        <td>{row.role}</td>
-                        <td>{String(row.isActive)}</td>
-                        <td>{row.error || "Ready"}</td>
+                        <td>{t(`adminUsers.roles.${row.role}`) || row.role}</td>
+                        <td>{row.isActive ? t("adminUsers.active") : t("adminUsers.inactive")}</td>
+                        <td>{row.error || t("adminUsers.ready")}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -293,28 +299,28 @@ export default function AdminUsersPage() {
         {importResult ? (
           <section className="dashboardGrid">
             <article className="surfaceCard">
-              <div className="sectionHeader"><h3>Import summary</h3></div>
+              <div className="sectionHeader"><h3>{t("adminUsers.importSummary")}</h3></div>
               <div className="sectionBody">
                 <div className="summaryStrip">
-                  <article className="summaryCard"><span className="summaryLabel">Requested</span><strong>{importResult.requested}</strong></article>
-                  <article className="summaryCard"><span className="summaryLabel">Imported</span><strong>{importResult.imported}</strong></article>
-                  <article className="summaryCard"><span className="summaryLabel">Failed</span><strong>{importResult.failed}</strong></article>
+                  <article className="summaryCard"><span className="summaryLabel">{t("adminUsers.requested")}</span><strong>{importResult.requested}</strong></article>
+                  <article className="summaryCard"><span className="summaryLabel">{t("adminUsers.imported")}</span><strong>{importResult.imported}</strong></article>
+                  <article className="summaryCard"><span className="summaryLabel">{t("adminUsers.failed")}</span><strong>{importResult.failed}</strong></article>
                 </div>
               </div>
             </article>
 
             {importResult.users?.length > 0 ? (
               <article className="surfaceCard">
-                <div className="sectionHeader"><h3>Imported accounts</h3></div>
+                <div className="sectionHeader"><h3>{t("adminUsers.importedAccounts")}</h3></div>
                 <div className="sectionBody">
                   <div className="tableWrap">
                     <table className="dataTable">
                       <thead>
                         <tr>
-                          <th>Full name</th>
-                          <th>Email</th>
-                          <th>Role</th>
-                          <th>Temporary password</th>
+                          <th>{t("adminUsers.fullName")}</th>
+                          <th>{t("adminUsers.email")}</th>
+                          <th>{t("adminUsers.role")}</th>
+                          <th>{t("adminUsers.temporaryPassword")}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -322,7 +328,7 @@ export default function AdminUsersPage() {
                           <tr key={account.id}>
                             <td>{account.fullName}</td>
                             <td>{account.email}</td>
-                            <td>{account.role}</td>
+                            <td>{t(`adminUsers.roles.${account.role}`) || account.role}</td>
                             <td>{account.temporaryPassword || "-"}</td>
                           </tr>
                         ))}
@@ -335,14 +341,14 @@ export default function AdminUsersPage() {
 
             {importResult.errors?.length > 0 ? (
               <article className="surfaceCard">
-                <div className="sectionHeader"><h3>Failed rows</h3></div>
+                <div className="sectionHeader"><h3>{t("adminUsers.failedRows")}</h3></div>
                 <div className="sectionBody">
                   <div className="tableWrap">
                     <table className="dataTable">
                       <thead>
                         <tr>
-                          <th>Email</th>
-                          <th>Error</th>
+                          <th>{t("adminUsers.email")}</th>
+                          <th>{t("common.error") || "Error"}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -362,35 +368,35 @@ export default function AdminUsersPage() {
         ) : null}
 
         <section className="surfaceCard">
-          <div className="sectionHeader"><h3>User directory</h3></div>
+          <div className="sectionHeader"><h3>{t("adminUsers.userDirectory")}</h3></div>
           <div className="sectionBody stackLg">
             <div className="filtersRow">
-              <input className="input" placeholder="Search by full name or email" value={filters.search} onChange={(e) => setFilters((c) => ({ ...c, search: e.target.value }))} />
+              <input className="input" placeholder={t("adminUsers.searchPlaceholder")} value={filters.search} onChange={(e) => setFilters((c) => ({ ...c, search: e.target.value }))} />
               <select className="input" value={filters.role} onChange={(e) => setFilters((c) => ({ ...c, role: e.target.value }))}>
-                <option value="">All roles</option>
-                {ROLE_OPTIONS.map((role) => <option key={role} value={role}>{role}</option>)}
-                <option value="Admin">Admin</option>
+                <option value="">{t("adminUsers.allRoles")}</option>
+                {ROLE_OPTIONS.map((role) => <option key={role} value={role}>{t(`adminUsers.roles.${role}`)}</option>)}
+                <option value="Admin">{t("adminUsers.roles.Admin")}</option>
               </select>
               <select className="input" value={filters.status} onChange={(e) => setFilters((c) => ({ ...c, status: e.target.value }))}>
-                <option value="all">All statuses</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
+                <option value="all">{t("adminUsers.allStatuses")}</option>
+                <option value="active">{t("adminUsers.active")}</option>
+                <option value="inactive">{t("adminUsers.inactive")}</option>
               </select>
             </div>
 
             {loadingUsers ? (
-              <div className="pageStateCard">Loading user records...</div>
+              <div className="pageStateCard">{t("adminUsers.loadingRecords")}</div>
             ) : (
               <div className="tableWrap">
                 <table className="dataTable">
                   <thead>
                     <tr>
-                      <th>Full name</th>
-                      <th>Email</th>
-                      <th>Role</th>
-                      <th>Status</th>
-                      <th>Created</th>
-                      <th>Actions</th>
+                      <th>{t("adminUsers.fullName")}</th>
+                      <th>{t("adminUsers.email")}</th>
+                      <th>{t("adminUsers.role")}</th>
+                      <th>{t("adminUsers.status")}</th>
+                      <th>{t("adminUsers.created")}</th>
+                      <th>{t("adminUsers.actions")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -402,10 +408,10 @@ export default function AdminUsersPage() {
                           <td>{account.email}</td>
                           <td>{isEditing ? (
                             <select className="input" value={editForm.role} onChange={(e) => setEditForm((c) => ({ ...c, role: e.target.value }))}>
-                              {[...ROLE_OPTIONS, "Admin"].map((role) => <option key={role} value={role}>{role}</option>)}
+                              {[...ROLE_OPTIONS, "Admin"].map((role) => <option key={role} value={role}>{t(`adminUsers.roles.${role}`)}</option>)}
                             </select>
-                          ) : account.role}</td>
-                          <td><span className={`statusPill ${account.isActive ? "statusLive" : "statusDraft"}`}>{account.isActive ? "Active" : "Inactive"}</span></td>
+                          ) : t(`adminUsers.roles.${account.role}`) || account.role}</td>
+                          <td><span className={`statusPill ${account.isActive ? "statusLive" : "statusDraft"}`}>{account.isActive ? t("adminUsers.active") : t("adminUsers.inactive")}</span></td>
                           <td>{new Date(account.createdAt).toLocaleDateString()}</td>
                           <td>
                             <div className="actionsCol">
@@ -413,24 +419,24 @@ export default function AdminUsersPage() {
                                 <>
                                   <label className="checkboxRow">
                                     <input type="checkbox" checked={editForm.isActive} onChange={(e) => setEditForm((c) => ({ ...c, isActive: e.target.checked }))} />
-                                    <span>Active</span>
+                                    <span>{t("adminUsers.active")}</span>
                                   </label>
                                   <div className="row" style={{ gap: 8, justifyContent: "flex-start" }}>
-                                    <button className="btn btnPrimary" type="button" onClick={() => saveEdit(account.id)}>Save</button>
-                                    <button className="btn" type="button" onClick={() => setEditingId(null)}>Cancel</button>
+                                    <button className="btn btnPrimary" type="button" onClick={() => saveEdit(account.id)}>{t("adminUsers.save")}</button>
+                                    <button className="btn" type="button" onClick={() => setEditingId(null)}>{t("common.cancel")}</button>
                                   </div>
                                 </>
                               ) : (
                                 <>
                                   <div className="row" style={{ gap: 8, flexWrap: "wrap", justifyContent: "flex-start" }}>
-                                    <button className="btn" type="button" onClick={() => beginEdit(account)}>Edit</button>
+                                    <button className="btn" type="button" onClick={() => beginEdit(account)}>{t("adminUsers.edit")}</button>
                                     <button className="btn" type="button" onClick={() => toggleStatus(account)}>
-                                      {account.isActive ? "Deactivate" : "Activate"}
+                                      {account.isActive ? t("adminUsers.deactivate") : t("adminUsers.activate")}
                                     </button>
                                   </div>
                                   <div className="row" style={{ gap: 8, justifyContent: "flex-start" }}>
-                                    <input className="input" placeholder="New password" value={passwordDrafts[account.id] || ""} onChange={(e) => setPasswordDrafts((c) => ({ ...c, [account.id]: e.target.value }))} />
-                                    <button className="btn" type="button" onClick={() => handleResetPassword(account.id)}>Reset</button>
+                                    <input className="input" placeholder={t("adminUsers.newPassword")} value={passwordDrafts[account.id] || ""} onChange={(e) => setPasswordDrafts((c) => ({ ...c, [account.id]: e.target.value }))} />
+                                    <button className="btn" type="button" onClick={() => handleResetPassword(account.id)}>{t("adminUsers.reset")}</button>
                                   </div>
                                 </>
                               )}
@@ -450,7 +456,7 @@ export default function AdminUsersPage() {
   );
 }
 
-function parseCsvRows(rawText) {
+function parseCsvRows(rawText, t) {
   const lines = rawText.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
   if (lines.length <= 1) {
     return { rows: [], errors: {} };
@@ -468,13 +474,13 @@ function parseCsvRows(rawText) {
     let error = "";
 
     if (!fullName || !email || !role) {
-      error = "FullName, Email, and Role are required.";
+      error = t("adminUsers.csvErrors.required");
     } else if (!ROLE_OPTIONS.includes(role) && role !== "Admin") {
-      error = "Role must be Student, Professor, Assistant, or Admin.";
+      error = t("adminUsers.csvErrors.invalidRole");
     } else if (seenEmails.has(key)) {
-      error = "Duplicate email in CSV.";
+      error = t("adminUsers.csvErrors.duplicate");
     } else if (password && !isStrongPassword(password)) {
-      error = "Password must be at least 8 characters and include upper, lower, and number.";
+      error = t("adminUsers.csvErrors.weakPassword");
     }
 
     seenEmails.add(key);

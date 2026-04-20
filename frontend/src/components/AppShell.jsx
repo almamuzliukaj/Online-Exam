@@ -1,25 +1,26 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { logout } from "../lib/auth";
 
 const navigationByRole = {
   Admin: [
-    { to: "/dashboard", label: "Overview" },
-    { to: "/admin/academic", label: "Academic" },
-    { to: "/admin/users", label: "Users" },
-    { to: "/exams", label: "Exams" },
+    { to: "/dashboard", labelKey: "shell.nav.adminOverview" },
+    { to: "/admin/academic", labelKey: "shell.nav.adminAcademic" },
+    { to: "/admin/users", labelKey: "shell.nav.adminUsers" },
+    { to: "/exams", labelKey: "shell.nav.adminExams" },
   ],
   Professor: [
-    { to: "/dashboard", label: "Overview" },
-    { to: "/exams", label: "My exams" },
-    { to: "/exams/new", label: "Create exam" },
+    { to: "/dashboard", labelKey: "shell.nav.professorOverview" },
+    { to: "/exams", labelKey: "shell.nav.professorExams" },
+    { to: "/exams/new", labelKey: "shell.nav.professorCreateExam" },
   ],
   Assistant: [
-    { to: "/dashboard", label: "Overview" },
-    { to: "/exams", label: "Assigned exams" },
+    { to: "/dashboard", labelKey: "shell.nav.assistantOverview" },
+    { to: "/exams", labelKey: "shell.nav.assistantExams" },
   ],
   Student: [
-    { to: "/dashboard", label: "Overview" },
-    { to: "/exams", label: "Available exams" },
+    { to: "/dashboard", labelKey: "shell.nav.studentOverview" },
+    { to: "/exams", labelKey: "shell.nav.studentExams" },
   ],
 };
 
@@ -32,6 +33,7 @@ export default function AppShell({
   children,
 }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const items = navigationByRole[user?.role] || navigationByRole.Student;
 
   function handleLogout() {
@@ -46,43 +48,41 @@ export default function AppShell({
           <Link className="brand brandLarge" to="/dashboard">
             <span className="logoMark" />
             <span>
-              <strong>Online Exam</strong>
-              <small>Faculty Operations Suite</small>
+              <strong>{t("common.appName")}</strong>
+              <small>{t("common.facultyWorkspace")}</small>
             </span>
           </Link>
 
           <div className="sidebarIdentity">
             <div className="avatarCircle">{getInitials(user?.email)}</div>
             <div>
-              <div className="sidebarLabel">Signed in</div>
-              <div className="sidebarValue">{user?.email || "Unknown user"}</div>
-              <div className="sidebarMeta">{user?.role || "Guest"}</div>
+              <div className="sidebarLabel">{t("common.signedIn")}</div>
+              <div className="sidebarValue">{user?.email || t("common.unknownUser")}</div>
+              <div className="sidebarMeta">{user?.role || t("common.guest")}</div>
             </div>
           </div>
         </div>
 
         <nav className="sidebarNav">
-          <div className="sidebarSectionTitle">Workspace</div>
+          <div className="sidebarSectionTitle">{t("common.workspace")}</div>
           {items.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               className={({ isActive }) => `navItem${isActive ? " navItemActive" : ""}`}
             >
-              {item.label}
+              {t(item.labelKey)}
             </NavLink>
           ))}
         </nav>
 
         <div className="sidebarFoot">
           <div className="supportPanel">
-            <div className="sidebarSectionTitle">Operational note</div>
-            <p>
-              This workspace is structured for role-based academic operations and secure exam delivery.
-            </p>
+            <div className="sidebarSectionTitle">{t("common.operationalNote")}</div>
+            <p>{t("common.operationalNoteText")}</p>
           </div>
           <button className="btn btnGhost" onClick={handleLogout}>
-            Log out
+            {t("common.logout")}
           </button>
         </div>
       </aside>

@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom' // Sigurohu që është këtu
 import App from './App'
 import './index.css'
 import './styles/ui.css';
+import './lib/i18n';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

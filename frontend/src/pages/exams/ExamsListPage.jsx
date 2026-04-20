@@ -4,8 +4,10 @@ import { useCurrentUser } from "../../hooks/useCurrentUser";
 import { listExams } from "../../lib/examsApi";
 import { canManageExams } from "../../lib/permissions";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function ExamsListPage() {
+  const { t } = useTranslation();
   const { user, loading: userLoading, error: userError } = useCurrentUser();
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,7 +23,7 @@ export default function ExamsListPage() {
         const data = await listExams();
         if (active) setExams(Array.isArray(data) ? data : []);
       } catch {
-        if (active) setError("Failed to load exam data.");
+        if (active) setError(t("examsList.error"));
       } finally {
         if (active) setLoading(false);
       }
@@ -30,14 +32,14 @@ export default function ExamsListPage() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [t]);
 
   if (userLoading) {
-    return <div className="pageState">Loading exams...</div>;
+    return <div className="pageState">{t("examsList.loading")}</div>;
   }
 
   if (!user) {
-    return <div className="pageState">{userError || "Unable to load user profile."}</div>;
+    return <div className="pageState">{userError || t("examsList.userError")}</div>;
   }
 
   const canCreate = canManageExams(user.role);
@@ -45,23 +47,23 @@ export default function ExamsListPage() {
   return (
     <AppShell
       user={user}
-      badge="Exam workspace"
-      title="Exams"
-      subtitle="Review current assessments, drafts, and publishing readiness in a cleaner operational view."
-      actions={canCreate ? <Link to="/exams/new" className="btn btnPrimary">Create exam</Link> : null}
+      badge={t("examsList.badge")}
+      title={t("examsList.title")}
+      subtitle={t("examsList.subtitle")}
+      actions={canCreate ? <Link to="/exams/new" className="btn btnPrimary">{t("examsList.create")}</Link> : null}
     >
       <div className="stackXl">
         <section className="summaryStrip">
           <article className="summaryCard">
-            <span className="summaryLabel">Total exams</span>
+            <span className="summaryLabel">{t("examsList.total")}</span>
             <strong>{exams.length}</strong>
           </article>
           <article className="summaryCard">
-            <span className="summaryLabel">Published</span>
+            <span className="summaryLabel">{t("examsList.published")}</span>
             <strong>{exams.filter((exam) => exam.isPublished).length}</strong>
           </article>
           <article className="summaryCard">
-            <span className="summaryLabel">Draft</span>
+            <span className="summaryLabel">{t("examsList.draft")}</span>
             <strong>{exams.filter((exam) => !exam.isPublished).length}</strong>
           </article>
         </section>
@@ -69,11 +71,11 @@ export default function ExamsListPage() {
         {error ? <div className="alert">{error}</div> : null}
 
         {loading ? (
-          <div className="pageStateCard">Loading exam records...</div>
+          <div className="pageStateCard">{t("examsList.loadingRecords")}</div>
         ) : exams.length === 0 ? (
           <div className="emptyState">
-            <p>No exams are available yet.</p>
-            <p>Once faculty workflows are connected, current, scheduled, and published exams will appear here.</p>
+            <p>{t("examsList.emptyTitle")}</p>
+            <p>{t("examsList.emptyText")}</p>
           </div>
         ) : (
           <section className="resourceGrid">
@@ -81,15 +83,15 @@ export default function ExamsListPage() {
               <article key={exam.id} className="resourceCard">
                 <div className="resourceMetaRow">
                   <span className={`statusPill ${exam.isPublished ? "statusLive" : "statusDraft"}`}>
-                    {exam.isPublished ? "Published" : "Draft"}
+                    {exam.isPublished ? t("examsList.published") : t("examsList.draft")}
                   </span>
                   <span className="small">{exam.durationMinutes || 60} min</span>
                 </div>
                 <h3>{exam.title}</h3>
-                <p>{exam.description || "No description has been provided for this assessment yet."}</p>
+                <p>{exam.description || t("examsList.noDescription")}</p>
                 <div className="resourceFooter">
-                  <div className="small">Open the exam to manage questions, review details, and continue the workflow.</div>
-                  <Link className="btn" to={`/exams/${exam.id}`}>Open</Link>
+                  <div className="small">{t("examsList.openHint")}</div>
+                  <Link className="btn" to={`/exams/${exam.id}`}>{t("examsList.open")}</Link>
                 </div>
               </article>
             ))}

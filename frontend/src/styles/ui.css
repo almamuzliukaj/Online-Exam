@@ -737,6 +737,31 @@
   font-weight: 600;
 }
 
+.languageSwitcher{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 148px;
+}
+
+.languageSwitcherCompact{
+  min-width: 126px;
+}
+
+.languageSwitcherLabel{
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.languageSwitcherSelect{
+  min-height: 42px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
 @media (max-width: 1180px){
   .appShell,
   .heroPanel,

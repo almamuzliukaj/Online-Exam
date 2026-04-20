@@ -3,8 +3,10 @@ import { createExam } from "../../lib/examsApi";
 import AppShell from "../../components/AppShell";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function ExamCreatePage() {
+  const { t } = useTranslation();
   const nav = useNavigate();
   const { user, loading, error: userError } = useCurrentUser();
   const [form, setForm] = useState({
@@ -32,39 +34,38 @@ export default function ExamCreatePage() {
         err?.response?.data?.message ||
         (typeof err?.response?.data === "string" ? err.response.data : null) ||
         err?.message;
-
-      setError(apiMessage || "Unable to create the exam right now.");
+      setError(apiMessage || t("examCreate.error"));
     } finally {
       setSaving(false);
     }
   }
 
   if (loading) {
-    return <div className="pageState">Loading creation workspace...</div>;
+    return <div className="pageState">{t("examCreate.loading")}</div>;
   }
 
   if (!user) {
-    return <div className="pageState">{userError || "Unable to load user profile."}</div>;
+    return <div className="pageState">{userError || t("examCreate.userError")}</div>;
   }
 
   return (
     <AppShell
       user={user}
-      badge="Exam authoring"
-      title="Create exam"
-      subtitle="Set the assessment foundation first. Question selection, scheduling, and publishing will build on this record."
-      actions={<Link className="btn" to="/exams">Cancel</Link>}
+      badge={t("examCreate.badge")}
+      title={t("examCreate.title")}
+      subtitle={t("examCreate.subtitle")}
+      actions={<Link className="btn" to="/exams">{t("common.cancel")}</Link>}
     >
       <section className="formSurface">
         <div className="surfaceCard">
           <div className="sectionHeader">
-            <h3>Exam configuration</h3>
+            <h3>{t("examCreate.configuration")}</h3>
           </div>
           <div className="sectionBody">
             {error ? <div className="alert">{error}</div> : null}
             <form className="stackLg" onSubmit={onSubmit}>
               <div className="field">
-                <label className="label">Exam title</label>
+                <div className="label">{t("examCreate.titleLabel")}</div>
                 <input
                   className="input"
                   value={form.title}
@@ -75,7 +76,7 @@ export default function ExamCreatePage() {
               </div>
 
               <div className="field">
-                <label className="label">Duration in minutes</label>
+                <label className="label">{t("examCreate.durationLabel")}</label>
                 <input
                   className="input"
                   type="number"
@@ -86,19 +87,19 @@ export default function ExamCreatePage() {
               </div>
 
               <div className="field">
-                <label className="label">Description</label>
+                <div className="label">{t("examCreate.descriptionLabel")}</div>
                 <textarea
                   className="input textarea"
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  placeholder="Describe scope, instructions, allowed materials, and intended delivery notes."
+                  placeholder={t("examCreate.descriptionPlaceholder")}
                 />
               </div>
 
               <div className="row" style={{ justifyContent: "flex-end" }}>
-                <Link className="btn" to="/exams">Back</Link>
+                <Link className="btn" to="/exams">{t("common.back")}</Link>
                 <button className="btn btnPrimary" type="submit" disabled={saving}>
-                  {saving ? "Creating..." : "Create exam"}
+                  {saving ? t("examCreate.creating") : t("examCreate.create")}
                 </button>
               </div>
             </form>
