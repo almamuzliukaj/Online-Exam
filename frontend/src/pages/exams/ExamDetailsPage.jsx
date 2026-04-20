@@ -104,6 +104,8 @@ export default function ExamDetailsPage() {
                           <div className="questionMeta">
                             <span>{question.type ? `Type: ${question.type}` : "Type: -"}</span>
                             <span>{typeof question.points === "number" ? `Points: ${question.points}` : "Points: -"}</span>
+                            {question.answerLanguage ? <span>{`Language: ${question.answerLanguage}`}</span> : null}
+                            {typeof question.testCaseCount === "number" && question.testCaseCount > 0 ? <span>{`Test cases: ${question.testCaseCount}`}</span> : null}
                           </div>
                         </div>
                       </article>

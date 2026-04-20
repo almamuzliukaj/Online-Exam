@@ -6,6 +6,8 @@ const navigationByRole = {
     { to: "/dashboard", label: "Overview" },
     { to: "/admin/academic", label: "Academic" },
     { to: "/admin/users", label: "Users" },
+    { to: "/admin/courses", label: "Courses" },
+    { to: "/admin/offerings", label: "Offerings" },
     { to: "/exams", label: "Exams" },
   ],
   Professor: [

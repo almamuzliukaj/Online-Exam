@@ -24,8 +24,17 @@ export default function Dashboard() {
       actions={
         <>
           <Link className="btn" to="/exams">Exam workspace</Link>
+ feature/agnesa-admin-academic-structure
           {isAdmin(user.role) ? <Link className="btn" to="/admin/academic">Academic setup</Link> : null}
           {isAdmin(user.role) ? <Link className="btn btnPrimary" to="/admin/users">User management</Link> : null}
+
+          {isAdmin(user.role) ? (
+            <>
+              <Link className="btn" to="/admin/courses">Academic catalog</Link>
+              <Link className="btn btnPrimary" to="/admin/users">User management</Link>
+            </>
+          ) : null}
+main
         </>
       }
     >

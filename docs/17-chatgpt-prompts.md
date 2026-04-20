@@ -418,6 +418,21 @@ Example create payload:
 - Update exam creation and exam-taking flows to reference `CourseOfferingId` and `StudentCourseEnrollmentId`.
 - Seed the 34-course catalog from configuration or JSON so the faculty structure is reproducible across environments.
 
+### Person 2 Implementation Status
+- Backend for `Terms`, `Courses`, `CourseOfferings`, `CourseOfferingStaffAssignments`, `SemesterEnrollments`, `StudentCourseEnrollments`, and `CarryOverCourses` is implemented in `OnlineExam.Api`.
+- Admin frontend now includes:
+  - `User management` for sprint 1 identity flows
+  - `Course catalog` for sprint 2 catalog CRUD and filtering
+  - `Course offerings` for sprint 2 offering creation, publish/close actions, and staff assignment history
+- Question authoring now supports:
+  - `CSharp` questions with starter code and test case setup
+  - `SQL` questions with starter query and test case setup
+  - backend validation that blocks unsupported languages and empty test case foundations
+- Remaining future work for Person 2 is mainly downstream integration:
+  - student enrollment UI expansion
+  - carry-over management UI
+  - richer academic analytics and audit views
+
 ## Prompt for Person 3
 ```text
 Help me design a professional English frontend for a university online exam system in React. I need page structure, navigation, reusable components, dashboard widgets, empty states, style direction, and acceptance criteria for admin, professor, assistant, and student roles.

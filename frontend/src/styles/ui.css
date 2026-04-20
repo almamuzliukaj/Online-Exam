@@ -265,6 +265,7 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+feature/agnesa-admin-academic-structure
 .twoColGrid{
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -275,6 +276,20 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
+
+.gridTwo,
+.gridThree{
+  display: grid;
+  gap: 14px;
+}
+
+.gridTwo{
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.gridThree{
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+ main
 }
 
 .surfaceCard{
@@ -389,6 +404,11 @@
 .statusDraft{
   background: #f4e7d9;
   color: #965623;
+}
+
+.statusMuted{
+  background: #e8edf1;
+  color: #52606d;
 }
 
 .bulletStack,
@@ -553,6 +573,10 @@
   gap: 12px;
 }
 
+.filtersRowWide{
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+}
+
 .tableWrap{
   overflow: auto;
   border: 1px solid var(--border);
@@ -586,6 +610,38 @@
   flex-direction: column;
   gap: 10px;
   min-width: 280px;
+}
+
+.rowStart{
+  justify-content: flex-start;
+}
+
+.rowWrap{
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.cellTitle{
+  font-weight: 700;
+  color: var(--heading);
+}
+
+.cellMeta{
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.inlineMetaPanel{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.65);
+  border: 1px solid var(--border);
 }
 
 .alert,
@@ -744,7 +800,10 @@
   .dashboardGridWide,
   .summaryStrip,
   .loginContent,
-  .loginFeatureGrid{
+  .loginFeatureGrid,
+  .gridTwo,
+  .gridThree,
+  .filtersRowWide{
     grid-template-columns: 1fr;
   }
 

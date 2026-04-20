@@ -64,8 +64,7 @@ namespace OnlineExam.Api.Controllers
                 Audience = jwtIssuer,
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),
-                    SecurityAlgorithms.HmacSha256
-                )
+                    SecurityAlgorithms.HmacSha256)
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();
