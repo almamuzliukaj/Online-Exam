@@ -88,6 +88,7 @@ function getDashboardConfig(roleKey, t) {
 
   const quickActionsByRole = {
     admin: [
+      { label: t("rolePanels.admin.quickActions.academicSetup"), to: "/admin/academic" },
       { label: t("rolePanels.admin.quickActions.manageUsers"), to: "/admin/users" },
       { label: t("rolePanels.admin.quickActions.reviewExams"), to: "/exams" },
     ],

@@ -66,6 +66,7 @@ const resources = {
         title: "Operational overview",
         subtitle: "A role-based workspace designed for real academic operations, exam preparation, and secure assessment delivery.",
         examWorkspace: "Exam workspace",
+        academicSetup: "Academic setup",
         userManagement: "User management",
         badges: {
           Admin: "Admin dashboard",
@@ -227,6 +228,7 @@ const resources = {
       shell: {
         nav: {
           adminOverview: "Overview",
+          adminAcademic: "Academic",
           adminUsers: "Users",
           adminExams: "Exams",
           professorOverview: "Overview",
@@ -250,6 +252,7 @@ const resources = {
             alerts: { label: "Policy alerts", meta: "Need admin action" }
           },
           quickActions: {
+            academicSetup: "Academic setup",
             manageUsers: "Manage users",
             reviewExams: "Review exams"
           },
@@ -432,6 +435,7 @@ const resources = {
         title: "Pasqyra operative",
         subtitle: "Një hapësirë me role për operacione reale akademike, përgatitje provimesh dhe zhvillim të sigurt të vlerësimit.",
         examWorkspace: "Hapësira e provimeve",
+        academicSetup: "Konfigurimi akademik",
         userManagement: "Menaxhimi i përdoruesve",
         badges: {
           Admin: "Paneli i adminit",
@@ -593,6 +597,7 @@ const resources = {
       shell: {
         nav: {
           adminOverview: "Përmbledhje",
+          adminAcademic: "Akademike",
           adminUsers: "Përdoruesit",
           adminExams: "Provimet",
           professorOverview: "Përmbledhje",
@@ -616,6 +621,7 @@ const resources = {
             alerts: { label: "Njoftime politike", meta: "Kërkojnë veprim admini" }
           },
           quickActions: {
+            academicSetup: "Konfigurimi akademik",
             manageUsers: "Menaxho përdoruesit",
             reviewExams: "Shiko provimet"
           },

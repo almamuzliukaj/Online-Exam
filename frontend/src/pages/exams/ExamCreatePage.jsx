@@ -69,7 +69,8 @@ export default function ExamCreatePage() {
                 <input
                   className="input"
                   value={form.title}
-                  onChange={(e) => setForm((current) => ({ ...current, title: e.target.value }))}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  placeholder="Algorithms Midterm"
                   required
                 />
               </div>
@@ -81,7 +82,7 @@ export default function ExamCreatePage() {
                   type="number"
                   min="1"
                   value={form.durationMinutes}
-                  onChange={(e) => setForm((current) => ({ ...current, durationMinutes: Number(e.target.value) }))}
+                  onChange={(e) => setForm({ ...form, durationMinutes: Number(e.target.value) })}
                 />
               </div>
 

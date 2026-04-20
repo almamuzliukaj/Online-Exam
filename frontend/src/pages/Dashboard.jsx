@@ -26,6 +26,7 @@ export default function Dashboard() {
       actions={
         <>
           <Link className="btn" to="/exams">{t("dashboard.examWorkspace")}</Link>
+          {isAdmin(user.role) ? <Link className="btn" to="/admin/academic">{t("dashboard.academicSetup")}</Link> : null}
           {isAdmin(user.role) ? <Link className="btn btnPrimary" to="/admin/users">{t("dashboard.userManagement")}</Link> : null}
         </>
       }

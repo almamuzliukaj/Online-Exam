@@ -5,6 +5,7 @@ import { logout } from "../lib/auth";
 const navigationByRole = {
   Admin: [
     { to: "/dashboard", labelKey: "shell.nav.adminOverview" },
+    { to: "/admin/academic", labelKey: "shell.nav.adminAcademic" },
     { to: "/admin/users", labelKey: "shell.nav.adminUsers" },
     { to: "/exams", labelKey: "shell.nav.adminExams" },
   ],

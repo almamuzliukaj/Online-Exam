@@ -17,8 +17,8 @@ export default function QuestionCreatePage() {
     type: "MCQ",
     points: 10,
   });
-  const [saving, setSaving] = useState(false);
   const [loadingExam, setLoadingExam] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
   const canEdit = useMemo(() => canManageExams(user?.role), [user?.role]);
