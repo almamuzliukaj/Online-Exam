@@ -131,11 +131,14 @@ namespace OnlineExam.Api.Migrations
             modelBuilder.Entity("OnlineExam.Api.Models.Question", b =>
                 {
                     b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uuid");
+                    b.Property<string>("AnswerLanguage").HasColumnType("text");
                     b.Property<string>("CorrectAnswer").HasColumnType("text");
                     b.Property<Guid?>("CourseId").HasColumnType("uuid");
                     b.Property<string>("Difficulty").HasColumnType("text");
                     b.Property<Guid>("ExamId").HasColumnType("uuid");
                     b.Property<int>("Points").HasColumnType("integer");
+                    b.Property<string>("StarterCode").HasColumnType("text");
+                    b.Property<string>("TestCasesJson").HasColumnType("text");
                     b.Property<string>("Text").IsRequired().HasColumnType("text");
                     b.Property<string>("Type").IsRequired().HasColumnType("text");
                     b.HasKey("Id");

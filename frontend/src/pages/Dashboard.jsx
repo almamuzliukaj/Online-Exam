@@ -24,7 +24,12 @@ export default function Dashboard() {
       actions={
         <>
           <Link className="btn" to="/exams">Exam workspace</Link>
-          {isAdmin(user.role) ? <Link className="btn btnPrimary" to="/admin/users">User management</Link> : null}
+          {isAdmin(user.role) ? (
+            <>
+              <Link className="btn" to="/admin/courses">Academic catalog</Link>
+              <Link className="btn btnPrimary" to="/admin/users">User management</Link>
+            </>
+          ) : null}
         </>
       }
     >

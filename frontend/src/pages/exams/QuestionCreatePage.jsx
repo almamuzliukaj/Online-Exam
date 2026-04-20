@@ -1,9 +1,9 @@
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import AppShell from "../../components/AppShell";
+import { useCurrentUser } from "../../hooks/useCurrentUser";
 import { addQuestion, getExam } from "../../lib/examsApi";
 import { canManageExams } from "../../lib/permissions";
-import { useCurrentUser } from "../../hooks/useCurrentUser";
-import AppShell from "../../components/AppShell";
-import { useEffect, useMemo, useState } from "react";
 
 export default function QuestionCreatePage() {
   const nav = useNavigate();
@@ -13,6 +13,10 @@ export default function QuestionCreatePage() {
   const [form, setForm] = useState({
     text: "",
     type: "MCQ",
+    difficulty: "Medium",
+    correctAnswer: "",
+    starterCode: "",
+    testCases: [{ input: "", expectedOutput: "", isHidden: false, weight: 1 }],
     points: 10,
   });
   const [saving, setSaving] = useState(false);
@@ -37,8 +41,8 @@ export default function QuestionCreatePage() {
     })();
   }, [examId]);
 
-  async function onSubmit(e) {
-    e.preventDefault();
+  async function onSubmit(event) {
+    event.preventDefault();
     if (!examId || !canEdit || !form.text.trim()) return;
 
     try {
@@ -47,6 +51,18 @@ export default function QuestionCreatePage() {
       await addQuestion(examId, {
         text: form.text.trim(),
         type: form.type,
+        difficulty: form.difficulty,
+        correctAnswer: requiresLanguage(form.type) ? null : form.correctAnswer?.trim() || null,
+        answerLanguage: requiresLanguage(form.type) ? form.type : null,
+        starterCode: requiresLanguage(form.type) ? form.starterCode : null,
+        testCases: requiresLanguage(form.type)
+          ? form.testCases.map((testCase) => ({
+              input: testCase.input,
+              expectedOutput: testCase.expectedOutput,
+              isHidden: testCase.isHidden,
+              weight: Number(testCase.weight) || 1,
+            }))
+          : [],
         points: Number(form.points) || 0,
       });
       nav(`/exams/${examId}`);
@@ -91,41 +107,176 @@ export default function QuestionCreatePage() {
                 <textarea
                   className="input textarea"
                   value={form.text}
-                  onChange={(e) => setForm((current) => ({ ...current, text: e.target.value }))}
+                  onChange={(event) => setForm((current) => ({ ...current, text: event.target.value }))}
                   disabled={saving || loadingExam}
                   placeholder="Write the question prompt here."
                   rows={6}
                 />
               </div>
 
-              <div className="field">
-                <label className="label">Type</label>
-                <select
-                  className="input"
-                  value={form.type}
-                  onChange={(e) => setForm((current) => ({ ...current, type: e.target.value }))}
-                  disabled={saving || loadingExam}
-                >
-                  <option value="MCQ">MCQ</option>
-                  <option value="Text">Text</option>
-                  <option value="Code">Code</option>
-                </select>
+              <div className="gridThree">
+                <div className="field">
+                  <label className="label">Type</label>
+                  <select
+                    className="input"
+                    value={form.type}
+                    onChange={(event) => setForm((current) => ({
+                      ...current,
+                      type: event.target.value,
+                      starterCode: "",
+                      correctAnswer: "",
+                      testCases: [{ input: "", expectedOutput: "", isHidden: false, weight: 1 }],
+                    }))}
+                    disabled={saving || loadingExam}
+                  >
+                    <option value="MCQ">MCQ</option>
+                    <option value="Text">Text</option>
+                    <option value="CSharp">C#</option>
+                    <option value="SQL">SQL</option>
+                  </select>
+                </div>
+
+                <div className="field">
+                  <label className="label">Difficulty</label>
+                  <select
+                    className="input"
+                    value={form.difficulty}
+                    onChange={(event) => setForm((current) => ({ ...current, difficulty: event.target.value }))}
+                    disabled={saving || loadingExam}
+                  >
+                    <option value="Easy">Easy</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Hard">Hard</option>
+                  </select>
+                </div>
+
+                <div className="field">
+                  <label className="label">Points</label>
+                  <input
+                    className="input"
+                    type="number"
+                    min="1"
+                    value={form.points}
+                    onChange={(event) => setForm((current) => ({ ...current, points: Number(event.target.value) }))}
+                    disabled={saving || loadingExam}
+                  />
+                </div>
               </div>
 
-              <div className="field">
-                <label className="label">Points</label>
-                <input
-                  className="input"
-                  type="number"
-                  min="1"
-                  value={form.points}
-                  onChange={(e) => setForm((current) => ({ ...current, points: Number(e.target.value) }))}
-                  disabled={saving || loadingExam}
-                />
-              </div>
+              {!requiresLanguage(form.type) ? (
+                <div className="field">
+                  <label className="label">Expected answer</label>
+                  <input
+                    className="input"
+                    value={form.correctAnswer}
+                    onChange={(event) => setForm((current) => ({ ...current, correctAnswer: event.target.value }))}
+                    disabled={saving || loadingExam}
+                    placeholder={form.type === "MCQ" ? "Correct option key or canonical answer" : "Expected answer or grading note"}
+                  />
+                </div>
+              ) : null}
+
+              {requiresLanguage(form.type) ? (
+                <>
+                  <div className="field">
+                    <label className="label">Language</label>
+                    <input className="input" value={form.type} disabled />
+                  </div>
+
+                  <div className="field">
+                    <label className="label">Starter code / starter query</label>
+                    <textarea
+                      className="input textarea"
+                      value={form.starterCode}
+                      onChange={(event) => setForm((current) => ({ ...current, starterCode: event.target.value }))}
+                      disabled={saving || loadingExam}
+                      placeholder={form.type === "CSharp" ? "public class Solution { ... }" : "SELECT * FROM Students;"}
+                      rows={8}
+                    />
+                  </div>
+
+                  <div className="field">
+                    <label className="label">Test cases</label>
+                    <div className="stackLg">
+                      {form.testCases.map((testCase, index) => (
+                        <div key={`test-case-${index}`} className="surfaceCard">
+                          <div className="sectionBody stackLg">
+                            <div className="gridThree">
+                              <div className="field">
+                                <label className="label">Weight</label>
+                                <input
+                                  className="input"
+                                  type="number"
+                                  min="1"
+                                  value={testCase.weight}
+                                  onChange={(event) => updateTestCase(index, "weight", Number(event.target.value), setForm)}
+                                  disabled={saving || loadingExam}
+                                />
+                              </div>
+                              <label className="checkboxRow" style={{ marginTop: 30 }}>
+                                <input
+                                  type="checkbox"
+                                  checked={testCase.isHidden}
+                                  onChange={(event) => updateTestCase(index, "isHidden", event.target.checked, setForm)}
+                                  disabled={saving || loadingExam}
+                                />
+                                <span>Hidden test case</span>
+                              </label>
+                              <div className="row rowStart" style={{ marginTop: 24 }}>
+                                <button
+                                  className="btn"
+                                  type="button"
+                                  onClick={() => removeTestCase(index, setForm)}
+                                  disabled={saving || loadingExam || form.testCases.length === 1}
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="field">
+                              <label className="label">Input</label>
+                              <textarea
+                                className="input textarea"
+                                value={testCase.input}
+                                onChange={(event) => updateTestCase(index, "input", event.target.value, setForm)}
+                                disabled={saving || loadingExam}
+                                rows={4}
+                                placeholder={form.type === "CSharp" ? "stdin or execution context" : "dataset or setup context"}
+                              />
+                            </div>
+
+                            <div className="field">
+                              <label className="label">Expected output</label>
+                              <textarea
+                                className="input textarea"
+                                value={testCase.expectedOutput}
+                                onChange={(event) => updateTestCase(index, "expectedOutput", event.target.value, setForm)}
+                                disabled={saving || loadingExam}
+                                rows={4}
+                                placeholder={form.type === "CSharp" ? "Expected stdout/result" : "Expected query result signature"}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+
+                      <div className="row rowStart">
+                        <button className="btn" type="button" onClick={() => addTestCase(setForm)} disabled={saving || loadingExam}>
+                          Add test case
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              ) : null}
 
               <div className="row" style={{ justifyContent: "flex-end" }}>
-                <button className="btn btnPrimary" type="submit" disabled={saving || loadingExam || !canEdit || !form.text.trim()}>
+                <button
+                  className="btn btnPrimary"
+                  type="submit"
+                  disabled={saving || loadingExam || !canEdit || !form.text.trim() || !isQuestionFormReady(form)}
+                >
                   {saving ? "Saving..." : "Save question"}
                 </button>
               </div>
@@ -135,4 +286,39 @@ export default function QuestionCreatePage() {
       </section>
     </AppShell>
   );
+}
+
+function requiresLanguage(type) {
+  return type === "CSharp" || type === "SQL";
+}
+
+function isQuestionFormReady(form) {
+  if (!requiresLanguage(form.type)) {
+    return true;
+  }
+
+  return form.testCases.length > 0 && form.testCases.every((testCase) => testCase.expectedOutput.trim());
+}
+
+function addTestCase(setForm) {
+  setForm((current) => ({
+    ...current,
+    testCases: [...current.testCases, { input: "", expectedOutput: "", isHidden: false, weight: 1 }],
+  }));
+}
+
+function removeTestCase(index, setForm) {
+  setForm((current) => ({
+    ...current,
+    testCases: current.testCases.filter((_, currentIndex) => currentIndex !== index),
+  }));
+}
+
+function updateTestCase(index, key, value, setForm) {
+  setForm((current) => ({
+    ...current,
+    testCases: current.testCases.map((testCase, currentIndex) =>
+      currentIndex === index ? { ...testCase, [key]: value } : testCase,
+    ),
+  }));
 }
