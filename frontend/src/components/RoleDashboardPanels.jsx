@@ -13,6 +13,7 @@ const dashboardConfig = {
       { label: "Policy alerts", value: "02", meta: "Need admin action" },
     ],
     quickActions: [
+      { label: "Academic setup", to: "/admin/academic" },
       { label: "Manage users", to: "/admin/users" },
       { label: "Review exams", to: "/exams" },
     ],

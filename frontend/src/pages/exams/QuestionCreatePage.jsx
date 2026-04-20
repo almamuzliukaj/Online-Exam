@@ -8,12 +8,7 @@ import { canManageExams } from "../../lib/permissions";
 export default function QuestionCreatePage() {
   const nav = useNavigate();
   const { examId } = useParams();
-feature/exam-fixes-and-logo
-
-  const [role, setRole] = useState(null);
-
   const { user, loading: userLoading, error: userError } = useCurrentUser();
- main
   const [exam, setExam] = useState(null);
   const [form, setForm] = useState({
     text: "",
@@ -24,13 +19,8 @@ feature/exam-fixes-and-logo
     testCases: [{ input: "", expectedOutput: "", isHidden: false, weight: 1 }],
     points: 10,
   });
- feature/exam-fixes-and-logo
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-
-  const [saving, setSaving] = useState(false);
   const [loadingExam, setLoadingExam] = useState(true);
- main
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
   const canEdit = useMemo(() => canManageExams(user?.role), [user?.role]);
@@ -40,13 +30,13 @@ feature/exam-fixes-and-logo
 
     (async () => {
       try {
-        setLoading(true);
+        setLoadingExam(true);
         const data = await getExam(examId);
         setExam(data);
       } catch {
         setError("Failed to load exam.");
       } finally {
-        setLoading(false);
+        setLoadingExam(false);
       }
     })();
   }, [examId]);
@@ -88,35 +78,6 @@ feature/exam-fixes-and-logo
     }
   }
 
-feature/exam-fixes-and-logo
-  return (
-    <div className="shell">
-      <header className="nav">
-        <div className="container navInner">
-          <div className="brand">
-            <img className="brandLogo" src="/logo-itm.svg" alt="ITM Exam logo" />
-            <span>ITM Exam</span>
-          </div>
-          <div className="row">
-            <Link className="btn" to={`/exams/${examId}`}>Back</Link>
-          </div>
-        </div>
-      </header>
-
-      <main className="container" style={{ padding: "26px 0 40px" }}>
-        <section className="card" style={{ maxWidth: 720, margin: "0 auto" }}>
-          <div className="cardHeader">
-            <h2 style={{ margin: 0 }}>Add Question</h2>
-            <p className="p" style={{ marginTop: 8 }}>
-              {exam?.title ? `Exam: ${exam.title}` : "Add a question to this exam."}
-            </p>
-          </div>
-
-          <div className="cardBody">
-            {error ? <div className="alert" style={{ marginBottom: 14 }}>{error}</div> : null}
-
-            <form className="authForm" onSubmit={onSubmit}>
-
   if (userLoading) {
     return <div className="pageState">Loading question editor...</div>;
   }
@@ -141,7 +102,6 @@ feature/exam-fixes-and-logo
           <div className="sectionBody">
             {error ? <div className="alert">{error}</div> : null}
             <form className="stackLg" onSubmit={onSubmit}>
- main
               <div className="field">
                 <label className="label">Prompt</label>
                 <textarea
@@ -311,12 +271,6 @@ feature/exam-fixes-and-logo
                 </>
               ) : null}
 
-feature/exam-fixes-and-logo
-              <div className="row" style={{ gap: 12, justifyContent: "flex-end" }}>
-                <Link className="btn" to={`/exams/${examId}`}>Cancel</Link>
-                <button className="btn btnPrimary" type="submit" disabled={saving || loading || !canEdit}>
-                  {saving ? "Saving..." : "Save"}
-
               <div className="row" style={{ justifyContent: "flex-end" }}>
                 <button
                   className="btn btnPrimary"
@@ -324,7 +278,6 @@ feature/exam-fixes-and-logo
                   disabled={saving || loadingExam || !canEdit || !form.text.trim() || !isQuestionFormReady(form)}
                 >
                   {saving ? "Saving..." : "Save question"}
- main
                 </button>
               </div>
             </form>

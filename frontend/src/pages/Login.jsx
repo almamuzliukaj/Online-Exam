@@ -25,11 +25,18 @@ export default function Login() {
       navigate("/dashboard");
     } catch (err) {
       const apiMessage =
+ feature/agnesa-admin-academic-structure
+        typeof err?.response?.data === "string"
+          ? err.response.data
+          : err?.response?.data?.message;
+      setError(apiMessage || err?.message || "Login failed");
+
         err?.response?.data?.message ||
         err?.response?.data ||
         err?.message ||
         "Login failed";
       setError(String(apiMessage));
+main
     } finally {
       setLoading(false);
     }

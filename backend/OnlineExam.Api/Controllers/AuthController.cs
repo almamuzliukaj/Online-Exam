@@ -28,15 +28,12 @@ namespace OnlineExam.Api.Controllers
             var user = _db.Users.FirstOrDefault(u => u.Email == dto.Email);
 
             if (user == null || !user.IsActive)
-            {
                 return Unauthorized("Invalid credentials");
-            }
 
             if (!PasswordMatches(user.PasswordHash, dto.Password))
-            {
                 return Unauthorized("Invalid credentials");
-            }
 
+            // Preserve compatibility with seeded plaintext demo users by upgrading them after first successful login.
             if (!IsBcryptHash(user.PasswordHash))
             {
                 user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
@@ -47,9 +44,7 @@ namespace OnlineExam.Api.Controllers
             var jwtIssuer = _config["Jwt:Issuer"];
 
             if (string.IsNullOrEmpty(jwtKey) || string.IsNullOrEmpty(jwtIssuer))
-            {
                 return StatusCode(500, "JWT config missing");
-            }
 
             var key = Encoding.UTF8.GetBytes(jwtKey);
 
@@ -110,20 +105,16 @@ namespace OnlineExam.Api.Controllers
         private static bool IsBcryptHash(string value)
         {
             return !string.IsNullOrWhiteSpace(value) &&
-                (value.StartsWith("$2a$") || value.StartsWith("$2b$") || value.StartsWith("$2y$"));
+                   (value.StartsWith("$2a$") || value.StartsWith("$2b$") || value.StartsWith("$2y$"));
         }
 
         private static bool PasswordMatches(string storedHash, string inputPassword)
         {
             if (string.IsNullOrWhiteSpace(storedHash) || string.IsNullOrWhiteSpace(inputPassword))
-            {
                 return false;
-            }
 
             if (!IsBcryptHash(storedHash))
-            {
                 return storedHash == inputPassword;
-            }
 
             try
             {
