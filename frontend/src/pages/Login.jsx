@@ -24,7 +24,11 @@ export default function Login() {
       await login(email, password);
       navigate("/dashboard");
     } catch (err) {
-      setError(err?.message || "Login failed");
+      const apiMessage =
+        typeof err?.response?.data === "string"
+          ? err.response.data
+          : err?.response?.data?.message;
+      setError(apiMessage || err?.message || "Login failed");
     } finally {
       setLoading(false);
     }

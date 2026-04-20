@@ -336,9 +336,9 @@ public class CourseOfferingsController : ControllerBase
 
     private static bool IsValidYearSemesterPair(int yearOfStudy, int semesterNo)
     {
-        if (yearOfStudy < 1 || yearOfStudy > 3)
+        if (yearOfStudy < 1)
             return false;
 
-        return semesterNo == ((yearOfStudy * 2) - 1) || semesterNo == (yearOfStudy * 2);
+        return semesterNo >= 1;
     }
 }

@@ -11,6 +11,7 @@ import ExamCreatePage from "../pages/exams/ExamCreatePage";
 import ExamDetailsPage from "../pages/exams/ExamDetailsPage";
 import QuestionCreatePage from "../pages/exams/QuestionCreatePage";
 import AdminUsersPage from "../pages/admin/AdminUsersPage";
+import AdminAcademicStructurePage from "../pages/admin/AdminAcademicStructurePage";
 
 export default function AppRoutes() {
   return (
@@ -24,6 +25,7 @@ export default function AppRoutes() {
 
         <Route element={<RoleGuard allow={["Admin"]} />}>
           <Route path="/admin/users" element={<AdminUsersPage />} />
+          <Route path="/admin/academic" element={<AdminAcademicStructurePage />} />
         </Route>
 
         <Route element={<RoleGuard allow={["Admin", "Professor"]} />}>

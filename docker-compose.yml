@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: onlineexam
       POSTGRES_PASSWORD: onlineexam
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - onlineexam_db:/var/lib/postgresql/data
 
