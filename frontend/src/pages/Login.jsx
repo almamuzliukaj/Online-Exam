@@ -1,15 +1,18 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 import { login } from "../lib/auth";
-
-const presets = [
-  { label: "Admin demo", email: "admin@onlineexam.com", password: "Password123!" },
-  { label: "Professor demo", email: "prof@onlineexam.com", password: "Password123!" },
-  { label: "Student demo", email: "student@onlineexam.com", password: "Password123!" },
-];
 
 export default function Login() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+  const presets = [
+    { label: t("login.presets.admin"), email: "admin@onlineexam.com", password: "Password123!" },
+    { label: t("login.presets.professor"), email: "prof@onlineexam.com", password: "Password123!" },
+    { label: t("login.presets.student"), email: "student@onlineexam.com", password: "Password123!" },
+  ];
+
   const [email, setEmail] = useState("admin@onlineexam.com");
   const [password, setPassword] = useState("Password123!");
   const [show, setShow] = useState(false);
@@ -28,7 +31,7 @@ export default function Login() {
         err?.response?.data?.message ||
         err?.response?.data ||
         err?.message ||
-        "Login failed";
+        t("login.loginFailed");
       setError(String(apiMessage));
     } finally {
       setLoading(false);
@@ -40,23 +43,24 @@ export default function Login() {
       <div className="loginBackdrop" />
       <div className="loginContent">
         <section className="loginIntro">
-          <div className="eyebrow">Exam operations platform</div>
-          <h1 className="loginTitle">Run academic assessment with clarity, structure, and control.</h1>
-          <p className="loginText">
-            Built for departments that need role-based onboarding, exam preparation, question bank workflows, and a clean student-facing experience.
-          </p>
+          <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start", gap: 16 }}>
+            <div className="eyebrow">{t("common.examOperationsPlatform")}</div>
+            <LanguageSwitcher />
+          </div>
+          <h1 className="loginTitle">{t("login.title")}</h1>
+          <p className="loginText">{t("login.text")}</p>
           <div className="loginFeatureGrid">
             <article className="featureTile">
-              <strong>Admin operations</strong>
-              <span>User onboarding, imports, staff management, and semester control.</span>
+              <strong>{t("login.features.adminTitle")}</strong>
+              <span>{t("login.features.adminText")}</span>
             </article>
             <article className="featureTile">
-              <strong>Teaching workflows</strong>
-              <span>Question authoring, exam setup, publishing, and grading readiness.</span>
+              <strong>{t("login.features.teachingTitle")}</strong>
+              <span>{t("login.features.teachingText")}</span>
             </article>
             <article className="featureTile">
-              <strong>Student delivery</strong>
-              <span>Focused access to eligible exams, results, and carry-over opportunities.</span>
+              <strong>{t("login.features.studentTitle")}</strong>
+              <span>{t("login.features.studentText")}</span>
             </article>
           </div>
         </section>
@@ -65,15 +69,15 @@ export default function Login() {
           <div className="brand brandLarge">
             <span className="logoMark" />
             <span>
-              <strong>Online Exam</strong>
-              <small>Department workspace</small>
+              <strong>{t("common.appName")}</strong>
+              <small>{t("common.departmentWorkspace")}</small>
             </span>
           </div>
 
           <div className="stackLg">
             <div>
-              <h2 className="panelTitle">Sign in</h2>
-              <p className="panelText">Access your role-based workspace. Account provisioning is handled by the administrator.</p>
+              <h2 className="panelTitle">{t("login.signIn")}</h2>
+              <p className="panelText">{t("login.signInText")}</p>
             </div>
 
             <div className="presetRow">
@@ -96,13 +100,13 @@ export default function Login() {
               {error ? <div className="alert">{error}</div> : null}
 
               <div className="field">
-                <label className="label">Email address</label>
+                <label className="label">{t("login.emailLabel")}</label>
                 <input
                   className="input"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@faculty.edu"
+                  placeholder={t("login.emailPlaceholder")}
                   autoComplete="email"
                   disabled={loading}
                   required
@@ -110,14 +114,14 @@ export default function Login() {
               </div>
 
               <div className="field">
-                <label className="label">Password</label>
+                <label className="label">{t("login.passwordLabel")}</label>
                 <div className="inputWrap">
                   <input
                     className="input"
                     type={show ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
+                    placeholder={t("login.passwordPlaceholder")}
                     autoComplete="current-password"
                     disabled={loading}
                     required
@@ -128,13 +132,13 @@ export default function Login() {
                     onClick={() => setShow((value) => !value)}
                     disabled={loading}
                   >
-                    {show ? "Hide" : "Show"}
+                    {show ? t("login.hide") : t("login.show")}
                   </button>
                 </div>
               </div>
 
               <button className="btn btnPrimary btnBlock" type="submit" disabled={loading}>
-                {loading ? "Signing in..." : "Enter workspace"}
+                {loading ? t("login.signingIn") : t("common.enterWorkspace")}
               </button>
             </form>
           </div>

@@ -1,138 +1,10 @@
 import { Link } from "react-router-dom";
-
-const dashboardConfig = {
-  Admin: {
-    badge: "Administration",
-    heroTitle: "Control the academic cycle from one operational workspace.",
-    heroText:
-      "Manage user onboarding, monitor platform readiness, and keep semesters, staff assignments, and exam operations aligned.",
-    stats: [
-      { label: "Active users", value: "184", meta: "+12 this week" },
-      { label: "Course offerings", value: "34", meta: "Across 6 semesters" },
-      { label: "Pending imports", value: "03", meta: "Require review" },
-      { label: "Policy alerts", value: "02", meta: "Need admin action" },
-    ],
-    quickActions: [
-      { label: "Manage users", to: "/admin/users" },
-      { label: "Review exams", to: "/exams" },
-    ],
-    sections: [
-      {
-        title: "Operational priorities",
-        items: [
-          "Review newly imported students before semester activation.",
-          "Confirm professor and assistant assignments for course offerings.",
-          "Validate inactive accounts before the next exam window.",
-        ],
-      },
-      {
-        title: "Recommended next moves",
-        items: [
-          "Add enrollment workflows so students map to current and carry-over subjects.",
-          "Connect role dashboards to real aggregate APIs.",
-          "Finalize exam publishing and monitoring flows.",
-        ],
-      },
-    ],
-  },
-  Professor: {
-    badge: "Professor Workspace",
-    heroTitle: "Design exams, manage question quality, and supervise assessment readiness.",
-    heroText:
-      "Your dashboard groups teaching responsibilities, exam creation tasks, and grading priorities in one place.",
-    stats: [
-      { label: "Assigned courses", value: "05", meta: "Across Years 1-3" },
-      { label: "Draft exams", value: "04", meta: "Awaiting completion" },
-      { label: "Question bank", value: "128", meta: "Tagged by difficulty" },
-      { label: "Pending grading", value: "17", meta: "Assistant-linked included" },
-    ],
-    quickActions: [
-      { label: "Open exam workspace", to: "/exams" },
-      { label: "Create exam", to: "/exams/new" },
-    ],
-    sections: [
-      {
-        title: "This week's focus",
-        items: [
-          "Build exams from approved question banks per semester.",
-          "Review assistant-created assessments and their grading progress.",
-          "Prepare publish-ready schedules for active exam windows.",
-        ],
-      },
-      {
-        title: "Course organization",
-        items: [
-          "Year 1: Programming Fundamentals, Database Systems",
-          "Year 2: Algorithms, Operating Systems",
-          "Year 3: Software Engineering",
-        ],
-      },
-    ],
-  },
-  Assistant: {
-    badge: "Assistant Workspace",
-    heroTitle: "Support course delivery, exam execution, and grading coordination.",
-    heroText:
-      "Use this area to track assigned offerings, exam support tasks, and grading responsibilities under your professor's courses.",
-    stats: [
-      { label: "Assigned offerings", value: "03", meta: "Current semester" },
-      { label: "Support exams", value: "06", meta: "Including live sessions" },
-      { label: "Review tasks", value: "14", meta: "Short-answer grading" },
-      { label: "Active sessions", value: "01", meta: "Monitoring enabled soon" },
-    ],
-    quickActions: [{ label: "Open assigned exams", to: "/exams" }],
-    sections: [
-      {
-        title: "Responsibilities",
-        items: [
-          "Support exam preparation and monitor assigned assessments.",
-          "Review student outcomes for exams created under your course offerings.",
-          "Escalate publishing and unlock decisions to the professor.",
-        ],
-      },
-      {
-        title: "Operational notes",
-        items: [
-          "Assistant dashboards should expose grades and support actions, not global exam ownership.",
-          "Live monitoring and violation logs will appear here once the proctoring module is implemented.",
-        ],
-      },
-    ],
-  },
-  Student: {
-    badge: "Student Workspace",
-    heroTitle: "Track eligible exams, upcoming deadlines, and your result history.",
-    heroText:
-      "Your dashboard is focused on what you can actually act on: active-semester exams, carry-over opportunities, and published outcomes.",
-    stats: [
-      { label: "Eligible exams", value: "03", meta: "Current visibility rules" },
-      { label: "Upcoming windows", value: "02", meta: "Next 7 days" },
-      { label: "Published results", value: "05", meta: "Ready to download" },
-      { label: "Carry-over exams", value: "01", meta: "Professor unlock required" },
-    ],
-    quickActions: [{ label: "View exams", to: "/exams" }],
-    sections: [
-      {
-        title: "What you should see here",
-        items: [
-          "Only subjects from your active semester.",
-          "Carry-over exams only when explicitly unlocked.",
-          "Published results after staff approval.",
-        ],
-      },
-      {
-        title: "Security expectations",
-        items: [
-          "Exam access will later include QR entry and focused-session rules.",
-          "Attempt status, timer, and result downloads will appear as the student flow is completed.",
-        ],
-      },
-    ],
-  },
-};
+import { useTranslation } from "react-i18next";
 
 export default function RoleDashboardPanels({ role = "Student" }) {
-  const config = dashboardConfig[role] || dashboardConfig.Student;
+  const { t } = useTranslation();
+  const roleKey = role.toLowerCase();
+  const config = getDashboardConfig(roleKey, t);
 
   return (
     <div className="stackXl">
@@ -181,4 +53,105 @@ export default function RoleDashboardPanels({ role = "Student" }) {
       </section>
     </div>
   );
+}
+
+function getDashboardConfig(roleKey, t) {
+  const fallback = "student";
+  const current = ["admin", "professor", "assistant", "student"].includes(roleKey) ? roleKey : fallback;
+
+  const statsByRole = {
+    admin: [
+      { label: t("rolePanels.admin.stats.activeUsers.label"), value: "184", meta: t("rolePanels.admin.stats.activeUsers.meta") },
+      { label: t("rolePanels.admin.stats.offerings.label"), value: "34", meta: t("rolePanels.admin.stats.offerings.meta") },
+      { label: t("rolePanels.admin.stats.imports.label"), value: "03", meta: t("rolePanels.admin.stats.imports.meta") },
+      { label: t("rolePanels.admin.stats.alerts.label"), value: "02", meta: t("rolePanels.admin.stats.alerts.meta") },
+    ],
+    professor: [
+      { label: t("rolePanels.professor.stats.assignedCourses.label"), value: "05", meta: t("rolePanels.professor.stats.assignedCourses.meta") },
+      { label: t("rolePanels.professor.stats.draftExams.label"), value: "04", meta: t("rolePanels.professor.stats.draftExams.meta") },
+      { label: t("rolePanels.professor.stats.questionBank.label"), value: "128", meta: t("rolePanels.professor.stats.questionBank.meta") },
+      { label: t("rolePanels.professor.stats.grading.label"), value: "17", meta: t("rolePanels.professor.stats.grading.meta") },
+    ],
+    assistant: [
+      { label: t("rolePanels.assistant.stats.assignedOfferings.label"), value: "03", meta: t("rolePanels.assistant.stats.assignedOfferings.meta") },
+      { label: t("rolePanels.assistant.stats.supportExams.label"), value: "06", meta: t("rolePanels.assistant.stats.supportExams.meta") },
+      { label: t("rolePanels.assistant.stats.reviewTasks.label"), value: "14", meta: t("rolePanels.assistant.stats.reviewTasks.meta") },
+      { label: t("rolePanels.assistant.stats.activeSessions.label"), value: "01", meta: t("rolePanels.assistant.stats.activeSessions.meta") },
+    ],
+    student: [
+      { label: t("rolePanels.student.stats.eligibleExams.label"), value: "03", meta: t("rolePanels.student.stats.eligibleExams.meta") },
+      { label: t("rolePanels.student.stats.upcoming.label"), value: "02", meta: t("rolePanels.student.stats.upcoming.meta") },
+      { label: t("rolePanels.student.stats.results.label"), value: "05", meta: t("rolePanels.student.stats.results.meta") },
+      { label: t("rolePanels.student.stats.carryOver.label"), value: "01", meta: t("rolePanels.student.stats.carryOver.meta") },
+    ],
+  };
+
+  const quickActionsByRole = {
+    admin: [
+      { label: t("rolePanels.admin.quickActions.manageUsers"), to: "/admin/users" },
+      { label: t("rolePanels.admin.quickActions.reviewExams"), to: "/exams" },
+    ],
+    professor: [
+      { label: t("rolePanels.professor.quickActions.openExams"), to: "/exams" },
+      { label: t("rolePanels.professor.quickActions.createExam"), to: "/exams/new" },
+    ],
+    assistant: [
+      { label: t("rolePanels.assistant.quickActions.assignedExams"), to: "/exams" },
+    ],
+    student: [
+      { label: t("rolePanels.student.quickActions.viewExams"), to: "/exams" },
+    ],
+  };
+
+  const sectionsByRole = {
+    admin: [
+      {
+        title: t("rolePanels.admin.sections.priorities.title"),
+        items: t("rolePanels.admin.sections.priorities.items", { returnObjects: true }),
+      },
+      {
+        title: t("rolePanels.admin.sections.nextMoves.title"),
+        items: t("rolePanels.admin.sections.nextMoves.items", { returnObjects: true }),
+      },
+    ],
+    professor: [
+      {
+        title: t("rolePanels.professor.sections.focus.title"),
+        items: t("rolePanels.professor.sections.focus.items", { returnObjects: true }),
+      },
+      {
+        title: t("rolePanels.professor.sections.courses.title"),
+        items: t("rolePanels.professor.sections.courses.items", { returnObjects: true }),
+      },
+    ],
+    assistant: [
+      {
+        title: t("rolePanels.assistant.sections.responsibilities.title"),
+        items: t("rolePanels.assistant.sections.responsibilities.items", { returnObjects: true }),
+      },
+      {
+        title: t("rolePanels.assistant.sections.notes.title"),
+        items: t("rolePanels.assistant.sections.notes.items", { returnObjects: true }),
+      },
+    ],
+    student: [
+      {
+        title: t("rolePanels.student.sections.visible.title"),
+        items: t("rolePanels.student.sections.visible.items", { returnObjects: true }),
+      },
+      {
+        title: t("rolePanels.student.sections.security.title"),
+        items: t("rolePanels.student.sections.security.items", { returnObjects: true }),
+      },
+    ],
+  };
+
+  return {
+    badge: t(`rolePanels.${current}.badge`),
+    heroTitle: t(`rolePanels.${current}.heroTitle`),
+    heroText: t(`rolePanels.${current}.heroText`),
+    stats: statsByRole[current],
+    quickActions: quickActionsByRole[current],
+    sections: sectionsByRole[current],
+  };
 }

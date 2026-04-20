@@ -4,8 +4,10 @@ import { canManageExams } from "../../lib/permissions";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
 import AppShell from "../../components/AppShell";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function QuestionCreatePage() {
+  const { t } = useTranslation();
   const nav = useNavigate();
   const { examId } = useParams();
   const { user, loading: userLoading, error: userError } = useCurrentUser();
@@ -30,12 +32,12 @@ export default function QuestionCreatePage() {
         const data = await getExam(examId);
         setExam(data);
       } catch {
-        setError("Failed to load exam.");
+        setError(t("questionCreate.loadExamError"));
       } finally {
         setLoadingExam(false);
       }
     })();
-  }, [examId]);
+  }, [examId, t]);
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -56,50 +58,50 @@ export default function QuestionCreatePage() {
         (typeof err?.response?.data === "string" ? err.response.data : null) ||
         err?.message;
 
-      setError(apiMessage || "Failed to add question.");
+      setError(apiMessage || t("questionCreate.saveError"));
     } finally {
       setSaving(false);
     }
   }
 
   if (userLoading) {
-    return <div className="pageState">Loading question editor...</div>;
+    return <div className="pageState">{t("questionCreate.loading")}</div>;
   }
 
   if (!user) {
-    return <div className="pageState">{userError || "Unable to load user profile."}</div>;
+    return <div className="pageState">{userError || t("questionCreate.userError")}</div>;
   }
 
   return (
     <AppShell
       user={user}
-      badge="Question authoring"
-      title="Add question"
-      subtitle={loadingExam ? "Loading exam context..." : `Create a new question for ${exam?.title || "this exam"}.`}
-      actions={<Link className="btn" to={`/exams/${examId}`}>Back to exam</Link>}
+      badge={t("questionCreate.badge")}
+      title={t("questionCreate.title")}
+      subtitle={loadingExam ? t("questionCreate.subtitleLoading") : t("questionCreate.subtitle", { title: exam?.title || t("examDetails.titleFallback") })}
+      actions={<Link className="btn" to={`/exams/${examId}`}>{t("questionCreate.backToExam")}</Link>}
     >
       <section className="formSurface">
         <div className="surfaceCard">
           <div className="sectionHeader">
-            <h3>Question content</h3>
+            <h3>{t("questionCreate.content")}</h3>
           </div>
           <div className="sectionBody">
             {error ? <div className="alert">{error}</div> : null}
             <form className="stackLg" onSubmit={onSubmit}>
               <div className="field">
-                <label className="label">Prompt</label>
+                <label className="label">{t("questionCreate.prompt")}</label>
                 <textarea
                   className="input textarea"
                   value={form.text}
                   onChange={(e) => setForm((current) => ({ ...current, text: e.target.value }))}
                   disabled={saving || loadingExam}
-                  placeholder="Write the question prompt here."
+                  placeholder={t("questionCreate.promptPlaceholder")}
                   rows={6}
                 />
               </div>
 
               <div className="field">
-                <label className="label">Type</label>
+                <label className="label">{t("questionCreate.type")}</label>
                 <select
                   className="input"
                   value={form.type}
@@ -107,13 +109,13 @@ export default function QuestionCreatePage() {
                   disabled={saving || loadingExam}
                 >
                   <option value="MCQ">MCQ</option>
-                  <option value="Text">Text</option>
-                  <option value="Code">Code</option>
+                  <option value="Text">{t("common.text")}</option>
+                  <option value="Code">{t("common.code")}</option>
                 </select>
               </div>
 
               <div className="field">
-                <label className="label">Points</label>
+                <label className="label">{t("questionCreate.points")}</label>
                 <input
                   className="input"
                   type="number"
@@ -126,7 +128,7 @@ export default function QuestionCreatePage() {
 
               <div className="row" style={{ justifyContent: "flex-end" }}>
                 <button className="btn btnPrimary" type="submit" disabled={saving || loadingExam || !canEdit || !form.text.trim()}>
-                  {saving ? "Saving..." : "Save question"}
+                  {saving ? t("questionCreate.saving") : t("questionCreate.save")}
                 </button>
               </div>
             </form>

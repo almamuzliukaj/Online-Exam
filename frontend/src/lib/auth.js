@@ -4,18 +4,30 @@ export function getToken() {
   return localStorage.getItem("token");
 }
 
+export function getStoredUser() {
+  const raw = localStorage.getItem("user");
+  return raw ? JSON.parse(raw) : null;
+}
+
 export function saveToken(token) {
   localStorage.setItem("token", token);
+}
+
+export function saveUser(user) {
+  localStorage.setItem("user", JSON.stringify(user));
 }
 
 export function clearToken() {
   localStorage.removeItem("token");
 }
 
-// KJO ISHTE PJESA QE MANGOI:
+export function clearUser() {
+  localStorage.removeItem("user");
+}
+
 export function logout() {
   clearToken();
-  // Kjo e dërgon përdoruesin te login dhe rifreskon faqen që të fshihen të dhënat e vjetra
+  clearUser();
   window.location.href = "/login";
 }
 
@@ -25,10 +37,19 @@ export async function me() {
 
   try {
     const response = await api.get("/auth/me");
-    return response.data;
+    const storedUser = getStoredUser();
+    const mergedUser = {
+      ...response.data,
+      fullName: storedUser?.fullName || response.data?.fullName || "",
+      email: response.data?.email || storedUser?.email || "",
+      role: response.data?.role || storedUser?.role || "",
+    };
+    saveUser(mergedUser);
+    return mergedUser;
   } catch (error) {
     if (error.response?.status === 401) {
       clearToken();
+      clearUser();
     }
     return null;
   }
@@ -37,9 +58,15 @@ export async function me() {
 export async function login(email, password) {
   const response = await api.post("/auth/login", { email, password });
   const data = response.data;
-  
+
   if (data.token) {
     saveToken(data.token);
+    saveUser({
+      fullName: data.fullName,
+      email: data.email,
+      role: data.role,
+    });
   }
+
   return data;
 }
