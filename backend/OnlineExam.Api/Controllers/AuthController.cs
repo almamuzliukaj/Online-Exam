@@ -91,10 +91,20 @@ namespace OnlineExam.Api.Controllers
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var email = User.FindFirst(ClaimTypes.Name)?.Value;
             var role = User.FindFirst(ClaimTypes.Role)?.Value;
+            string? fullName = null;
+
+            if (Guid.TryParse(userId, out var parsedUserId))
+            {
+                fullName = _db.Users
+                    .Where(u => u.Id == parsedUserId)
+                    .Select(u => u.FullName)
+                    .FirstOrDefault();
+            }
 
             return Ok(new
             {
                 userId,
+                fullName,
                 email,
                 role
             });

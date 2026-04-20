@@ -87,6 +87,30 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Startup");
+    logger.LogInformation("Applying pending database migrations...");
+    db.Database.Migrate();
+
+    if (!db.Users.Any(u => u.Email == "assistant@onlineexam.com"))
+    {
+        db.Users.Add(new OnlineExam.Api.Models.User
+        {
+            Id = Guid.Parse("9d5f2e54-204f-447d-b0f2-41e40ef6699c"),
+            FullName = "Assistant",
+            Email = "assistant@onlineexam.com",
+            PasswordHash = "Password123!",
+            Role = "Assistant",
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow
+        });
+        db.SaveChanges();
+        logger.LogInformation("Seeded assistant demo account for role-based shell testing.");
+    }
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

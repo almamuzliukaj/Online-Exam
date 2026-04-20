@@ -1,6 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 import { getExam, listQuestions } from "../../lib/examsApi";
-import { canManageExams } from "../../lib/permissions";
+import { canCreateQuestions } from "../../lib/permissions";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
 import AppShell from "../../components/AppShell";
 import { useEffect, useState } from "react";
@@ -46,7 +46,7 @@ export default function ExamDetailsPage() {
     return <div className="pageState">{userError || "Unable to load user profile."}</div>;
   }
 
-  const canEdit = canManageExams(user.role);
+  const canEdit = canCreateQuestions(user.role);
 
   return (
     <AppShell

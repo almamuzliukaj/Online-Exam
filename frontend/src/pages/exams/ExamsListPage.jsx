@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import AppShell from "../../components/AppShell";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
 import { listExams } from "../../lib/examsApi";
-import { canManageExams } from "../../lib/permissions";
+import { canCreateExams, normalizeRole } from "../../lib/permissions";
 import { useEffect, useState } from "react";
 
 export default function ExamsListPage() {
@@ -40,14 +40,15 @@ export default function ExamsListPage() {
     return <div className="pageState">{userError || "Unable to load user profile."}</div>;
   }
 
-  const canCreate = canManageExams(user.role);
+  const canCreate = canCreateExams(user.role);
+  const roleLabel = normalizeRole(user.role);
 
   return (
     <AppShell
       user={user}
       badge="Exam workspace"
       title="Exams"
-      subtitle="Review current assessments, drafts, and publishing readiness in a cleaner operational view."
+      subtitle={`Review the assessments visible to your ${roleLabel.toLowerCase()} workspace, with ownership-aware actions and cleaner navigation.`}
       actions={canCreate ? <Link to="/exams/new" className="btn btnPrimary">Create exam</Link> : null}
     >
       <div className="stackXl">

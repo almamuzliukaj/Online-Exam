@@ -1,9 +1,7 @@
-import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
-
+import { Navigate, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
 import RoleGuard from "./RoleGuard";
-
+import SessionHomeRedirect from "./SessionHomeRedirect";
 import Login from "../pages/Login";
 import Dashboard from "../pages/Dashboard";
 import ExamsListPage from "../pages/exams/ExamsListPage";
@@ -18,11 +16,10 @@ export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/" element={<SessionHomeRedirect />} />
 
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/exams" element={<ExamsListPage />} />
-        <Route path="/exams/:examId" element={<ExamDetailsPage />} />
 
         <Route element={<RoleGuard allow={["Admin"]} />}>
           <Route path="/admin/users" element={<AdminUsersPage />} />
@@ -30,14 +27,21 @@ export default function AppRoutes() {
           <Route path="/admin/offerings" element={<AdminOfferingsPage />} />
         </Route>
 
-        <Route element={<RoleGuard allow={["Admin", "Professor"]} />}>
+        <Route element={<RoleGuard allow={["Professor", "Assistant", "Student"]} />}>
+          <Route path="/exams" element={<ExamsListPage />} />
+          <Route path="/exams/:examId" element={<ExamDetailsPage />} />
+        </Route>
+
+        <Route element={<RoleGuard allow={["Professor", "Assistant"]} />}>
           <Route path="/exams/new" element={<ExamCreatePage />} />
+        </Route>
+
+        <Route element={<RoleGuard allow={["Professor"]} />}>
           <Route path="/exams/:examId/questions/new" element={<QuestionCreatePage />} />
         </Route>
       </Route>
 
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

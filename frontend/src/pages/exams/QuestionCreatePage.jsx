@@ -3,52 +3,57 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import AppShell from "../../components/AppShell";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
 import { addQuestion, getExam } from "../../lib/examsApi";
-import { canManageExams } from "../../lib/permissions";
+import { canCreateQuestions } from "../../lib/permissions";
+
+const EMPTY_TEST_CASE = { input: "", expectedOutput: "", isHidden: false, weight: 1 };
 
 export default function QuestionCreatePage() {
-  const nav = useNavigate();
+  const navigate = useNavigate();
   const { examId } = useParams();
-feature/exam-fixes-and-logo
-
-  const [role, setRole] = useState(null);
-
   const { user, loading: userLoading, error: userError } = useCurrentUser();
- main
   const [exam, setExam] = useState(null);
+  const [loadingExam, setLoadingExam] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
   const [form, setForm] = useState({
     text: "",
     type: "MCQ",
     difficulty: "Medium",
     correctAnswer: "",
     starterCode: "",
-    testCases: [{ input: "", expectedOutput: "", isHidden: false, weight: 1 }],
+    testCases: [{ ...EMPTY_TEST_CASE }],
     points: 10,
   });
- feature/exam-fixes-and-logo
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
 
-  const [saving, setSaving] = useState(false);
-  const [loadingExam, setLoadingExam] = useState(true);
- main
-  const [error, setError] = useState("");
-
-  const canEdit = useMemo(() => canManageExams(user?.role), [user?.role]);
+  const canEdit = useMemo(() => canCreateQuestions(user?.role), [user?.role]);
 
   useEffect(() => {
     if (!examId) return;
 
+    let active = true;
+
     (async () => {
       try {
-        setLoading(true);
+        setLoadingExam(true);
+        setError("");
         const data = await getExam(examId);
-        setExam(data);
+        if (active) {
+          setExam(data);
+        }
       } catch {
-        setError("Failed to load exam.");
+        if (active) {
+          setError("Failed to load exam.");
+        }
       } finally {
-        setLoading(false);
+        if (active) {
+          setLoadingExam(false);
+        }
       }
     })();
+
+    return () => {
+      active = false;
+    };
   }, [examId]);
 
   async function onSubmit(event) {
@@ -75,7 +80,7 @@ feature/exam-fixes-and-logo
           : [],
         points: Number(form.points) || 0,
       });
-      nav(`/exams/${examId}`);
+      navigate(`/exams/${examId}`);
     } catch (err) {
       const apiMessage =
         err?.response?.data?.message ||
@@ -87,35 +92,6 @@ feature/exam-fixes-and-logo
       setSaving(false);
     }
   }
-
-feature/exam-fixes-and-logo
-  return (
-    <div className="shell">
-      <header className="nav">
-        <div className="container navInner">
-          <div className="brand">
-            <img className="brandLogo" src="/logo-itm.svg" alt="ITM Exam logo" />
-            <span>ITM Exam</span>
-          </div>
-          <div className="row">
-            <Link className="btn" to={`/exams/${examId}`}>Back</Link>
-          </div>
-        </div>
-      </header>
-
-      <main className="container" style={{ padding: "26px 0 40px" }}>
-        <section className="card" style={{ maxWidth: 720, margin: "0 auto" }}>
-          <div className="cardHeader">
-            <h2 style={{ margin: 0 }}>Add Question</h2>
-            <p className="p" style={{ marginTop: 8 }}>
-              {exam?.title ? `Exam: ${exam.title}` : "Add a question to this exam."}
-            </p>
-          </div>
-
-          <div className="cardBody">
-            {error ? <div className="alert" style={{ marginBottom: 14 }}>{error}</div> : null}
-
-            <form className="authForm" onSubmit={onSubmit}>
 
   if (userLoading) {
     return <div className="pageState">Loading question editor...</div>;
@@ -140,8 +116,8 @@ feature/exam-fixes-and-logo
           </div>
           <div className="sectionBody">
             {error ? <div className="alert">{error}</div> : null}
+
             <form className="stackLg" onSubmit={onSubmit}>
- main
               <div className="field">
                 <label className="label">Prompt</label>
                 <textarea
@@ -165,7 +141,7 @@ feature/exam-fixes-and-logo
                       type: event.target.value,
                       starterCode: "",
                       correctAnswer: "",
-                      testCases: [{ input: "", expectedOutput: "", isHidden: false, weight: 1 }],
+                      testCases: [{ ...EMPTY_TEST_CASE }],
                     }))}
                     disabled={saving || loadingExam}
                   >
@@ -214,15 +190,8 @@ feature/exam-fixes-and-logo
                     placeholder={form.type === "MCQ" ? "Correct option key or canonical answer" : "Expected answer or grading note"}
                   />
                 </div>
-              ) : null}
-
-              {requiresLanguage(form.type) ? (
+              ) : (
                 <>
-                  <div className="field">
-                    <label className="label">Language</label>
-                    <input className="input" value={form.type} disabled />
-                  </div>
-
                   <div className="field">
                     <label className="label">Starter code / starter query</label>
                     <textarea
@@ -253,6 +222,7 @@ feature/exam-fixes-and-logo
                                   disabled={saving || loadingExam}
                                 />
                               </div>
+
                               <label className="checkboxRow" style={{ marginTop: 30 }}>
                                 <input
                                   type="checkbox"
@@ -262,6 +232,7 @@ feature/exam-fixes-and-logo
                                 />
                                 <span>Hidden test case</span>
                               </label>
+
                               <div className="row rowStart" style={{ marginTop: 24 }}>
                                 <button
                                   className="btn"
@@ -309,22 +280,16 @@ feature/exam-fixes-and-logo
                     </div>
                   </div>
                 </>
-              ) : null}
-
-feature/exam-fixes-and-logo
-              <div className="row" style={{ gap: 12, justifyContent: "flex-end" }}>
-                <Link className="btn" to={`/exams/${examId}`}>Cancel</Link>
-                <button className="btn btnPrimary" type="submit" disabled={saving || loading || !canEdit}>
-                  {saving ? "Saving..." : "Save"}
+              )}
 
               <div className="row" style={{ justifyContent: "flex-end" }}>
+                <Link className="btn" to={`/exams/${examId}`}>Cancel</Link>
                 <button
                   className="btn btnPrimary"
                   type="submit"
                   disabled={saving || loadingExam || !canEdit || !form.text.trim() || !isQuestionFormReady(form)}
                 >
                   {saving ? "Saving..." : "Save question"}
- main
                 </button>
               </div>
             </form>
@@ -350,7 +315,7 @@ function isQuestionFormReady(form) {
 function addTestCase(setForm) {
   setForm((current) => ({
     ...current,
-    testCases: [...current.testCases, { input: "", expectedOutput: "", isHidden: false, weight: 1 }],
+    testCases: [...current.testCases, { ...EMPTY_TEST_CASE }],
   }));
 }
 

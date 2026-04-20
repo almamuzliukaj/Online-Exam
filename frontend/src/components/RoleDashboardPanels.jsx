@@ -14,7 +14,7 @@ const dashboardConfig = {
     ],
     quickActions: [
       { label: "Manage users", to: "/admin/users" },
-      { label: "Review exams", to: "/exams" },
+      { label: "Manage offerings", to: "/admin/offerings" },
     ],
     sections: [
       {

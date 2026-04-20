@@ -1,11 +1,11 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { createExam } from "../../lib/examsApi";
 import AppShell from "../../components/AppShell";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
-import { useState } from "react";
+import { createExam } from "../../lib/examsApi";
 
 export default function ExamCreatePage() {
-  const nav = useNavigate();
+  const navigate = useNavigate();
   const { user, loading, error: userError } = useCurrentUser();
   const [form, setForm] = useState({
     title: "",
@@ -15,53 +15,23 @@ export default function ExamCreatePage() {
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
-  async function onSubmit(e) {
-    e.preventDefault();
-    setError("");
+  async function onSubmit(event) {
+    event.preventDefault();
 
     try {
- feature/exam-fixes-and-logo
-
       setSaving(true);
- main
+      setError("");
       await createExam({
-        title: form.title,
-        description: form.description,
+        title: form.title.trim(),
+        description: form.description.trim(),
         durationMinutes: Number(form.durationMinutes) || 60,
       });
-      nav("/exams");
+      navigate("/exams");
     } catch (err) {
       const apiMessage =
         err?.response?.data?.message ||
         (typeof err?.response?.data === "string" ? err.response.data : null) ||
         err?.message;
-feature/exam-fixes-and-logo
-
-      setError(apiMessage || "Provimi nuk u krijua. Kontrollo fushat dhe provo perseri.");
-    }
-  }
-
-  return (
-    <div className="shell">
-      <header className="nav">
-        <div className="container navInner">
-          <div className="brand">
-            <img className="brandLogo" src="/logo-itm.svg" alt="ITM Exam logo" />
-            <span>ITM Exam</span>
-          </div>
-          <div className="row" style={{ gap: 12 }}>
-            <Link className="btn" to="/exams">Back</Link>
-          </div>
-        </div>
-      </header>
-
-      <main className="container" style={{ padding: "26px 0 40px" }}>
-        <section className="card" style={{ maxWidth: 720, margin: "0 auto" }}>
-          <div className="cardHeader">
-            <h2 style={{ margin: 0 }}>Create Exam</h2>
-            <p className="p" style={{ marginTop: 8 }}>
-              Add the basic exam information below.
-            </p>
 
       setError(apiMessage || "Unable to create the exam right now.");
     } finally {
@@ -70,7 +40,7 @@ feature/exam-fixes-and-logo
   }
 
   if (loading) {
-    return <div className="pageState">Loading creation workspace...</div>;
+    return <div className="pageState">Loading exam authoring workspace...</div>;
   }
 
   if (!user) {
@@ -82,67 +52,66 @@ feature/exam-fixes-and-logo
       user={user}
       badge="Exam authoring"
       title="Create exam"
-      subtitle="Set the assessment foundation first. Question selection, scheduling, and publishing will build on this record."
-      actions={<Link className="btn" to="/exams">Cancel</Link>}
+      subtitle="Start a new assessment workspace with the core metadata the teaching team needs before publishing or adding questions."
+      actions={<Link className="btn" to="/exams">Back to exams</Link>}
     >
       <section className="formSurface">
         <div className="surfaceCard">
           <div className="sectionHeader">
             <h3>Exam configuration</h3>
- main
           </div>
           <div className="sectionBody">
             {error ? <div className="alert">{error}</div> : null}
+
             <form className="stackLg" onSubmit={onSubmit}>
               <div className="field">
-                <div className="label">Title</div>
+                <label className="label">Title</label>
                 <input
                   className="input"
                   value={form.title}
-                  onChange={(e) => setForm((current) => ({ ...current, title: e.target.value }))}
+                  onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
+                  placeholder="Midterm Assessment - Database Systems"
+                  disabled={saving}
                   required
                 />
               </div>
 
-              <div className="field">
-                <label className="label">Duration in minutes</label>
-                <input
-                  className="input"
-                  type="number"
-                  min="1"
-                  value={form.durationMinutes}
-                  onChange={(e) => setForm((current) => ({ ...current, durationMinutes: Number(e.target.value) }))}
-                />
+              <div className="gridTwo">
+                <div className="field">
+                  <label className="label">Duration in minutes</label>
+                  <input
+                    className="input"
+                    type="number"
+                    min="1"
+                    value={form.durationMinutes}
+                    onChange={(event) => setForm((current) => ({ ...current, durationMinutes: Number(event.target.value) }))}
+                    disabled={saving}
+                  />
+                </div>
+
+                <div className="inlineMetaPanel">
+                  <div>
+                    <strong>Creator visibility</strong>
+                    <div className="cellMeta">The backend attaches ownership to the signed-in staff member.</div>
+                  </div>
+                </div>
               </div>
 
               <div className="field">
-                <div className="label">Description</div>
+                <label className="label">Description</label>
                 <textarea
-feature/exam-fixes-and-logo
-                  className="input"
-                  rows={5}
-                  value={form.description}
-                  onChange={(e) => setForm((current) => ({ ...current, description: e.target.value }))}
-                />
-              </div>
-
-              <div className="row" style={{ gap: 12, justifyContent: "flex-end" }}>
-                <Link className="btn" to="/exams">Cancel</Link>
-                <button className="btn btnPrimary" type="submit">
-                  Krijo Provimin
-
                   className="input textarea"
                   value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  placeholder="Describe scope, instructions, allowed materials, and intended delivery notes."
+                  onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
+                  placeholder="Describe scope, instructions, allowed materials, and delivery notes."
+                  disabled={saving}
                 />
               </div>
 
               <div className="row" style={{ justifyContent: "flex-end" }}>
-                <Link className="btn" to="/exams">Back</Link>
-                <button className="btn btnPrimary" type="submit" disabled={saving}>
+                <Link className="btn" to="/exams">Cancel</Link>
+                <button className="btn btnPrimary" type="submit" disabled={saving || !form.title.trim()}>
                   {saving ? "Creating..." : "Create exam"}
-main
                 </button>
               </div>
             </form>

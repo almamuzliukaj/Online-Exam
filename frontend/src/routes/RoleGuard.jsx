@@ -1,25 +1,23 @@
-import React, { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import { me } from "../lib/auth";
+import { useCurrentUser } from "../hooks/useCurrentUser";
+import { getDefaultRouteForRole, normalizeRole } from "../lib/permissions";
 
-export default function RoleGuard({ allow }) {
-  const [user, setUser] = useState(undefined);
+export default function RoleGuard({ allow = [] }) {
+  const { user, loading } = useCurrentUser();
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const data = await me();
-        setUser(data);
-      } catch {
-        setUser(null);
-      }
-    })();
-  }, []);
+  if (loading) {
+    return <div className="pageState">Loading role permissions...</div>;
+  }
 
-  if (user === undefined) return <div>Loading...</div>;
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
 
-  if (!user || !allow.includes(user.role)) {
-    return <Navigate to="/dashboard" replace />;
+  const normalizedRole = normalizeRole(user.role);
+  const allowedRoles = allow.map(normalizeRole);
+
+  if (!allowedRoles.includes(normalizedRole)) {
+    return <Navigate to={getDefaultRouteForRole(normalizedRole)} replace />;
   }
 
   return <Outlet />;

@@ -2,6 +2,7 @@
   min-height: 100vh;
   display: grid;
   grid-template-columns: 288px minmax(0, 1fr);
+  position: relative;
 }
 
 .sidebar{
@@ -12,8 +13,28 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
-  background: linear-gradient(180deg, rgba(19,33,29,.98), rgba(25,49,42,.95));
+  background:
+    radial-gradient(460px 320px at 0% 0%, rgba(67,184,159,.16), transparent 60%),
+    linear-gradient(180deg, rgba(17,30,27,.99), rgba(20,42,37,.96));
   color: rgba(255,255,255,.92);
+  border-right: 1px solid rgba(255,255,255,.08);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,.22) transparent;
+}
+
+.sidebar::-webkit-scrollbar{
+  width: 10px;
+}
+
+.sidebar::-webkit-scrollbar-thumb{
+  background: rgba(255,255,255,.18);
+  border-radius: 999px;
+}
+
+.sidebar::-webkit-scrollbar-track{
+  background: transparent;
 }
 
 .sidebarTop,
@@ -23,10 +44,24 @@
   gap: 20px;
 }
 
+.sidebarBody{
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 .brand{
   display: inline-flex;
   align-items: center;
   gap: 12px;
+}
+
+.brandLogo{
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  flex-shrink: 0;
+  box-shadow: 0 14px 30px rgba(8,33,28,.22);
 }
 
 .brandLarge strong{
@@ -57,8 +92,9 @@
 .supportPanel{
   padding: 18px;
   border-radius: var(--radius-lg);
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.08);
+  background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+  border: 1px solid rgba(255,255,255,.1);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
 }
 
 .sidebarIdentity{
@@ -66,6 +102,7 @@
   grid-template-columns: 48px minmax(0, 1fr);
   gap: 14px;
   align-items: center;
+  min-width: 0;
 }
 
 .avatarCircle{
@@ -89,6 +126,8 @@
 .sidebarValue{
   margin-top: 4px;
   font-weight: 600;
+  line-height: 1.4;
+  word-break: break-word;
 }
 
 .sidebarMeta{
@@ -104,17 +143,23 @@
 }
 
 .navItem{
-  padding: 13px 14px;
-  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 15px;
+  border-radius: 18px;
   color: rgba(255,255,255,.78);
-  transition: background .18s ease, color .18s ease, transform .18s ease;
+  border: 1px solid transparent;
+  transition: background .18s ease, color .18s ease, transform .18s ease, border-color .18s ease, box-shadow .18s ease;
 }
 
 .navItem:hover,
 .navItemActive{
-  background: rgba(255,255,255,.09);
+  background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.08));
+  border-color: rgba(255,255,255,.1);
   color: white;
   transform: translateX(2px);
+  box-shadow: 0 10px 22px rgba(0,0,0,.12);
 }
 
 .supportPanel p{
@@ -123,9 +168,29 @@
   line-height: 1.55;
 }
 
+.navItemLabel{
+  font-weight: 700;
+}
+
+.navItemMeta{
+  color: rgba(255,255,255,.56);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.sidebarFoot{
+  padding-top: 4px;
+}
+
 .mainPanel{
   min-width: 0;
-  padding: 28px;
+  padding: 28px 34px 40px;
+}
+
+.mainPanelInner{
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .topbar{
@@ -133,7 +198,76 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 24px;
-  margin-bottom: 28px;
+  margin-bottom: 30px;
+  padding: 28px 32px;
+  border-radius: 28px;
+  background:
+    radial-gradient(420px 180px at 100% 0%, rgba(15,118,110,.10), transparent 62%),
+    radial-gradient(320px 140px at 0% 100%, rgba(188,108,37,.08), transparent 64%),
+    linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.74));
+  border: 1px solid rgba(32,49,43,.07);
+  box-shadow: 0 20px 46px rgba(39,51,44,.08);
+  backdrop-filter: blur(14px);
+}
+
+.topbarIntro{
+  min-width: 0;
+  max-width: 700px;
+}
+
+.topbarMeta{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 14px;
+}
+
+.topbarIdentity{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topbarUserBlock{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.topbarUserBlock strong{
+  color: var(--heading);
+}
+
+.topbarUserBlock span{
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.topbarRolePill{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 12px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(15,118,110,.14), rgba(15,118,110,.08));
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.shellMenuBtn{
+  display: none;
+  margin-bottom: 14px;
+  border: 1px solid var(--border-strong);
+  background: rgba(255,255,255,.78);
+  color: var(--heading);
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .topbarActions{
@@ -141,6 +275,10 @@
   gap: 12px;
   flex-wrap: wrap;
   justify-content: flex-end;
+}
+
+.shellBackdrop{
+  display: none;
 }
 
 .eyebrow{
@@ -162,17 +300,17 @@
 }
 
 .pageTitle{
-  font-size: clamp(34px, 4vw, 46px);
+  font-size: clamp(38px, 4vw, 52px);
 }
 
 .pageSubtitle,
 .loginText,
 .heroText{
   margin-top: 10px;
-  max-width: 760px;
+  max-width: 680px;
   color: var(--muted);
-  line-height: 1.7;
-  font-size: 16px;
+  line-height: 1.75;
+  font-size: 17px;
 }
 
 .contentArea{
@@ -198,25 +336,37 @@
 .summaryCard,
 .resourceCard,
 .pageStateCard{
-  background: var(--surface);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-md);
+  background: linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,.76));
+  border: 1px solid rgba(32,49,43,.08);
+  box-shadow: 0 18px 40px rgba(39,51,44,.08);
   backdrop-filter: blur(14px);
 }
 
 .heroPanel{
-  padding: 28px;
+  padding: 32px;
   border-radius: var(--radius-xl);
   display: grid;
-  grid-template-columns: 1.3fr 1fr;
-  gap: 24px;
+  grid-template-columns: minmax(0, 1.25fr) minmax(340px, .95fr);
+  gap: 28px;
+  position: relative;
+  overflow: hidden;
+  align-items: stretch;
+}
+
+.heroPanel::before{
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 6px;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
 }
 
 .heroCopy{
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 20px;
+  gap: 22px;
+  max-width: 620px;
 }
 
 .heroActions{
@@ -232,10 +382,11 @@
 }
 
 .metricCard{
-  padding: 18px;
+  padding: 20px;
   border-radius: 20px;
-  background: rgba(255,255,255,.84);
+  background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(244,248,246,.82));
   border: 1px solid rgba(19,33,29,.08);
+  box-shadow: 0 14px 26px rgba(39,51,44,.06);
 }
 
 .metricValue{
@@ -258,7 +409,7 @@
 .dashboardGrid{
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20px;
+  gap: 22px;
 }
 
 .dashboardGridWide{
@@ -286,11 +437,12 @@
 
 .sectionHeader{
   padding: 22px 24px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(32,49,43,.08);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  background: linear-gradient(180deg, rgba(249,250,248,.88), rgba(255,255,255,.7));
 }
 
 .sectionHeader h3{
@@ -300,18 +452,32 @@
 }
 
 .sectionBody{
-  padding: 24px;
+  padding: 26px;
+}
+
+.contentArea > *{
+  width: 100%;
 }
 
 .summaryStrip{
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: 18px;
 }
 
 .summaryCard{
-  padding: 18px 20px;
+  padding: 18px 20px 18px 24px;
   border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.summaryCard::before{
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 5px;
+  background: linear-gradient(180deg, var(--primary), var(--accent));
 }
 
 .summaryLabel{
@@ -333,7 +499,7 @@
 .resourceGrid{
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-  gap: 18px;
+  gap: 20px;
 }
 
 .resourceCard{
@@ -342,18 +508,37 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
+  position: relative;
+  overflow: hidden;
+  min-height: 220px;
+}
+
+.resourceCard::after{
+  content: "";
+  position: absolute;
+  inset: auto -40px -50px auto;
+  width: 140px;
+  height: 140px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(15,118,110,.1), transparent 65%);
+  pointer-events: none;
 }
 
 .resourceCard h3{
   margin: 0;
   color: var(--heading);
   font-size: 24px;
+  max-width: 90%;
 }
 
 .resourceCard p{
   margin: 0;
   color: var(--muted);
   line-height: 1.65;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .resourceMetaRow,
@@ -425,11 +610,12 @@
 .questionCard{
   padding: 18px;
   border-radius: 20px;
-  background: rgba(255,255,255,.78);
-  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(250,252,251,.84));
+  border: 1px solid rgba(32,49,43,.08);
   display: grid;
   grid-template-columns: 60px minmax(0, 1fr);
   gap: 14px;
+  box-shadow: 0 12px 24px rgba(39,51,44,.05);
 }
 
 .questionIndex{
@@ -460,6 +646,8 @@
 
 .formSurface{
   max-width: 860px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .field{
@@ -507,11 +695,11 @@
   border-radius: 16px;
   padding: 12px 16px;
   border: 1px solid rgba(19,33,29,.16);
-  background: rgba(255,255,255,.82);
+  background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(249,250,248,.76));
   color: var(--heading);
   cursor: pointer;
   font-weight: 700;
-  transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
+  transition: transform .16s ease, box-shadow .16s ease, background .16s ease, border-color .16s ease;
 }
 
 .btn:hover{
@@ -529,6 +717,12 @@
   background: transparent;
   border-color: rgba(255,255,255,.15);
   color: white;
+}
+
+.btnDangerSoft{
+  background: linear-gradient(180deg, rgba(180,35,24,.1), rgba(180,35,24,.04));
+  border-color: rgba(180,35,24,.14);
+  color: var(--danger);
 }
 
 .btnBlock{
@@ -623,8 +817,8 @@
   gap: 16px;
   padding: 16px 18px;
   border-radius: 18px;
-  background: rgba(255,255,255,.65);
-  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(242,248,246,.95), rgba(255,255,255,.76));
+  border: 1px solid rgba(32,49,43,.08);
 }
 
 .alert,
@@ -653,7 +847,7 @@
 .pageStateCard{
   padding: 28px;
   border: 1px dashed var(--border-strong);
-  background: rgba(255,255,255,.56);
+  background: linear-gradient(180deg, rgba(255,255,255,.72), rgba(250,249,246,.58));
   color: var(--muted);
 }
 
@@ -791,8 +985,36 @@
   }
 
   .sidebar{
-    position: static;
-    height: auto;
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: min(88vw, 320px);
+    z-index: 30;
+    transform: translateX(-100%);
+    transition: transform .22s ease;
+    box-shadow: 0 24px 60px rgba(8,33,28,.25);
+  }
+
+  .sidebarBody{
+    padding-bottom: 12px;
+  }
+
+  .sidebarOpen{
+    transform: translateX(0);
+  }
+
+  .shellBackdrop{
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    background: rgba(8,18,16,.36);
+  }
+
+  .shellBackdropVisible{
+    display: block;
+  }
+
+  .shellMenuBtn{
+    display: inline-flex;
   }
 }
 
@@ -805,12 +1027,30 @@
   }
 
   .topbar,
+  .topbarMeta,
+  .topbarIdentity,
   .resourceFooter,
   .resourceMetaRow,
   .filtersRow,
   .row{
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .topbar{
+    padding: 18px;
+  }
+
+  .mainPanel{
+    padding: 18px;
+  }
+
+  .mainPanelInner{
+    max-width: none;
+  }
+
+  .topbarUserBlock{
+    align-items: flex-start;
   }
 
   .topbarActions{

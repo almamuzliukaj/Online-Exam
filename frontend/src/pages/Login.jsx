@@ -1,28 +1,56 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { login } from "../lib/auth";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { getStoredUser, getToken, login, me } from "../lib/auth";
+import { getDefaultRouteForRole } from "../lib/permissions";
 
 const presets = [
   { label: "Admin demo", email: "admin@onlineexam.com", password: "Password123!" },
   { label: "Professor demo", email: "prof@onlineexam.com", password: "Password123!" },
+  { label: "Assistant demo", email: "assistant@onlineexam.com", password: "Password123!" },
   { label: "Student demo", email: "student@onlineexam.com", password: "Password123!" },
 ];
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState("admin@onlineexam.com");
   const [password, setPassword] = useState("Password123!");
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    async function resumeSession() {
+      if (!getToken()) return;
+
+      const storedUser = getStoredUser();
+      if (storedUser?.role) {
+        navigate(getDefaultRouteForRole(storedUser.role), { replace: true });
+        return;
+      }
+
+      const profile = await me();
+      if (profile?.role) {
+        navigate(getDefaultRouteForRole(profile.role), { replace: true });
+      }
+    }
+
+    resumeSession();
+  }, [navigate]);
+
   async function onSubmit(e) {
     e.preventDefault();
     setError("");
     setLoading(true);
+
     try {
-      await login(email, password);
-      navigate("/dashboard");
+      const authResponse = await login(email, password);
+      const profile = await me();
+      const role = profile?.role || authResponse?.role;
+      const requestedPath = location.state?.from?.pathname;
+      const fallbackPath = getDefaultRouteForRole(role);
+
+      navigate(requestedPath || fallbackPath, { replace: true });
     } catch (err) {
       const apiMessage =
         err?.response?.data?.message ||
@@ -40,40 +68,41 @@ export default function Login() {
       <div className="loginBackdrop" />
       <div className="loginContent">
         <section className="loginIntro">
-          <div className="eyebrow">Exam operations platform</div>
-          <h1 className="loginTitle">Run academic assessment with clarity, structure, and control.</h1>
+          <div className="eyebrow">University exam management platform</div>
+          <h1 className="loginTitle">A cleaner operational entry point for every academic role.</h1>
           <p className="loginText">
-            Built for departments that need role-based onboarding, exam preparation, question bank workflows, and a clean student-facing experience.
+            Sign in to a workspace that adapts its navigation, dashboard focus, and protected routes for administrators, professors, assistants, and students.
           </p>
+
           <div className="loginFeatureGrid">
             <article className="featureTile">
-              <strong>Admin operations</strong>
-              <span>User onboarding, imports, staff management, and semester control.</span>
+              <strong>Role-aware shell</strong>
+              <span>Shared sidebar, header, and responsive layout reused across protected pages.</span>
             </article>
             <article className="featureTile">
-              <strong>Teaching workflows</strong>
-              <span>Question authoring, exam setup, publishing, and grading readiness.</span>
+              <strong>Secure entry flow</strong>
+              <span>Login resolves the current role and sends each user to the right starting workspace.</span>
             </article>
             <article className="featureTile">
-              <strong>Student delivery</strong>
-              <span>Focused access to eligible exams, results, and carry-over opportunities.</span>
+              <strong>Professional navigation</strong>
+              <span>Each role sees only the navigation and operations that belong to that access level.</span>
             </article>
           </div>
         </section>
 
         <section className="loginPanel">
           <div className="brand brandLarge">
-            <span className="logoMark" />
+            <img className="brandLogo" src="/logo-itm.svg" alt="ITM Exam logo" />
             <span>
-              <strong>Online Exam</strong>
-              <small>Department workspace</small>
+              <strong>ITM Exam</strong>
+              <small>Role-based university workspace</small>
             </span>
           </div>
 
           <div className="stackLg">
             <div>
               <h2 className="panelTitle">Sign in</h2>
-              <p className="panelText">Access your role-based workspace. Account provisioning is handled by the administrator.</p>
+              <p className="panelText">Account provisioning is handled by administrators. Use a role demo or sign in with your assigned credentials.</p>
             </div>
 
             <div className="presetRow">
