@@ -20,15 +20,18 @@ export default function AppRoutes() {
 
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/exams" element={<ExamsListPage />} />
-        <Route path="/exams/:examId" element={<ExamDetailsPage />} />
 
         <Route element={<RoleGuard allow={["Admin"]} />}>
           <Route path="/admin/users" element={<AdminUsersPage />} />
           <Route path="/admin/academic" element={<AdminAcademicStructurePage />} />
         </Route>
 
-        <Route element={<RoleGuard allow={["Admin", "Professor"]} />}>
+        <Route element={<RoleGuard allow={["Professor", "Assistant", "Student"]} />}>
+          <Route path="/exams" element={<ExamsListPage />} />
+          <Route path="/exams/:examId" element={<ExamDetailsPage />} />
+        </Route>
+
+        <Route element={<RoleGuard allow={["Professor", "Assistant"]} />}>
           <Route path="/exams/new" element={<ExamCreatePage />} />
           <Route path="/exams/:examId/questions/new" element={<QuestionCreatePage />} />
         </Route>

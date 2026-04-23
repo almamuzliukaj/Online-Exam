@@ -1,5 +1,5 @@
 export function canManageExams(role) {
-  return role === "Admin" || role === "Professor";
+  return role === "Professor" || role === "Assistant";
 }
 
 export function isAdmin(role) {

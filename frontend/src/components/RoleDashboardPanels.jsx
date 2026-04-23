@@ -90,7 +90,6 @@ function getDashboardConfig(roleKey, t) {
     admin: [
       { label: t("rolePanels.admin.quickActions.academicSetup"), to: "/admin/academic" },
       { label: t("rolePanels.admin.quickActions.manageUsers"), to: "/admin/users" },
-      { label: t("rolePanels.admin.quickActions.reviewExams"), to: "/exams" },
     ],
     professor: [
       { label: t("rolePanels.professor.quickActions.openExams"), to: "/exams" },
