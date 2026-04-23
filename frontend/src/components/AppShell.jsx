@@ -1,5 +1,6 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "./LanguageSwitcher";
 import { logout } from "../lib/auth";
 
 const navigationByRole = {
@@ -7,7 +8,6 @@ const navigationByRole = {
     { to: "/dashboard", labelKey: "shell.nav.adminOverview" },
     { to: "/admin/academic", labelKey: "shell.nav.adminAcademic" },
     { to: "/admin/users", labelKey: "shell.nav.adminUsers" },
-    { to: "/exams", labelKey: "shell.nav.adminExams" },
   ],
   Professor: [
     { to: "/dashboard", labelKey: "shell.nav.professorOverview" },
@@ -95,6 +95,7 @@ export default function AppShell({
             {subtitle ? <p className="pageSubtitle">{subtitle}</p> : null}
           </div>
           <div className="topbarActions">{actions}</div>
+          <LanguageSwitcher compact />
         </header>
 
         <main className="contentArea">{children}</main>

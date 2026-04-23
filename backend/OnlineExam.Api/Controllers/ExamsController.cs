@@ -23,6 +23,9 @@ public class ExamsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Exam>>> GetExams()
     {
+        if (User.IsInRole("Admin"))
+            return Forbid();
+
         IQueryable<Exam> query = _context.Exams.Include(x => x.CourseOffering);
 
         if (User.IsInRole("Professor") || User.IsInRole("Assistant"))
@@ -45,6 +48,9 @@ public class ExamsController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<Exam>> GetExam(Guid id)
     {
+        if (User.IsInRole("Admin"))
+            return Forbid();
+
         var exam = await _context.Exams.Include(x => x.CourseOffering).FirstOrDefaultAsync(x => x.Id == id);
         if (exam == null)
             return NotFound();
@@ -69,7 +75,7 @@ public class ExamsController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin,Professor,Assistant")]
+    [Authorize(Roles = "Professor,Assistant")]
     public async Task<ActionResult<Exam>> PostExam([FromBody] CreateExamDto dto)
     {
         if (string.IsNullOrWhiteSpace(dto.Title))
@@ -92,16 +98,13 @@ public class ExamsController : ControllerBase
             if (!offeringExists)
                 return BadRequest(new { message = "CourseOfferingId is invalid." });
 
-            if (!User.IsInRole("Admin"))
-            {
-                var hasAssignment = await _context.CourseOfferingStaffAssignments.AnyAsync(a =>
-                    a.CourseOfferingId == dto.CourseOfferingId.Value &&
-                    a.UserId == userId.Value &&
-                    a.IsActive);
+            var hasAssignment = await _context.CourseOfferingStaffAssignments.AnyAsync(a =>
+                a.CourseOfferingId == dto.CourseOfferingId.Value &&
+                a.UserId == userId.Value &&
+                a.IsActive);
 
-                if (!hasAssignment)
-                    return Forbid();
-            }
+            if (!hasAssignment)
+                return Forbid();
         }
 
         var exam = new Exam
@@ -126,7 +129,7 @@ public class ExamsController : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
-    [Authorize(Roles = "Admin,Professor,Assistant")]
+    [Authorize(Roles = "Professor,Assistant")]
     public async Task<IActionResult> PutExam(Guid id, [FromBody] CreateExamDto dto)
     {
         var exam = await _context.Exams.FindAsync(id);
@@ -137,7 +140,7 @@ public class ExamsController : ControllerBase
         if (userId == null)
             return Unauthorized();
 
-        if (!User.IsInRole("Admin") && exam.CreatedByUserId != userId.Value)
+        if (exam.CreatedByUserId != userId.Value)
             return Forbid();
 
         if (string.IsNullOrWhiteSpace(dto.Title))
@@ -164,7 +167,7 @@ public class ExamsController : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
-    [Authorize(Roles = "Admin,Professor,Assistant")]
+    [Authorize(Roles = "Professor,Assistant")]
     public async Task<IActionResult> DeleteExam(Guid id)
     {
         var exam = await _context.Exams.FindAsync(id);
@@ -175,7 +178,7 @@ public class ExamsController : ControllerBase
         if (userId == null)
             return Unauthorized();
 
-        if (!User.IsInRole("Admin") && exam.CreatedByUserId != userId.Value)
+        if (exam.CreatedByUserId != userId.Value)
             return Forbid();
 
         _context.Exams.Remove(exam);
@@ -251,7 +254,7 @@ public class ExamsController : ControllerBase
     }
 
     [HttpPost("{id:guid}/publish")]
-    [Authorize(Roles = "Admin,Professor")]
+    [Authorize(Roles = "Professor")]
     public async Task<IActionResult> PublishExam(Guid id)
     {
         var exam = await _context.Exams.FindAsync(id);
@@ -266,7 +269,7 @@ public class ExamsController : ControllerBase
     }
 
     [HttpGet("{id:guid}/gradebook")]
-    [Authorize(Roles = "Admin,Professor")]
+    [Authorize(Roles = "Professor")]
     public async Task<IActionResult> GetGradebook(Guid id)
     {
         var attempts = await _context.ExamAttempts
@@ -284,7 +287,7 @@ public class ExamsController : ControllerBase
     }
 
     [HttpPost("build-random")]
-    [Authorize(Roles = "Admin,Professor")]
+    [Authorize(Roles = "Professor")]
     public async Task<IActionResult> BuildRandomExam([FromBody] BuildExamParamsDto dto)
     {
         if (dto.NumberOfQuestions <= 0)
