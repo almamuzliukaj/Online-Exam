@@ -7,7 +7,7 @@ const resources = {
   en: {
     translation: {
       common: {
-        appName: "Online Exam",
+        appName: "ITM Exam",
         language: "Language",
         english: "English",
         albanian: "Albanian",
@@ -376,7 +376,7 @@ const resources = {
   sq: {
     translation: {
       common: {
-        appName: "Online Exam",
+        appName: "ITM Exam",
         language: "Gjuha",
         english: "Anglisht",
         albanian: "Shqip",
