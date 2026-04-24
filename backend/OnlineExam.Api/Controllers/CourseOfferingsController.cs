@@ -26,6 +26,7 @@ public class CourseOfferingsController : ControllerBase
     public async Task<IActionResult> GetOfferings([FromQuery] Guid? termId, [FromQuery] int? yearOfStudy, [FromQuery] int? semesterNo)
     {
         IQueryable<CourseOffering> query = _context.CourseOfferings
+            .AsNoTracking()
             .Include(x => x.Course)
             .Include(x => x.Term)
             .Include(x => x.StaffAssignments.Where(a => a.IsActive));
@@ -53,6 +54,7 @@ public class CourseOfferingsController : ControllerBase
             .OrderBy(x => x.YearOfStudy)
             .ThenBy(x => x.SemesterNo)
             .ThenBy(x => x.SectionCode)
+            .Select(MapToOfferingResponse())
             .ToListAsync();
 
         return Ok(offerings);
@@ -62,6 +64,7 @@ public class CourseOfferingsController : ControllerBase
     public async Task<IActionResult> GetOffering(Guid id)
     {
         var offering = await _context.CourseOfferings
+            .AsNoTracking()
             .Include(x => x.Course)
             .Include(x => x.Term)
             .Include(x => x.StaffAssignments)
@@ -84,7 +87,7 @@ public class CourseOfferingsController : ControllerBase
                 return Forbid();
         }
 
-        return Ok(offering);
+        return Ok(await BuildOfferingResponseAsync(id));
     }
 
     [HttpGet("mine")]
@@ -96,6 +99,7 @@ public class CourseOfferingsController : ControllerBase
             return Unauthorized();
 
         var offerings = await _context.CourseOfferings
+            .AsNoTracking()
             .Include(x => x.Course)
             .Include(x => x.Term)
             .Include(x => x.StaffAssignments.Where(a => a.IsActive))
@@ -105,6 +109,7 @@ public class CourseOfferingsController : ControllerBase
                 x.StaffAssignments.Any(a => a.UserId == currentUserId.Value && a.IsActive))
             .OrderBy(x => x.YearOfStudy)
             .ThenBy(x => x.SemesterNo)
+            .Select(MapToOfferingResponse())
             .ToListAsync();
 
         return Ok(offerings);
@@ -227,7 +232,7 @@ public class CourseOfferingsController : ControllerBase
         offering.Status = "Published";
         offering.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
-        return Ok(offering);
+        return Ok(await BuildOfferingResponseAsync(id));
     }
 
     [HttpPost("{id:guid}/close")]
@@ -241,16 +246,81 @@ public class CourseOfferingsController : ControllerBase
         offering.Status = "Closed";
         offering.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
-        return Ok(offering);
+        return Ok(await BuildOfferingResponseAsync(id));
     }
 
-    private async Task<object?> BuildOfferingResponseAsync(Guid offeringId)
+    private async Task<CourseOfferingResponseDto?> BuildOfferingResponseAsync(Guid offeringId)
     {
         return await _context.CourseOfferings
+            .AsNoTracking()
             .Include(x => x.Course)
             .Include(x => x.Term)
             .Include(x => x.StaffAssignments)
-            .FirstOrDefaultAsync(x => x.Id == offeringId);
+            .Where(x => x.Id == offeringId)
+            .Select(MapToOfferingResponse())
+            .FirstOrDefaultAsync();
+    }
+
+    private static System.Linq.Expressions.Expression<Func<CourseOffering, CourseOfferingResponseDto>> MapToOfferingResponse()
+    {
+        return offering => new CourseOfferingResponseDto
+        {
+            Id = offering.Id,
+            CourseId = offering.CourseId,
+            TermId = offering.TermId,
+            YearOfStudy = offering.YearOfStudy,
+            SemesterNo = offering.SemesterNo,
+            SectionCode = offering.SectionCode,
+            DeliveryType = offering.DeliveryType,
+            Capacity = offering.Capacity,
+            Status = offering.Status,
+            PrimaryProfessorId = offering.PrimaryProfessorId,
+            AssistantId = offering.AssistantId,
+            CreatedAt = offering.CreatedAt,
+            UpdatedAt = offering.UpdatedAt,
+            Course = offering.Course == null ? null : new CourseOfferingCourseDto
+            {
+                Id = offering.Course.Id,
+                Code = offering.Course.Code,
+                Name = offering.Course.Name,
+                Credits = offering.Course.Credits,
+                YearOfStudy = offering.Course.YearOfStudy,
+                DefaultSemesterNo = offering.Course.DefaultSemesterNo,
+                IsElective = offering.Course.IsElective,
+                IsActive = offering.Course.IsActive,
+                Description = offering.Course.Description
+            },
+            Term = offering.Term == null ? null : new CourseOfferingTermDto
+            {
+                Id = offering.Term.Id,
+                Code = offering.Term.Code,
+                Name = offering.Term.Name,
+                Season = offering.Term.Season,
+                AcademicYearLabel = offering.Term.AcademicYearLabel,
+                StartDate = offering.Term.StartDate,
+                EndDate = offering.Term.EndDate,
+                EnrollmentOpenAt = offering.Term.EnrollmentOpenAt,
+                EnrollmentCloseAt = offering.Term.EnrollmentCloseAt,
+                Status = offering.Term.Status,
+                IsCurrent = offering.Term.IsCurrent
+            },
+            StaffAssignments = offering.StaffAssignments
+                .Select(assignment => new CourseOfferingStaffAssignmentResponseDto
+                {
+                    Id = assignment.Id,
+                    CourseOfferingId = assignment.CourseOfferingId,
+                    UserId = assignment.UserId,
+                    RoleInOffering = assignment.RoleInOffering,
+                    AssignmentType = assignment.AssignmentType,
+                    PermissionsProfile = assignment.PermissionsProfile,
+                    AssignedAt = assignment.AssignedAt,
+                    AssignedBy = assignment.AssignedBy,
+                    RevokedAt = assignment.RevokedAt,
+                    RevokedBy = assignment.RevokedBy,
+                    IsActive = assignment.IsActive
+                })
+                .ToList()
+        };
     }
 
     private Task SyncAssignmentsAsync(CourseOffering offering, Guid primaryProfessorId, Guid? assistantId)

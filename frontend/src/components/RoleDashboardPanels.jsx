@@ -33,6 +33,61 @@ export default function RoleDashboardPanels({ role = "Student" }) {
 
   const config = getDashboardConfig(roleKey, t, summary?.metrics, loading, Boolean(error));
 
+  if (roleKey === "admin") {
+    return (
+      <div className="stackXl">
+        <section className="adminDashboardHero">
+          <div className="adminDashboardHeroCopy">
+            <div className="adminHeroBrand">
+              <img className="adminHeroBrandLogo adminHeroBrandLogoIcon" src="/app-logo.svg" alt="Online Exam" />
+              <span>Administration Portal</span>
+            </div>
+            <div className="eyebrow">{config.badge}</div>
+            <h2 className="heroTitle">{config.heroTitle}</h2>
+            <p className="heroText">{config.heroText}</p>
+          </div>
+          <div className="adminHeroActions">
+            {config.quickActions.map((action) => (
+              <Link key={action.to} className="btn btnPrimary" to={action.to}>
+                {action.label}
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        <section className="adminMetricGrid">
+          {config.stats.map((stat) => (
+            <article key={stat.label} className="adminMetricCard">
+              <span className="summaryLabel">{stat.label}</span>
+              <strong>{stat.value}</strong>
+              <p>{stat.meta}</p>
+            </article>
+          ))}
+        </section>
+
+        <section className="adminSectionGrid">
+          {config.sections.map((section) => (
+            <article key={section.title} className="surfaceCard adminSectionCard">
+              <div className="sectionHeader">
+                <h3>{section.title}</h3>
+              </div>
+              <div className="sectionBody">
+                <div className="bulletStack adminList">
+                  {section.items.map((item) => (
+                    <div key={item} className="listRow">
+                      <span className="listDot" />
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </article>
+          ))}
+        </section>
+      </div>
+    );
+  }
+
   return (
     <div className="stackXl">
       {error ? <div className="alert">{error}</div> : null}
