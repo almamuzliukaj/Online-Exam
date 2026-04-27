@@ -1,12 +1,41 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+ feat/student-eligibility-dashboard
 import { getMyEligibilityDashboard } from "../lib/studentApi";
+
+import { getDashboardSummary } from "../lib/dashboardApi";
+ main
 
 export default function RoleDashboardPanels({ role = "Student" }) {
   const { t } = useTranslation();
   const roleKey = role.toLowerCase();
-  const config = getDashboardConfig(roleKey, t);
+  const [summary, setSummary] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    (async () => {
+      try {
+        setLoading(true);
+        setError("");
+        const data = await getDashboardSummary();
+        if (active) setSummary(data);
+      } catch {
+        if (active) setError(t("dashboard.statsError"));
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [t]);
+
+  const config = getDashboardConfig(roleKey, t, summary?.metrics, loading, Boolean(error));
 
   if (roleKey === "admin") {
     return (
@@ -69,6 +98,8 @@ export default function RoleDashboardPanels({ role = "Student" }) {
 
   return (
     <div className="stackXl">
+      {error ? <div className="alert">{error}</div> : null}
+
       <section className="heroPanel">
         <div className="heroCopy">
           <div className="eyebrow">{config.badge}</div>
@@ -116,6 +147,7 @@ export default function RoleDashboardPanels({ role = "Student" }) {
   );
 }
 
+ feat/student-eligibility-dashboard
 function StudentEligibilityPanel({ config }) {
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -326,33 +358,37 @@ function formatDateTime(value) {
 }
 
 function getDashboardConfig(roleKey, t) {
+
+function getDashboardConfig(roleKey, t, metrics = {}, loading = false, hasError = false) {
+ main
   const fallback = "student";
   const current = ["admin", "professor", "assistant", "student"].includes(roleKey) ? roleKey : fallback;
+  const value = (key) => formatMetric(metrics?.[key], loading, hasError);
 
   const statsByRole = {
     admin: [
-      { label: t("rolePanels.admin.stats.activeUsers.label"), value: "184", meta: t("rolePanels.admin.stats.activeUsers.meta") },
-      { label: t("rolePanels.admin.stats.offerings.label"), value: "34", meta: t("rolePanels.admin.stats.offerings.meta") },
-      { label: t("rolePanels.admin.stats.imports.label"), value: "03", meta: t("rolePanels.admin.stats.imports.meta") },
-      { label: t("rolePanels.admin.stats.alerts.label"), value: "02", meta: t("rolePanels.admin.stats.alerts.meta") },
+      { label: t("rolePanels.admin.stats.activeUsers.label"), value: value("activeUsers"), meta: t("rolePanels.admin.stats.activeUsers.meta") },
+      { label: t("rolePanels.admin.stats.offerings.label"), value: value("offerings"), meta: t("rolePanels.admin.stats.offerings.meta") },
+      { label: t("rolePanels.admin.stats.imports.label"), value: value("imports"), meta: t("rolePanels.admin.stats.imports.meta") },
+      { label: t("rolePanels.admin.stats.alerts.label"), value: value("alerts"), meta: t("rolePanels.admin.stats.alerts.meta") },
     ],
     professor: [
-      { label: t("rolePanels.professor.stats.assignedCourses.label"), value: "05", meta: t("rolePanels.professor.stats.assignedCourses.meta") },
-      { label: t("rolePanels.professor.stats.draftExams.label"), value: "04", meta: t("rolePanels.professor.stats.draftExams.meta") },
-      { label: t("rolePanels.professor.stats.questionBank.label"), value: "128", meta: t("rolePanels.professor.stats.questionBank.meta") },
-      { label: t("rolePanels.professor.stats.grading.label"), value: "17", meta: t("rolePanels.professor.stats.grading.meta") },
+      { label: t("rolePanels.professor.stats.assignedCourses.label"), value: value("assignedCourses"), meta: t("rolePanels.professor.stats.assignedCourses.meta") },
+      { label: t("rolePanels.professor.stats.draftExams.label"), value: value("draftExams"), meta: t("rolePanels.professor.stats.draftExams.meta") },
+      { label: t("rolePanels.professor.stats.questionBank.label"), value: value("questionBank"), meta: t("rolePanels.professor.stats.questionBank.meta") },
+      { label: t("rolePanels.professor.stats.grading.label"), value: value("grading"), meta: t("rolePanels.professor.stats.grading.meta") },
     ],
     assistant: [
-      { label: t("rolePanels.assistant.stats.assignedOfferings.label"), value: "03", meta: t("rolePanels.assistant.stats.assignedOfferings.meta") },
-      { label: t("rolePanels.assistant.stats.supportExams.label"), value: "06", meta: t("rolePanels.assistant.stats.supportExams.meta") },
-      { label: t("rolePanels.assistant.stats.reviewTasks.label"), value: "14", meta: t("rolePanels.assistant.stats.reviewTasks.meta") },
-      { label: t("rolePanels.assistant.stats.activeSessions.label"), value: "01", meta: t("rolePanels.assistant.stats.activeSessions.meta") },
+      { label: t("rolePanels.assistant.stats.assignedOfferings.label"), value: value("assignedOfferings"), meta: t("rolePanels.assistant.stats.assignedOfferings.meta") },
+      { label: t("rolePanels.assistant.stats.supportExams.label"), value: value("supportExams"), meta: t("rolePanels.assistant.stats.supportExams.meta") },
+      { label: t("rolePanels.assistant.stats.reviewTasks.label"), value: value("reviewTasks"), meta: t("rolePanels.assistant.stats.reviewTasks.meta") },
+      { label: t("rolePanels.assistant.stats.activeSessions.label"), value: value("activeSessions"), meta: t("rolePanels.assistant.stats.activeSessions.meta") },
     ],
     student: [
-      { label: t("rolePanels.student.stats.eligibleExams.label"), value: "03", meta: t("rolePanels.student.stats.eligibleExams.meta") },
-      { label: t("rolePanels.student.stats.upcoming.label"), value: "02", meta: t("rolePanels.student.stats.upcoming.meta") },
-      { label: t("rolePanels.student.stats.results.label"), value: "05", meta: t("rolePanels.student.stats.results.meta") },
-      { label: t("rolePanels.student.stats.carryOver.label"), value: "01", meta: t("rolePanels.student.stats.carryOver.meta") },
+      { label: t("rolePanels.student.stats.eligibleExams.label"), value: value("eligibleExams"), meta: t("rolePanels.student.stats.eligibleExams.meta") },
+      { label: t("rolePanels.student.stats.upcoming.label"), value: value("upcoming"), meta: t("rolePanels.student.stats.upcoming.meta") },
+      { label: t("rolePanels.student.stats.results.label"), value: value("results"), meta: t("rolePanels.student.stats.results.meta") },
+      { label: t("rolePanels.student.stats.carryOver.label"), value: value("carryOver"), meta: t("rolePanels.student.stats.carryOver.meta") },
     ],
   };
 
@@ -424,4 +460,12 @@ function getDashboardConfig(roleKey, t) {
     quickActions: quickActionsByRole[current],
     sections: sectionsByRole[current],
   };
+}
+
+function formatMetric(rawValue, loading, hasError) {
+  if (loading) return "...";
+  if (hasError) return "--";
+  const value = Number(rawValue ?? 0);
+  if (!Number.isFinite(value)) return "00";
+  return String(value).padStart(2, "0");
 }

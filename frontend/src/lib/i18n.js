@@ -63,6 +63,7 @@ const resources = {
       dashboard: {
         loading: "Loading workspace...",
         error: "Unable to load dashboard.",
+        statsError: "Dashboard data could not be loaded.",
         title: "Operational overview",
         subtitle: "A role-based workspace designed for real academic operations, exam preparation, and secure assessment delivery.",
         examWorkspace: "Exam workspace",
@@ -248,7 +249,7 @@ const resources = {
           stats: {
             activeUsers: { label: "Active users", meta: "+12 this week" },
             offerings: { label: "Course offerings", meta: "Across 6 semesters" },
-            imports: { label: "Pending imports", meta: "Require review" },
+            imports: { label: "Pending enrollments", meta: "Require review" },
             alerts: { label: "Policy alerts", meta: "Need admin action" }
           },
           quickActions: {
@@ -432,6 +433,7 @@ const resources = {
       dashboard: {
         loading: "Duke u ngarkuar hapësira...",
         error: "Ballina nuk mund të ngarkohet.",
+        statsError: "Të dhënat e panelit nuk mund të ngarkohen.",
         title: "Pasqyra operative",
         subtitle: "Një hapësirë me role për operacione reale akademike, përgatitje provimesh dhe zhvillim të sigurt të vlerësimit.",
         examWorkspace: "Hapësira e provimeve",
@@ -617,7 +619,7 @@ const resources = {
           stats: {
             activeUsers: { label: "Përdorues aktivë", meta: "+12 këtë javë" },
             offerings: { label: "Ofrime lëndësh", meta: "Në 6 semestra" },
-            imports: { label: "Importe në pritje", meta: "Kërkojnë kontroll" },
+            imports: { label: "Regjistrime në pritje", meta: "Kërkojnë kontroll" },
             alerts: { label: "Njoftime politike", meta: "Kërkojnë veprim admini" }
           },
           quickActions: {
