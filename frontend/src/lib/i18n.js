@@ -307,6 +307,23 @@ const resources = {
                 "Year 3: Software Engineering"
               ]
             }
+          },
+          offerings: {
+            title: "Assigned offerings",
+            subtitle: "Only course offerings assigned to your active professor account are shown.",
+            loading: "Loading assigned offerings...",
+            error: "Assigned offerings could not be loaded.",
+            emptyTitle: "No assigned offerings yet.",
+            emptyText: "Ask an administrator to assign you to a course offering before creating course-linked exams.",
+            total: "{{count}} assigned",
+            groupTitle: "Year {{year}}, Semester {{semester}}",
+            groupCount: "{{count}} offerings",
+            section: "Section {{section}}",
+            term: "Term",
+            delivery: "Delivery",
+            capacity: "Capacity",
+            courseFallback: "Unnamed course",
+            termFallback: "No term"
           }
         },
         assistant: {
@@ -677,6 +694,23 @@ const resources = {
                 "Viti 3: Inxhinieri Softuerike"
               ]
             }
+          },
+          offerings: {
+            title: "Ofrimet e caktuara",
+            subtitle: "Shfaqen vetem ofrimet e lendeve qe jane te lidhura me llogarine tende aktive si profesor.",
+            loading: "Duke u ngarkuar ofrimet e caktuara...",
+            error: "Ofrimet e caktuara nuk u ngarkuan.",
+            emptyTitle: "Ende nuk ke ofrime te caktuara.",
+            emptyText: "Kerko nga administratori te te caktoje ne nje ofrim lende para se te krijosh provime te lidhura me lenden.",
+            total: "{{count}} te caktuara",
+            groupTitle: "Viti {{year}}, Semestri {{semester}}",
+            groupCount: "{{count}} ofrime",
+            section: "Grupi {{section}}",
+            term: "Afati",
+            delivery: "Lloji",
+            capacity: "Kapaciteti",
+            courseFallback: "Lende pa emer",
+            termFallback: "Pa afat"
           }
         },
         assistant: {
