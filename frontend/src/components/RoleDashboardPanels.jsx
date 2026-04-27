@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { listMyOfferings } from "../lib/academicApi";
 import { getDashboardSummary } from "../lib/dashboardApi";
 
 export default function RoleDashboardPanels({ role = "Student" }) {
@@ -9,6 +10,9 @@ export default function RoleDashboardPanels({ role = "Student" }) {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [offerings, setOfferings] = useState([]);
+  const [offeringsLoading, setOfferingsLoading] = useState(false);
+  const [offeringsError, setOfferingsError] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -30,6 +34,34 @@ export default function RoleDashboardPanels({ role = "Student" }) {
       active = false;
     };
   }, [t]);
+
+  useEffect(() => {
+    if (roleKey !== "professor") {
+      setOfferings([]);
+      setOfferingsError("");
+      setOfferingsLoading(false);
+      return;
+    }
+
+    let active = true;
+
+    (async () => {
+      try {
+        setOfferingsLoading(true);
+        setOfferingsError("");
+        const data = await listMyOfferings();
+        if (active) setOfferings(Array.isArray(data) ? data : []);
+      } catch {
+        if (active) setOfferingsError(t("rolePanels.professor.offerings.error"));
+      } finally {
+        if (active) setOfferingsLoading(false);
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [roleKey, t]);
 
   const config = getDashboardConfig(roleKey, t, summary?.metrics, loading, Boolean(error));
 
@@ -88,6 +120,19 @@ export default function RoleDashboardPanels({ role = "Student" }) {
     );
   }
 
+  if (roleKey === "professor") {
+    return (
+      <ProfessorDashboard
+        config={config}
+        offerings={offerings}
+        offeringsLoading={offeringsLoading}
+        offeringsError={offeringsError}
+        summaryError={error}
+        t={t}
+      />
+    );
+  }
+
   return (
     <div className="stackXl">
       {error ? <div className="alert">{error}</div> : null}
@@ -137,6 +182,153 @@ export default function RoleDashboardPanels({ role = "Student" }) {
       </section>
     </div>
   );
+}
+
+function ProfessorDashboard({ config, offerings, offeringsLoading, offeringsError, summaryError, t }) {
+  const groups = groupOfferingsByYearSemester(offerings);
+
+  return (
+    <div className="stackXl">
+      {summaryError ? <div className="alert">{summaryError}</div> : null}
+      {offeringsError ? <div className="alert">{offeringsError}</div> : null}
+
+      <section className="heroPanel">
+        <div className="heroCopy">
+          <div className="eyebrow">{config.badge}</div>
+          <h2 className="heroTitle">{config.heroTitle}</h2>
+          <p className="heroText">{config.heroText}</p>
+          <div className="heroActions">
+            {config.quickActions.map((action) => (
+              <Link key={action.to} className="btn btnPrimary" to={action.to}>
+                {action.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+        <div className="heroStats">
+          {config.stats.map((stat) => (
+            <article key={stat.label} className="metricCard">
+              <div className="metricValue">{stat.value}</div>
+              <div className="metricLabel">{stat.label}</div>
+              <div className="metricMeta">{stat.meta}</div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="surfaceCard professorOfferingsSurface">
+        <div className="sectionHeader professorOfferingsHeader">
+          <div>
+            <h3>{t("rolePanels.professor.offerings.title")}</h3>
+            <span className="small">{t("rolePanels.professor.offerings.subtitle")}</span>
+          </div>
+          <span className="statusPill statusLive">
+            {t("rolePanels.professor.offerings.total", { count: offerings.length })}
+          </span>
+        </div>
+        <div className="sectionBody">
+          {offeringsLoading ? (
+            <div className="pageStateCard">{t("rolePanels.professor.offerings.loading")}</div>
+          ) : groups.length === 0 ? (
+            <div className="emptyState">
+              <p>{t("rolePanels.professor.offerings.emptyTitle")}</p>
+              <p>{t("rolePanels.professor.offerings.emptyText")}</p>
+            </div>
+          ) : (
+            <div className="offeringGroupStack">
+              {groups.map((group) => (
+                <article className="offeringGroup" key={group.key}>
+                  <div className="offeringGroupHeader">
+                    <div>
+                      <h4>{t("rolePanels.professor.offerings.groupTitle", { year: group.year, semester: group.semester })}</h4>
+                      <span className="small">{t("rolePanels.professor.offerings.groupCount", { count: group.items.length })}</span>
+                    </div>
+                  </div>
+
+                  <div className="assignedOfferingGrid">
+                    {group.items.map((offering) => (
+                      <article className="assignedOfferingCard" key={offering.id}>
+                        <div className="resourceMetaRow">
+                          <span className={`statusPill ${isLiveOffering(offering.status) ? "statusLive" : "statusDraft"}`}>
+                            {offering.status || "-"}
+                          </span>
+                          <span className="small">{formatSection(offering, t)}</span>
+                        </div>
+                        <h4>{formatCourseTitle(offering, t)}</h4>
+                        <dl className="offeringMetaList">
+                          <div>
+                            <dt>{t("rolePanels.professor.offerings.term")}</dt>
+                            <dd>{formatTerm(offering, t)}</dd>
+                          </div>
+                          <div>
+                            <dt>{t("rolePanels.professor.offerings.delivery")}</dt>
+                            <dd>{offering.deliveryType || "-"}</dd>
+                          </div>
+                          <div>
+                            <dt>{t("rolePanels.professor.offerings.capacity")}</dt>
+                            <dd>{Number.isFinite(Number(offering.capacity)) ? offering.capacity : "-"}</dd>
+                          </div>
+                        </dl>
+                      </article>
+                    ))}
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function groupOfferingsByYearSemester(offerings) {
+  const groups = new Map();
+
+  [...offerings]
+    .sort((a, b) =>
+      Number(a.yearOfStudy ?? 0) - Number(b.yearOfStudy ?? 0) ||
+      Number(a.semesterNo ?? 0) - Number(b.semesterNo ?? 0) ||
+      String(a.course?.code || "").localeCompare(String(b.course?.code || "")) ||
+      String(a.sectionCode || "").localeCompare(String(b.sectionCode || ""))
+    )
+    .forEach((offering) => {
+      const year = Number(offering.yearOfStudy ?? 0);
+      const semester = Number(offering.semesterNo ?? 0);
+      const key = `${year}-${semester}`;
+
+      if (!groups.has(key)) {
+        groups.set(key, { key, year, semester, items: [] });
+      }
+
+      groups.get(key).items.push(offering);
+    });
+
+  return Array.from(groups.values());
+}
+
+function formatCourseTitle(offering, t) {
+  const code = offering.course?.code?.trim();
+  const name = offering.course?.name?.trim();
+
+  if (code && name) return `${code} - ${name}`;
+  return code || name || t("rolePanels.professor.offerings.courseFallback");
+}
+
+function formatTerm(offering, t) {
+  const name = offering.term?.name?.trim();
+  const academicYear = offering.term?.academicYearLabel?.trim();
+
+  if (name && academicYear) return `${name} (${academicYear})`;
+  return name || academicYear || t("rolePanels.professor.offerings.termFallback");
+}
+
+function formatSection(offering, t) {
+  return t("rolePanels.professor.offerings.section", { section: offering.sectionCode || "-" });
+}
+
+function isLiveOffering(status) {
+  return ["Published", "Active"].includes(status);
 }
 
 function getDashboardConfig(roleKey, t, metrics = {}, loading = false, hasError = false) {
