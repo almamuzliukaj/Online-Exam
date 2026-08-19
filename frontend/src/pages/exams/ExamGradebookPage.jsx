@@ -451,7 +451,6 @@ export default function ExamGradebookPage() {
                     <AttemptReviewModal
                       attempt={selectedAttempt}
                       draft={drafts[selectedAttempt.attemptId] || {}}
-                      aiReview={aiReviews[selectedAttempt.attemptId]}
                       reviewing={reviewingId === selectedAttempt.attemptId}
                       saving={savingId === selectedAttempt.attemptId}
                       disabled={!canReview}
@@ -577,7 +576,7 @@ function normalizeGradebookRows(value) {
     .filter((attempt) => attempt.attemptId);
 }
 
-function AttemptReviewModal({ attempt, draft, aiReview, reviewing, saving, disabled, onClose, onDraftChange, onAiReview, onSaveGrade }) {
+function AttemptReviewModal({ attempt, draft, reviewing, saving, disabled, onClose, onDraftChange, onAiReview, onSaveGrade }) {
   const violationCount = Number(attempt.integrityViolationCount || 0);
   const questionScoreDrafts = toQuestionScoreList(draft.questionScores);
   const safeQuestionScoreDrafts = questionScoreDrafts.length > 0 ? questionScoreDrafts : normalizeQuestionScoreDrafts(attempt);
