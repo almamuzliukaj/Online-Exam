@@ -3,7 +3,7 @@ import Editor from "@monaco-editor/react";
 import AppShell from "../../components/AppShell";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
 import { useFaceProctoring } from "../../hooks/useFaceProctoring";
-import { getCurrentExamAttempt, getCurrentExamIntegritySummary, getExam, getExamAccessStatus, listQuestions, recordExamIntegrityEvent, requestExamApproval, requestExamDeviceChange, runTechnicalExamAnswer, sendExamHeartbeat, submitExamAttempt, verifyExamEntryCode } from "../../lib/examsApi";
+import { getCurrentExamAttempt, getCurrentExamIntegritySummary, getExam, getExamAccessStatus, listQuestions, recordExamIntegrityEvent, requestExamApproval, requestExamDeviceChange, runTechnicalExamAnswer, saveExamAttemptDraft, sendExamHeartbeat, submitExamAttempt, verifyExamEntryCode } from "../../lib/examsApi";
 import { loadProtectedPhotoUrl } from "../../lib/studentIdentityApi";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -46,6 +46,7 @@ export default function StudentExamSessionPage() {
   const [savedAt, setSavedAt] = useState("");
   const [sessionControlState, setSessionControlState] = useState(null);
   const submittedRef = useRef(false);
+  const lastServerSaveSignatureRef = useRef("");
   const autoSubmitAttemptedRef = useRef(false);
   const autoSubmitSummaryRef = useRef(null);
   const clientSessionIdRef = useRef(createClientSessionId());
@@ -294,6 +295,53 @@ export default function StudentExamSessionPage() {
     const timeout = window.setTimeout(() => persistDraft("saved"), 650);
     return () => window.clearTimeout(timeout);
   }, [answers, flaggedQuestions, loading, persistDraft, result, sessionTiming, storageKey]);
+
+  useEffect(() => {
+    if (!examId || !isLiveSession || loading || result || !sessionTiming || submittedRef.current) return;
+    if (!networkOnline || questions.length === 0) return;
+
+    const payload = {
+      answers: Object.entries(answers).map(([questionId, response]) => ({
+        questionId,
+        response: String(response || "").trim(),
+      })),
+      clientSessionId: clientSessionIdRef.current,
+    };
+    const signature = JSON.stringify(payload.answers);
+    if (signature === lastServerSaveSignatureRef.current) return;
+
+    const timeout = window.setTimeout(async () => {
+      if (submittedRef.current) return;
+
+      try {
+        setSaveState("saving");
+        const savedDraft = await saveExamAttemptDraft(examId, payload);
+        lastServerSaveSignatureRef.current = signature;
+        if (savedDraft?.examAttemptId) {
+          setAttemptId(savedDraft.examAttemptId);
+        }
+        setSavedAt(savedDraft?.lastSavedAt || new Date().toISOString());
+        setSaveState("saved");
+      } catch (err) {
+        const code = err?.response?.data?.code;
+        const message = getApiMessage(err, "");
+        if (code === "EXAM_ATTEMPT_ALREADY_SUBMITTED" || message.toLowerCase().includes("submitted")) {
+          submittedRef.current = true;
+          setQuestions([]);
+          setResult({ reason: "submitted-lock", examAttemptId: attemptId || "" });
+          setError("");
+          return;
+        }
+
+        if (!err?.response) {
+          setNetworkOnline(false);
+        }
+        setSaveState("error");
+      }
+    }, 3000);
+
+    return () => window.clearTimeout(timeout);
+  }, [answers, attemptId, examId, isLiveSession, loading, networkOnline, questions.length, result, sessionTiming]);
 
   useEffect(() => {
     if (!storageKey || loading || result || !sessionTiming) return;
@@ -1978,7 +2026,7 @@ function getApiMessage(err, fallback) {
 }
 
 function canEnterLiveExamSession(accessStatus) {
-  if (accessStatus?.accessStatus === "Submitted") return true;
+  if (accessStatus?.accessStatus === "Submitted") return false;
   if (!accessStatus?.requiresCode) return false;
   if (!accessStatus?.hasAccess) return false;
   if (!accessStatus?.verifiedAt) return false;
